@@ -1,8 +1,6 @@
 <?php
 session_start();
 
-// Se o usuário já estiver logado,
-// vai direto para a área principal.
 if (isset($_SESSION['usuario_id'])) {
     header("Location: inicio.php");
     exit;
@@ -23,42 +21,64 @@ if (isset($_SESSION['usuario_id'])) {
 
     <meta
         name="description"
-        content="CoraTech - Plataforma educacional gamificada para aprender matemática."
+        content="CoraTech - Plataforma educacional gamificada."
     >
 
-    <title>CoraTech | Sua aventura matemática</title>
+    <title>CoraTech | Aprenda de um jeito diferente</title>
 
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link
+        rel="stylesheet"
+        href="assets/css/style.css"
+    >
 
 </head>
 
 
-<body>
+<body data-theme="claro">
 
-    <!-- =================================================
-         ELEMENTOS DECORATIVOS DO FUNDO
-         ================================================= -->
 
-    <div class="background-math" aria-hidden="true">
+    <!-- ================================================
+         FUNDO MATEMÁTICO
+         ================================================ -->
+
+    <div
+        class="background-math"
+        aria-hidden="true"
+    >
 
         <span class="math-symbol symbol-1">+</span>
+
         <span class="math-symbol symbol-2">÷</span>
+
         <span class="math-symbol symbol-3">×</span>
+
         <span class="math-symbol symbol-4">=</span>
+
         <span class="math-symbol symbol-5">π</span>
+
         <span class="math-symbol symbol-6">½</span>
+
         <span class="math-symbol symbol-7">%</span>
+
+        <span class="math-symbol symbol-8">√</span>
+
+        <span class="math-symbol symbol-9">∑</span>
 
     </div>
 
 
-    <!-- =================================================
-         CABEÇALHO
-         ================================================= -->
+    <!-- ================================================
+         HEADER
+         ================================================ -->
 
     <header class="topbar">
 
-        <a href="index.php" class="logo-link">
+
+        <a
+            href="index.php"
+            class="logo-link"
+            aria-label="CoraTech - Página inicial"
+        >
 
             <img
                 src="assets/img/logo.png"
@@ -71,35 +91,37 @@ if (isset($_SESSION['usuario_id'])) {
 
         <div class="topbar-direita">
 
-            <span class="tema-texto">
-                Tema
-            </span>
 
-            <div class="tema-seletor">
+            <div
+                class="tema-seletor"
+                aria-label="Selecionar tema"
+            >
 
                 <button
                     type="button"
                     onclick="mudarTema('claro')"
+                    aria-label="Tema claro"
                     title="Tema claro"
-                    aria-label="Ativar tema claro"
                 >
                     ☀
                 </button>
 
+
                 <button
                     type="button"
                     onclick="mudarTema('escuro')"
+                    aria-label="Tema escuro"
                     title="Tema escuro"
-                    aria-label="Ativar tema escuro"
                 >
                     ◐
                 </button>
 
+
                 <button
                     type="button"
                     onclick="mudarTema('rosa')"
+                    aria-label="Tema rosa"
                     title="Tema rosa"
-                    aria-label="Ativar tema rosa"
                 >
                     ♡
                 </button>
@@ -111,323 +133,120 @@ if (isset($_SESSION['usuario_id'])) {
     </header>
 
 
-    <!-- =================================================
+    <!-- ================================================
          CONTEÚDO PRINCIPAL
-         ================================================= -->
+         ================================================ -->
 
     <main>
 
 
-        <!-- =================================================
-             HERO
-             ================================================= -->
-
-        <section class="hero">
-
-            <div class="hero-conteudo">
+        <section class="hero-minimal">
 
 
-                <div class="hero-tag">
+            <!-- Pequeno detalhe de identificação -->
 
-                    <span class="tag-ponto"></span>
+            <div class="hero-overline">
 
-                    PLATAFORMA EDUCACIONAL GAMIFICADA
+                <span></span>
 
-                </div>
+                CORATECH
 
-
-                <h1>
-
-                    Sua aventura
-                    <br>
-
-                    <span>matemática</span>
-                    começa aqui.
-
-                </h1>
-
-
-                <p class="hero-descricao">
-
-                    Aprenda matemática através de desafios,
-                    aventuras e jogos que transformam cada
-                    problema em uma nova conquista.
-
-                </p>
-
-
-                <div class="hero-acoes">
-
-                    <a
-                        href="cadastro.php"
-                        class="btn-principal"
-                    >
-
-                        Começar agora
-
-                        <span class="btn-seta">
-                            →
-                        </span>
-
-                    </a>
-
-
-                    <a
-                        href="login.php"
-                        class="btn-login"
-                    >
-
-                        Já tenho uma conta
-
-                    </a>
-
-                </div>
-
-
-                <!-- Pequena indicação de gamificação -->
-
-                <div class="hero-status">
-
-                    <div class="status-item">
-
-                        <span class="status-icone">
-                            ★
-                        </span>
-
-                        <div>
-                            <strong>XP</strong>
-                            <small>Ganhe pontos</small>
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-linha"></div>
-
-
-                    <div class="status-item">
-
-                        <span class="status-icone">
-                            ◆
-                        </span>
-
-                        <div>
-                            <strong>MEDALHAS</strong>
-                            <small>Desbloqueie conquistas</small>
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-linha"></div>
-
-
-                    <div class="status-item">
-
-                        <span class="status-icone">
-                            ↑
-                        </span>
-
-                        <div>
-                            <strong>EVOLUA</strong>
-                            <small>Acompanhe seu progresso</small>
-                        </div>
-
-                    </div>
-
-                </div>
+                <span></span>
 
             </div>
 
 
-            <!-- =================================================
-                 UNIVERSOS DOS JOGOS
-                 ================================================= -->
+            <!-- Título principal -->
 
-            <div class="universos">
+            <h1>
 
+                Matemática
 
-                <!-- MATHCHEF -->
+                <br>
 
-                <a
-                    href="#mathchef"
-                    class="universo universo-chef"
-                >
+                <span>de um jeito diferente.</span>
 
-                    <div class="universo-topo">
-
-                        <span class="universo-numero">
-                            01
-                        </span>
-
-                        <span class="universo-status">
-                            EM DESTAQUE
-                        </span>
-
-                    </div>
+            </h1>
 
 
-                    <div class="universo-icone">
+            <!-- Descrição -->
 
-                        <div class="icone-circulo">
-                            🍰
-                        </div>
+            <p class="hero-descricao">
 
-                    </div>
+                Uma nova forma de aprender, praticar
+                e evoluir através de experiências
+                interativas.
 
-
-                    <div class="universo-info">
-
-                        <span class="universo-label">
-                            COZINHA MATEMÁTICA
-                        </span>
-
-                        <h2>
-                            MathChef
-                        </h2>
-
-                        <p>
-                            Misture ingredientes,
-                            prepare receitas e domine
-                            as frações.
-                        </p>
-
-                    </div>
-
-
-                    <div class="universo-rodape">
-
-                        <span>
-                            Frações
-                        </span>
-
-                        <span>
-                            Explorar →
-                        </span>
-
-                    </div>
-
-                </a>
-
-
-                <!-- MATHSPACE -->
-
-                <a
-                    href="#mathspace"
-                    class="universo universo-space"
-                >
-
-                    <div class="universo-topo">
-
-                        <span class="universo-numero">
-                            02
-                        </span>
-
-                        <span class="universo-status">
-                            EM BREVE
-                        </span>
-
-                    </div>
-
-
-                    <div class="universo-icone">
-
-                        <div class="icone-circulo">
-                            🚀
-                        </div>
-
-                    </div>
-
-
-                    <div class="universo-info">
-
-                        <span class="universo-label">
-                            MISSÃO ESPACIAL
-                        </span>
-
-                        <h2>
-                            MathSpace
-                        </h2>
-
-                        <p>
-                            Viaje pelo espaço enquanto
-                            resolve desafios e conquista
-                            novos planetas.
-                        </p>
-
-                    </div>
-
-
-                    <div class="universo-rodape">
-
-                        <span>
-                            Desafios
-                        </span>
-
-                        <span>
-                            Explorar →
-                        </span>
-
-                    </div>
-
-                </a>
-
-
-                <!-- Elemento central decorativo -->
-
-                <div
-                    class="universos-centro"
-                    aria-hidden="true"
-                >
-
-                    <span>+</span>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             FRASE INFERIOR
-             ================================================= -->
-
-        <section class="frase">
-
-            <span class="linha"></span>
-
-            <p>
-                Cada desafio é um passo a mais.
             </p>
 
-            <span class="linha"></span>
+
+            <!-- Ações -->
+
+            <div class="hero-acoes">
+
+
+                <a
+                    href="cadastro.php"
+                    class="btn-principal"
+                >
+
+                    Começar agora
+
+                    <span>→</span>
+
+                </a>
+
+
+                <a
+                    href="login.php"
+                    class="btn-login"
+                >
+
+                    Já tenho uma conta
+
+                </a>
+
+
+            </div>
+
+
+            <!-- Pequeno indicador -->
+
+            <div class="hero-indicador">
+
+                <span class="indicador-linha"></span>
+
+                <span>
+                    Aprender • Jogar • Evoluir
+                </span>
+
+                <span class="indicador-linha"></span>
+
+            </div>
+
 
         </section>
+
 
     </main>
 
 
-    <!-- =================================================
-         RODAPÉ
-         ================================================= -->
+    <!-- ================================================
+         FOOTER
+         ================================================ -->
 
     <footer>
 
-        <p>
+        <span>
             © 2026 CoraTech
-        </p>
+        </span>
 
         <span>
-            Aprender • Jogar • Evoluir
+            Educação • Tecnologia • Inovação
         </span>
 
     </footer>
 
-
-    <!-- =================================================
-         JAVASCRIPT
-         ================================================= -->
 
     <script src="assets/js/tema.js"></script>
 

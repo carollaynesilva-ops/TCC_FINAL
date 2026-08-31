@@ -1,56 +1,47 @@
 /* =========================================================
    CORATECH
    STYLE.CSS
+   Tela inicial
    ========================================================= */
 
 
 /* =========================================================
-   1. VARIÁVEIS
+   1. VARIÁVEIS - TEMA CLARO
    ========================================================= */
 
-:root,
-[data-theme="claro"] {
+:root {
 
     --fundo: #f5f4f2;
-    --fundo-secundario: #ebe9e6;
-
     --superficie: #ffffff;
-    --superficie-hover: #faf9f8;
 
     --texto: #292728;
     --texto-secundario: #777274;
-    --texto-suave: #a19c9d;
+    --texto-suave: #aaa5a6;
 
     --vinho: #960c19;
     --vinho-escuro: #760812;
 
     --dourado: #bf9460;
 
-    --rosa: #d96b9a;
+    --rosa: #d45d8d;
     --rosa-claro: #f5dce7;
 
     --borda: rgba(41, 39, 40, 0.10);
 
     --sombra: rgba(41, 39, 40, 0.08);
 
-    --chef-fundo: #fff5f1;
-    --space-fundo: #f2f3f7;
-
     --transicao: 0.3s ease;
 }
 
 
 /* =========================================================
-   TEMA ESCURO
+   2. TEMA ESCURO
    ========================================================= */
 
 [data-theme="escuro"] {
 
     --fundo: #111114;
-    --fundo-secundario: #1b1b20;
-
-    --superficie: #1d1d22;
-    --superficie-hover: #25252b;
+    --superficie: #1c1c21;
 
     --texto: #f4f1f2;
     --texto-secundario: #aaa5a7;
@@ -67,23 +58,17 @@
     --borda: rgba(255, 255, 255, 0.08);
 
     --sombra: rgba(0, 0, 0, 0.35);
-
-    --chef-fundo: #261c1a;
-    --space-fundo: #191c25;
 }
 
 
 /* =========================================================
-   TEMA ROSA
+   3. TEMA ROSA
    ========================================================= */
 
 [data-theme="rosa"] {
 
     --fundo: #fff5f8;
-    --fundo-secundario: #f9e8ef;
-
     --superficie: #ffffff;
-    --superficie-hover: #fffafb;
 
     --texto: #382a30;
     --texto-secundario: #806d75;
@@ -100,14 +85,11 @@
     --borda: rgba(100, 55, 72, 0.10);
 
     --sombra: rgba(130, 60, 90, 0.10);
-
-    --chef-fundo: #fff0f4;
-    --space-fundo: #f8f0f5;
 }
 
 
 /* =========================================================
-   2. RESET
+   4. RESET
    ========================================================= */
 
 * {
@@ -138,6 +120,10 @@ body {
 
     overflow-x: hidden;
 
+    display: flex;
+
+    flex-direction: column;
+
     transition:
         background var(--transicao),
         color var(--transicao);
@@ -145,8 +131,9 @@ body {
 
 
 a {
-    color: inherit;
     text-decoration: none;
+
+    color: inherit;
 }
 
 
@@ -156,7 +143,7 @@ button {
 
 
 /* =========================================================
-   3. FUNDO MATEMÁTICO
+   5. FUNDO MATEMÁTICO
    ========================================================= */
 
 .background-math {
@@ -165,9 +152,9 @@ button {
 
     inset: 0;
 
-    pointer-events: none;
-
     overflow: hidden;
+
+    pointer-events: none;
 
     z-index: 0;
 }
@@ -181,65 +168,128 @@ button {
 
     opacity: 0.045;
 
-    font-size: 70px;
-
     font-weight: 700;
 
     user-select: none;
+
+    transition:
+        color var(--transicao),
+        opacity var(--transicao);
 }
 
 
+/* Símbolos individuais */
+
 .symbol-1 {
-    top: 12%;
-    left: 4%;
+
+    top: 14%;
+
+    left: 7%;
+
+    font-size: 75px;
+
     transform: rotate(-15deg);
 }
 
 
 .symbol-2 {
-    top: 72%;
-    left: 8%;
+
+    top: 65%;
+
+    left: 10%;
+
+    font-size: 65px;
+
     transform: rotate(12deg);
 }
 
 
 .symbol-3 {
-    top: 22%;
-    right: 6%;
+
+    top: 20%;
+
+    right: 8%;
+
+    font-size: 80px;
+
     transform: rotate(15deg);
 }
 
 
 .symbol-4 {
-    bottom: 10%;
-    right: 7%;
+
+    bottom: 13%;
+
+    right: 9%;
+
+    font-size: 70px;
+
     transform: rotate(-10deg);
 }
 
 
 .symbol-5 {
-    top: 48%;
-    left: 45%;
+
+    top: 43%;
+
+    left: 16%;
+
     font-size: 45px;
+
+    transform: rotate(8deg);
 }
 
 
 .symbol-6 {
-    top: 8%;
-    right: 30%;
+
+    top: 12%;
+
+    right: 28%;
+
     font-size: 48px;
+
+    transform: rotate(-8deg);
 }
 
 
 .symbol-7 {
+
     bottom: 28%;
-    right: 38%;
-    font-size: 42px;
+
+    right: 28%;
+
+    font-size: 43px;
+
+    transform: rotate(10deg);
+}
+
+
+.symbol-8 {
+
+    bottom: 18%;
+
+    left: 30%;
+
+    font-size: 52px;
+
+    transform: rotate(-12deg);
+}
+
+
+.symbol-9 {
+
+    top: 36%;
+
+    right: 17%;
+
+    font-size: 40px;
+
+    transform: rotate(5deg);
 }
 
 
 /* =========================================================
-   4. TOPBAR
+   6. HEADER
    ========================================================= */
 
 .topbar {
@@ -298,27 +348,15 @@ button {
 }
 
 
+/* =========================================================
+   7. SELETOR DE TEMA
+   ========================================================= */
+
 .topbar-direita {
 
     display: flex;
 
     align-items: center;
-
-    gap: 12px;
-}
-
-
-.tema-texto {
-
-    font-size: 11px;
-
-    text-transform: uppercase;
-
-    letter-spacing: 1.5px;
-
-    color: var(--texto-suave);
-
-    font-weight: 600;
 }
 
 
@@ -328,7 +366,7 @@ button {
 
     align-items: center;
 
-    gap: 4px;
+    gap: 3px;
 
     padding: 4px;
 
@@ -337,16 +375,19 @@ button {
     border-radius: 12px;
 
     background: var(--superficie);
+
+    box-shadow:
+        0 5px 15px var(--sombra);
 }
 
 
 .tema-seletor button {
 
-    width: 32px;
+    width: 31px;
 
-    height: 32px;
+    height: 31px;
 
-    border: 0;
+    border: none;
 
     border-radius: 8px;
 
@@ -354,9 +395,9 @@ button {
 
     color: var(--texto-secundario);
 
-    cursor: pointer;
+    font-size: 14px;
 
-    font-size: 15px;
+    cursor: pointer;
 
     transition: var(--transicao);
 }
@@ -372,8 +413,16 @@ button {
 }
 
 
+.tema-seletor button:focus-visible {
+
+    outline: 2px solid var(--rosa);
+
+    outline-offset: 2px;
+}
+
+
 /* =========================================================
-   5. MAIN
+   8. MAIN
    ========================================================= */
 
 main {
@@ -381,102 +430,92 @@ main {
     position: relative;
 
     z-index: 1;
+
+    flex: 1;
+
+    display: flex;
 }
 
 
 /* =========================================================
-   6. HERO
+   9. HERO MINIMALISTA
    ========================================================= */
 
-.hero {
+.hero-minimal {
 
-    width: min(1280px, 90%);
+    width: min(900px, 90%);
 
-    min-height: calc(100vh - 78px);
+    margin: auto;
 
-    margin: 0 auto;
+    padding: 70px 0 80px;
 
-    padding: 70px 0 45px;
+    display: flex;
 
-    display: grid;
-
-    grid-template-columns:
-        minmax(0, 1fr)
-        minmax(420px, 0.9fr);
+    flex-direction: column;
 
     align-items: center;
 
-    gap: 80px;
+    justify-content: center;
+
+    text-align: center;
 }
 
 
 /* =========================================================
-   7. HERO - CONTEÚDO
+   10. OVERLINE
    ========================================================= */
 
-.hero-conteudo {
+.hero-overline {
 
-    max-width: 650px;
-}
-
-
-.hero-tag {
-
-    display: inline-flex;
+    display: flex;
 
     align-items: center;
 
-    gap: 9px;
+    gap: 12px;
 
-    margin-bottom: 24px;
+    margin-bottom: 27px;
 
-    padding: 8px 13px;
-
-    border: 1px solid var(--borda);
-
-    border-radius: 100px;
-
-    background: var(--superficie);
-
-    color: var(--texto-secundario);
+    color: var(--texto-suave);
 
     font-size: 10px;
 
     font-weight: 700;
 
-    letter-spacing: 1.5px;
+    letter-spacing: 3px;
 }
 
 
-.tag-ponto {
+.hero-overline span {
 
-    width: 7px;
+    width: 22px;
 
-    height: 7px;
+    height: 1px;
 
-    border-radius: 50%;
-
-    background: var(--rosa);
-
-    box-shadow: 0 0 0 4px var(--rosa-claro);
+    background: var(--dourado);
 }
 
 
-.hero h1 {
+/* =========================================================
+   11. TÍTULO
+   ========================================================= */
 
-    font-size: clamp(45px, 5vw, 72px);
+.hero-minimal h1 {
+
+    max-width: 850px;
+
+    margin-bottom: 28px;
+
+    font-size: clamp(48px, 7vw, 82px);
 
     line-height: 0.98;
 
-    letter-spacing: -3px;
+    letter-spacing: -4px;
 
     font-weight: 800;
-
-    margin-bottom: 27px;
 }
 
 
-.hero h1 span {
+.hero-minimal h1 span {
 
     color: var(--vinho);
 
@@ -484,44 +523,48 @@ main {
 }
 
 
-.hero h1 span::after {
+.hero-minimal h1 span::after {
 
     content: "";
 
     position: absolute;
 
-    left: 2px;
+    left: 3px;
 
-    right: 4px;
+    right: 5px;
 
-    bottom: -5px;
+    bottom: -8px;
 
     height: 5px;
 
-    border-radius: 10px;
+    border-radius: 20px;
 
     background: var(--dourado);
 
-    opacity: 0.8;
-}
-
-
-.hero-descricao {
-
-    max-width: 520px;
-
-    color: var(--texto-secundario);
-
-    font-size: 17px;
-
-    line-height: 1.7;
-
-    margin-bottom: 35px;
+    opacity: 0.85;
 }
 
 
 /* =========================================================
-   8. HERO - AÇÕES
+   12. DESCRIÇÃO
+   ========================================================= */
+
+.hero-descricao {
+
+    width: min(500px, 90%);
+
+    margin-bottom: 35px;
+
+    color: var(--texto-secundario);
+
+    font-size: 16px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   13. AÇÕES
    ========================================================= */
 
 .hero-acoes {
@@ -530,38 +573,66 @@ main {
 
     align-items: center;
 
-    gap: 18px;
+    justify-content: center;
 
-    margin-bottom: 45px;
+    gap: 22px;
+
+    margin-bottom: 50px;
 }
 
 
+/* Botão principal */
+
 .btn-principal {
+
+    min-width: 185px;
+
+    min-height: 52px;
+
+    padding: 0 12px 0 22px;
 
     display: inline-flex;
 
     align-items: center;
 
-    justify-content: center;
+    justify-content: space-between;
 
-    gap: 20px;
+    gap: 18px;
 
-    min-height: 52px;
-
-    padding: 0 20px 0 25px;
-
-    border-radius: 12px;
+    border-radius: 11px;
 
     background: var(--vinho);
 
     color: #ffffff;
 
-    font-size: 14px;
+    font-size: 13px;
 
     font-weight: 700;
 
     box-shadow:
-        0 12px 25px var(--sombra);
+        0 12px 28px var(--sombra);
+
+    transition: var(--transicao);
+}
+
+
+.btn-principal span {
+
+    width: 30px;
+
+    height: 30px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.14);
+
+    font-size: 17px;
 
     transition: var(--transicao);
 }
@@ -574,39 +645,21 @@ main {
     transform: translateY(-3px);
 
     box-shadow:
-        0 15px 30px var(--sombra);
+        0 16px 30px var(--sombra);
 }
 
 
-.btn-seta {
-
-    width: 32px;
-
-    height: 32px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border-radius: 9px;
-
-    background: rgba(255, 255, 255, 0.15);
-
-    font-size: 18px;
-
-    transition: var(--transicao);
-}
-
-
-.btn-principal:hover .btn-seta {
+.btn-principal:hover span {
 
     transform: translateX(3px);
 }
 
 
+/* Login */
+
 .btn-login {
+
+    padding: 10px 2px;
 
     color: var(--texto-secundario);
 
@@ -629,34 +682,10 @@ main {
 
 
 /* =========================================================
-   9. STATUS / GAMIFICAÇÃO
+   14. INDICADOR INFERIOR
    ========================================================= */
 
-.hero-status {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 18px;
-}
-
-
-.status-item {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-}
-
-
-.status-icone {
-
-    width: 30px;
-
-    height: 30px;
+.hero-indicador {
 
     display: flex;
 
@@ -664,501 +693,32 @@ main {
 
     justify-content: center;
 
-    border-radius: 9px;
-
-    background: var(--rosa-claro);
-
-    color: var(--rosa);
-
-    font-size: 12px;
-}
-
-
-.status-item strong {
-
-    display: block;
-
-    color: var(--texto);
-
-    font-size: 9px;
-
-    letter-spacing: 1px;
-}
-
-
-.status-item small {
-
-    display: block;
+    gap: 15px;
 
     color: var(--texto-suave);
 
     font-size: 9px;
-
-    margin-top: 2px;
-}
-
-
-.status-linha {
-
-    width: 1px;
-
-    height: 30px;
-
-    background: var(--borda);
-}
-
-
-/* =========================================================
-   10. UNIVERSOS
-   ========================================================= */
-
-.universos {
-
-    position: relative;
-
-    display: grid;
-
-    grid-template-columns: 1fr 1fr;
-
-    gap: 18px;
-
-    align-items: center;
-
-    padding: 25px;
-}
-
-
-.universo {
-
-    position: relative;
-
-    min-height: 430px;
-
-    padding: 25px;
-
-    display: flex;
-
-    flex-direction: column;
-
-    justify-content: space-between;
-
-    overflow: hidden;
-
-    border: 1px solid var(--borda);
-
-    border-radius: 25px;
-
-    background: var(--superficie);
-
-    box-shadow:
-        0 18px 45px var(--sombra);
-
-    transition:
-        transform 0.4s ease,
-        box-shadow 0.4s ease,
-        border-color 0.4s ease;
-}
-
-
-.universo:hover {
-
-    transform: translateY(-8px);
-
-    box-shadow:
-        0 25px 55px var(--sombra);
-}
-
-
-/* =========================================================
-   11. DECORAÇÕES DOS UNIVERSOS
-   ========================================================= */
-
-.universo::before {
-
-    content: "";
-
-    position: absolute;
-
-    width: 220px;
-
-    height: 220px;
-
-    border-radius: 50%;
-
-    right: -80px;
-
-    top: -80px;
-
-    opacity: 0.7;
-
-    pointer-events: none;
-}
-
-
-.universo::after {
-
-    content: "";
-
-    position: absolute;
-
-    width: 100px;
-
-    height: 100px;
-
-    border: 1px solid currentColor;
-
-    border-radius: 50%;
-
-    right: -30px;
-
-    bottom: 50px;
-
-    opacity: 0.08;
-
-    pointer-events: none;
-}
-
-
-/* =========================================================
-   12. MATHCHEF
-   ========================================================= */
-
-.universo-chef {
-
-    background: var(--chef-fundo);
-
-    color: var(--texto);
-}
-
-
-.universo-chef::before {
-
-    background: var(--rosa-claro);
-}
-
-
-.universo-chef .icone-circulo {
-
-    background: var(--superficie);
-
-    box-shadow:
-        0 10px 25px var(--sombra);
-}
-
-
-/* =========================================================
-   13. MATHSPACE
-   ========================================================= */
-
-.universo-space {
-
-    background: var(--space-fundo);
-
-    color: var(--texto);
-
-    transform: translateY(35px);
-}
-
-
-.universo-space:hover {
-
-    transform: translateY(27px);
-}
-
-
-.universo-space::before {
-
-    background: rgba(150, 12, 25, 0.07);
-}
-
-
-.universo-space .icone-circulo {
-
-    background: var(--superficie);
-
-    box-shadow:
-        0 10px 25px var(--sombra);
-}
-
-
-/* =========================================================
-   14. TOPO DOS UNIVERSOS
-   ========================================================= */
-
-.universo-topo {
-
-    position: relative;
-
-    z-index: 2;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-}
-
-
-.universo-numero {
-
-    font-size: 11px;
-
-    color: var(--texto-suave);
-
-    font-weight: 700;
-
-    letter-spacing: 1px;
-}
-
-
-.universo-status {
-
-    padding: 6px 9px;
-
-    border-radius: 7px;
-
-    background: rgba(255, 255, 255, 0.6);
-
-    color: var(--texto-secundario);
-
-    font-size: 8px;
-
-    font-weight: 800;
-
-    letter-spacing: 1px;
-}
-
-
-[data-theme="escuro"] .universo-status {
-
-    background: rgba(255, 255, 255, 0.06);
-}
-
-
-/* =========================================================
-   15. ÍCONE
-   ========================================================= */
-
-.universo-icone {
-
-    position: relative;
-
-    z-index: 2;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    padding: 25px 0;
-}
-
-
-.icone-circulo {
-
-    width: 115px;
-
-    height: 115px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border-radius: 50%;
-
-    font-size: 53px;
-
-    transition: 0.4s ease;
-}
-
-
-.universo:hover .icone-circulo {
-
-    transform: scale(1.08) rotate(-3deg);
-}
-
-
-/* =========================================================
-   16. INFORMAÇÕES DO UNIVERSO
-   ========================================================= */
-
-.universo-info {
-
-    position: relative;
-
-    z-index: 2;
-}
-
-
-.universo-label {
-
-    display: block;
-
-    margin-bottom: 7px;
-
-    color: var(--dourado);
-
-    font-size: 9px;
-
-    font-weight: 800;
-
-    letter-spacing: 1.5px;
-}
-
-
-.universo-info h2 {
-
-    margin-bottom: 9px;
-
-    font-size: 32px;
-
-    letter-spacing: -1px;
-}
-
-
-.universo-info p {
-
-    max-width: 230px;
-
-    color: var(--texto-secundario);
-
-    font-size: 12px;
-
-    line-height: 1.6;
-}
-
-
-/* =========================================================
-   17. RODAPÉ DOS UNIVERSOS
-   ========================================================= */
-
-.universo-rodape {
-
-    position: relative;
-
-    z-index: 2;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    padding-top: 18px;
-
-    border-top: 1px solid var(--borda);
-
-    color: var(--texto-suave);
-
-    font-size: 10px;
 
     font-weight: 600;
-}
 
-
-.universo-rodape span:last-child {
-
-    color: var(--vinho);
-
-    transition: var(--transicao);
-}
-
-
-.universo:hover .universo-rodape span:last-child {
-
-    transform: translateX(4px);
-}
-
-
-/* =========================================================
-   18. ELEMENTO CENTRAL
-   ========================================================= */
-
-.universos-centro {
-
-    position: absolute;
-
-    left: 50%;
-
-    top: 50%;
-
-    transform: translate(-50%, -50%);
-
-    width: 44px;
-
-    height: 44px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border: 5px solid var(--fundo);
-
-    border-radius: 50%;
-
-    background: var(--superficie);
-
-    color: var(--dourado);
-
-    font-size: 15px;
-
-    font-weight: 700;
-
-    z-index: 5;
-}
-
-
-/* =========================================================
-   19. FRASE
-   ========================================================= */
-
-.frase {
-
-    width: min(900px, 85%);
-
-    margin: 10px auto 60px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 20px;
-}
-
-
-.frase p {
-
-    color: var(--texto-suave);
-
-    font-size: 11px;
-
-    letter-spacing: 1px;
+    letter-spacing: 1.8px;
 
     text-transform: uppercase;
-
-    text-align: center;
 }
 
 
-.linha {
+.indicador-linha {
+
+    width: 45px;
 
     height: 1px;
 
-    width: 100px;
-
     background: var(--borda);
 }
 
 
 /* =========================================================
-   20. FOOTER
+   15. FOOTER
    ========================================================= */
 
 footer {
@@ -1167,9 +727,11 @@ footer {
 
     z-index: 2;
 
+    width: 100%;
+
     min-height: 65px;
 
-    padding: 20px 6vw;
+    padding: 18px 6vw;
 
     display: flex;
 
@@ -1181,363 +743,200 @@ footer {
 
     color: var(--texto-suave);
 
-    font-size: 10px;
+    font-size: 9px;
 
-    letter-spacing: 0.5px;
-}
-
-
-footer span {
-
-    color: var(--texto-suave);
+    letter-spacing: 0.7px;
 }
 
 
 /* =========================================================
-   21. TABLET
+   16. TABLET
    ========================================================= */
 
-@media (max-width: 1050px) {
-
-    .hero {
-
-        width: 92%;
-
-        grid-template-columns: 1fr;
-
-        gap: 55px;
-
-        padding-top: 55px;
-    }
-
-
-    .hero-conteudo {
-
-        max-width: 750px;
-
-        margin: 0 auto;
-
-        text-align: center;
-    }
-
-
-    .hero-tag {
-
-        margin-left: auto;
-
-        margin-right: auto;
-    }
-
-
-    .hero-descricao {
-
-        margin-left: auto;
-
-        margin-right: auto;
-    }
-
-
-    .hero-acoes {
-
-        justify-content: center;
-    }
-
-
-    .hero-status {
-
-        justify-content: center;
-    }
-
-
-    .universos {
-
-        width: min(700px, 100%);
-
-        margin: 0 auto;
-    }
-
-
-    .universo {
-
-        min-height: 390px;
-    }
-}
-
-
-/* =========================================================
-   22. TABLET MENOR
-   ========================================================= */
-
-@media (max-width: 700px) {
+@media (max-width: 800px) {
 
     .topbar {
 
-        min-height: 70px;
+        padding: 0 30px;
+    }
 
-        padding: 0 20px;
+
+    .hero-minimal {
+
+        padding: 60px 0;
+    }
+
+
+    .hero-minimal h1 {
+
+        font-size: clamp(46px, 9vw, 68px);
+    }
+
+
+    .math-symbol {
+
+        opacity: 0.035;
+    }
+
+
+    .symbol-1 {
+
+        left: 2%;
+    }
+
+
+    .symbol-3 {
+
+        right: 2%;
+    }
+}
+
+
+/* =========================================================
+   17. CELULAR
+   ========================================================= */
+
+@media (max-width: 550px) {
+
+    .topbar {
+
+        min-height: 68px;
+
+        padding: 0 18px;
     }
 
 
     .logo {
 
-        width: 120px;
-    }
+        width: 115px;
 
-
-    .tema-texto {
-
-        display: none;
-    }
-
-
-    .hero {
-
-        width: 92%;
-
-        min-height: auto;
-
-        padding: 55px 0 35px;
-
-        gap: 45px;
-    }
-
-
-    .hero h1 {
-
-        font-size: clamp(42px, 11vw, 58px);
-
-        letter-spacing: -2.5px;
-    }
-
-
-    .hero-descricao {
-
-        font-size: 15px;
-    }
-
-
-    .hero-status {
-
-        gap: 12px;
-    }
-
-
-    .status-item small {
-
-        display: none;
-    }
-
-
-    .universos {
-
-        padding: 10px;
-
-        gap: 14px;
-    }
-
-
-    .universo {
-
-        min-height: 350px;
-
-        padding: 20px;
-    }
-
-
-    .universo-info h2 {
-
-        font-size: 27px;
-    }
-
-
-    .icone-circulo {
-
-        width: 95px;
-
-        height: 95px;
-
-        font-size: 45px;
-    }
-
-
-    .universos-centro {
-
-        width: 38px;
-
-        height: 38px;
-
-        border-width: 4px;
-    }
-}
-
-
-/* =========================================================
-   23. CELULAR
-   ========================================================= */
-
-@media (max-width: 520px) {
-
-    .topbar {
-
-        padding: 0 16px;
+        max-height: 48px;
     }
 
 
     .tema-seletor {
 
-        gap: 2px;
+        padding: 3px;
+
+        border-radius: 10px;
     }
 
 
     .tema-seletor button {
 
-        width: 29px;
+        width: 28px;
 
-        height: 29px;
+        height: 28px;
 
         font-size: 13px;
     }
 
 
-    .hero {
+    .hero-minimal {
 
         width: 90%;
 
-        padding-top: 40px;
+        padding: 50px 0 55px;
     }
 
 
-    .hero-tag {
+    .hero-overline {
+
+        margin-bottom: 22px;
+
+        gap: 8px;
 
         font-size: 8px;
 
-        letter-spacing: 1px;
-
-        text-align: center;
+        letter-spacing: 2.2px;
     }
 
 
-    .hero h1 {
+    .hero-overline span {
 
-        font-size: 42px;
-
-        line-height: 1.02;
+        width: 16px;
     }
 
 
-    .hero h1 span::after {
+    .hero-minimal h1 {
+
+        margin-bottom: 24px;
+
+        font-size: 43px;
+
+        line-height: 1;
+
+        letter-spacing: -2.5px;
+    }
+
+
+    .hero-minimal h1 span::after {
 
         height: 3px;
 
-        bottom: -3px;
+        bottom: -5px;
     }
 
 
     .hero-descricao {
 
+        width: 100%;
+
+        margin-bottom: 30px;
+
         font-size: 14px;
 
-        line-height: 1.6;
+        line-height: 1.65;
     }
 
 
     .hero-acoes {
 
+        width: 100%;
+
         flex-direction: column;
 
-        gap: 18px;
+        gap: 17px;
 
-        margin-bottom: 35px;
+        margin-bottom: 38px;
     }
 
 
     .btn-principal {
 
-        width: 100%;
+        width: min(300px, 100%);
+
+        min-height: 52px;
     }
 
 
-    .hero-status {
+    .btn-login {
 
-        display: grid;
-
-        grid-template-columns: 1fr;
-
-        justify-items: start;
-
-        width: fit-content;
-
-        margin: 0 auto;
-
-        gap: 12px;
+        font-size: 12px;
     }
 
 
-    .status-linha {
+    .hero-indicador {
 
-        display: none;
+        gap: 9px;
+
+        font-size: 7px;
+
+        letter-spacing: 1.2px;
     }
 
 
-    .universos {
+    .indicador-linha {
 
-        grid-template-columns: 1fr;
-
-        width: 100%;
-
-        padding: 0;
-
-        gap: 16px;
-    }
-
-
-    .universo {
-
-        min-height: 350px;
-    }
-
-
-    .universo-space {
-
-        transform: none;
-    }
-
-
-    .universo-space:hover {
-
-        transform: translateY(-8px);
-    }
-
-
-    .universos-centro {
-
-        display: none;
-    }
-
-
-    .frase {
-
-        margin-top: 45px;
-
-        margin-bottom: 40px;
-
-        gap: 10px;
-    }
-
-
-    .linha {
-
-        width: 35px;
-    }
-
-
-    .frase p {
-
-        font-size: 8px;
+        width: 25px;
     }
 
 
     footer {
+
+        min-height: 70px;
+
+        padding: 15px 20px;
 
         flex-direction: column;
 
@@ -1546,12 +945,72 @@ footer span {
         gap: 6px;
 
         text-align: center;
+
+        font-size: 8px;
+    }
+
+
+    /* Símbolos mais discretos no celular */
+
+    .math-symbol {
+
+        opacity: 0.025;
+    }
+
+
+    .symbol-1 {
+
+        top: 17%;
+
+        left: -5%;
+
+        font-size: 55px;
+    }
+
+
+    .symbol-2 {
+
+        top: 70%;
+
+        left: 2%;
+
+        font-size: 50px;
+    }
+
+
+    .symbol-3 {
+
+        top: 25%;
+
+        right: -5%;
+
+        font-size: 58px;
+    }
+
+
+    .symbol-4 {
+
+        bottom: 16%;
+
+        right: 0;
+
+        font-size: 52px;
+    }
+
+
+    .symbol-5,
+    .symbol-6,
+    .symbol-7,
+    .symbol-8,
+    .symbol-9 {
+
+        font-size: 30px;
     }
 }
 
 
 /* =========================================================
-   24. ACESSIBILIDADE
+   18. ACESSIBILIDADE
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1563,7 +1022,5 @@ footer span {
         scroll-behavior: auto !important;
 
         transition-duration: 0.01ms !important;
-
-        animation-duration: 0.01ms !important;
     }
 }
