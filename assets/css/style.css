@@ -1,0 +1,1569 @@
+/* =========================================================
+   CORATECH
+   STYLE.CSS
+   ========================================================= */
+
+
+/* =========================================================
+   1. VARIÁVEIS
+   ========================================================= */
+
+:root,
+[data-theme="claro"] {
+
+    --fundo: #f5f4f2;
+    --fundo-secundario: #ebe9e6;
+
+    --superficie: #ffffff;
+    --superficie-hover: #faf9f8;
+
+    --texto: #292728;
+    --texto-secundario: #777274;
+    --texto-suave: #a19c9d;
+
+    --vinho: #960c19;
+    --vinho-escuro: #760812;
+
+    --dourado: #bf9460;
+
+    --rosa: #d96b9a;
+    --rosa-claro: #f5dce7;
+
+    --borda: rgba(41, 39, 40, 0.10);
+
+    --sombra: rgba(41, 39, 40, 0.08);
+
+    --chef-fundo: #fff5f1;
+    --space-fundo: #f2f3f7;
+
+    --transicao: 0.3s ease;
+}
+
+
+/* =========================================================
+   TEMA ESCURO
+   ========================================================= */
+
+[data-theme="escuro"] {
+
+    --fundo: #111114;
+    --fundo-secundario: #1b1b20;
+
+    --superficie: #1d1d22;
+    --superficie-hover: #25252b;
+
+    --texto: #f4f1f2;
+    --texto-secundario: #aaa5a7;
+    --texto-suave: #777276;
+
+    --vinho: #c52a3a;
+    --vinho-escuro: #a51d2c;
+
+    --dourado: #c8a477;
+
+    --rosa: #db719e;
+    --rosa-claro: #382530;
+
+    --borda: rgba(255, 255, 255, 0.08);
+
+    --sombra: rgba(0, 0, 0, 0.35);
+
+    --chef-fundo: #261c1a;
+    --space-fundo: #191c25;
+}
+
+
+/* =========================================================
+   TEMA ROSA
+   ========================================================= */
+
+[data-theme="rosa"] {
+
+    --fundo: #fff5f8;
+    --fundo-secundario: #f9e8ef;
+
+    --superficie: #ffffff;
+    --superficie-hover: #fffafb;
+
+    --texto: #382a30;
+    --texto-secundario: #806d75;
+    --texto-suave: #ad989f;
+
+    --vinho: #a52a48;
+    --vinho-escuro: #861f39;
+
+    --dourado: #bf9460;
+
+    --rosa: #d45d8d;
+    --rosa-claro: #f5d4e1;
+
+    --borda: rgba(100, 55, 72, 0.10);
+
+    --sombra: rgba(130, 60, 90, 0.10);
+
+    --chef-fundo: #fff0f4;
+    --space-fundo: #f8f0f5;
+}
+
+
+/* =========================================================
+   2. RESET
+   ========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+
+    min-height: 100vh;
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    background: var(--fundo);
+
+    color: var(--texto);
+
+    overflow-x: hidden;
+
+    transition:
+        background var(--transicao),
+        color var(--transicao);
+}
+
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+
+button {
+    font-family: inherit;
+}
+
+
+/* =========================================================
+   3. FUNDO MATEMÁTICO
+   ========================================================= */
+
+.background-math {
+
+    position: fixed;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    overflow: hidden;
+
+    z-index: 0;
+}
+
+
+.math-symbol {
+
+    position: absolute;
+
+    color: var(--texto);
+
+    opacity: 0.045;
+
+    font-size: 70px;
+
+    font-weight: 700;
+
+    user-select: none;
+}
+
+
+.symbol-1 {
+    top: 12%;
+    left: 4%;
+    transform: rotate(-15deg);
+}
+
+
+.symbol-2 {
+    top: 72%;
+    left: 8%;
+    transform: rotate(12deg);
+}
+
+
+.symbol-3 {
+    top: 22%;
+    right: 6%;
+    transform: rotate(15deg);
+}
+
+
+.symbol-4 {
+    bottom: 10%;
+    right: 7%;
+    transform: rotate(-10deg);
+}
+
+
+.symbol-5 {
+    top: 48%;
+    left: 45%;
+    font-size: 45px;
+}
+
+
+.symbol-6 {
+    top: 8%;
+    right: 30%;
+    font-size: 48px;
+}
+
+
+.symbol-7 {
+    bottom: 28%;
+    right: 38%;
+    font-size: 42px;
+}
+
+
+/* =========================================================
+   4. TOPBAR
+   ========================================================= */
+
+.topbar {
+
+    position: relative;
+
+    z-index: 10;
+
+    width: 100%;
+
+    min-height: 78px;
+
+    padding: 0 6vw;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border-bottom: 1px solid var(--borda);
+
+    background: rgba(255, 255, 255, 0.55);
+
+    backdrop-filter: blur(14px);
+
+    -webkit-backdrop-filter: blur(14px);
+
+    transition:
+        background var(--transicao),
+        border-color var(--transicao);
+}
+
+
+[data-theme="escuro"] .topbar {
+
+    background: rgba(17, 17, 20, 0.65);
+}
+
+
+.logo-link {
+
+    display: flex;
+
+    align-items: center;
+}
+
+
+.logo {
+
+    width: 145px;
+
+    max-height: 58px;
+
+    object-fit: contain;
+}
+
+
+.topbar-direita {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.tema-texto {
+
+    font-size: 11px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1.5px;
+
+    color: var(--texto-suave);
+
+    font-weight: 600;
+}
+
+
+.tema-seletor {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+    padding: 4px;
+
+    border: 1px solid var(--borda);
+
+    border-radius: 12px;
+
+    background: var(--superficie);
+}
+
+
+.tema-seletor button {
+
+    width: 32px;
+
+    height: 32px;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: var(--texto-secundario);
+
+    cursor: pointer;
+
+    font-size: 15px;
+
+    transition: var(--transicao);
+}
+
+
+.tema-seletor button:hover {
+
+    color: var(--rosa);
+
+    background: var(--rosa-claro);
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   5. MAIN
+   ========================================================= */
+
+main {
+
+    position: relative;
+
+    z-index: 1;
+}
+
+
+/* =========================================================
+   6. HERO
+   ========================================================= */
+
+.hero {
+
+    width: min(1280px, 90%);
+
+    min-height: calc(100vh - 78px);
+
+    margin: 0 auto;
+
+    padding: 70px 0 45px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(420px, 0.9fr);
+
+    align-items: center;
+
+    gap: 80px;
+}
+
+
+/* =========================================================
+   7. HERO - CONTEÚDO
+   ========================================================= */
+
+.hero-conteudo {
+
+    max-width: 650px;
+}
+
+
+.hero-tag {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin-bottom: 24px;
+
+    padding: 8px 13px;
+
+    border: 1px solid var(--borda);
+
+    border-radius: 100px;
+
+    background: var(--superficie);
+
+    color: var(--texto-secundario);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+}
+
+
+.tag-ponto {
+
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--rosa);
+
+    box-shadow: 0 0 0 4px var(--rosa-claro);
+}
+
+
+.hero h1 {
+
+    font-size: clamp(45px, 5vw, 72px);
+
+    line-height: 0.98;
+
+    letter-spacing: -3px;
+
+    font-weight: 800;
+
+    margin-bottom: 27px;
+}
+
+
+.hero h1 span {
+
+    color: var(--vinho);
+
+    position: relative;
+}
+
+
+.hero h1 span::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 2px;
+
+    right: 4px;
+
+    bottom: -5px;
+
+    height: 5px;
+
+    border-radius: 10px;
+
+    background: var(--dourado);
+
+    opacity: 0.8;
+}
+
+
+.hero-descricao {
+
+    max-width: 520px;
+
+    color: var(--texto-secundario);
+
+    font-size: 17px;
+
+    line-height: 1.7;
+
+    margin-bottom: 35px;
+}
+
+
+/* =========================================================
+   8. HERO - AÇÕES
+   ========================================================= */
+
+.hero-acoes {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    margin-bottom: 45px;
+}
+
+
+.btn-principal {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 20px;
+
+    min-height: 52px;
+
+    padding: 0 20px 0 25px;
+
+    border-radius: 12px;
+
+    background: var(--vinho);
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 12px 25px var(--sombra);
+
+    transition: var(--transicao);
+}
+
+
+.btn-principal:hover {
+
+    background: var(--vinho-escuro);
+
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 15px 30px var(--sombra);
+}
+
+
+.btn-seta {
+
+    width: 32px;
+
+    height: 32px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.15);
+
+    font-size: 18px;
+
+    transition: var(--transicao);
+}
+
+
+.btn-principal:hover .btn-seta {
+
+    transform: translateX(3px);
+}
+
+
+.btn-login {
+
+    color: var(--texto-secundario);
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    border-bottom: 1px solid transparent;
+
+    transition: var(--transicao);
+}
+
+
+.btn-login:hover {
+
+    color: var(--vinho);
+
+    border-color: var(--vinho);
+}
+
+
+/* =========================================================
+   9. STATUS / GAMIFICAÇÃO
+   ========================================================= */
+
+.hero-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+}
+
+
+.status-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+}
+
+
+.status-icone {
+
+    width: 30px;
+
+    height: 30px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: var(--rosa-claro);
+
+    color: var(--rosa);
+
+    font-size: 12px;
+}
+
+
+.status-item strong {
+
+    display: block;
+
+    color: var(--texto);
+
+    font-size: 9px;
+
+    letter-spacing: 1px;
+}
+
+
+.status-item small {
+
+    display: block;
+
+    color: var(--texto-suave);
+
+    font-size: 9px;
+
+    margin-top: 2px;
+}
+
+
+.status-linha {
+
+    width: 1px;
+
+    height: 30px;
+
+    background: var(--borda);
+}
+
+
+/* =========================================================
+   10. UNIVERSOS
+   ========================================================= */
+
+.universos {
+
+    position: relative;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 18px;
+
+    align-items: center;
+
+    padding: 25px;
+}
+
+
+.universo {
+
+    position: relative;
+
+    min-height: 430px;
+
+    padding: 25px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: space-between;
+
+    overflow: hidden;
+
+    border: 1px solid var(--borda);
+
+    border-radius: 25px;
+
+    background: var(--superficie);
+
+    box-shadow:
+        0 18px 45px var(--sombra);
+
+    transition:
+        transform 0.4s ease,
+        box-shadow 0.4s ease,
+        border-color 0.4s ease;
+}
+
+
+.universo:hover {
+
+    transform: translateY(-8px);
+
+    box-shadow:
+        0 25px 55px var(--sombra);
+}
+
+
+/* =========================================================
+   11. DECORAÇÕES DOS UNIVERSOS
+   ========================================================= */
+
+.universo::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 220px;
+
+    height: 220px;
+
+    border-radius: 50%;
+
+    right: -80px;
+
+    top: -80px;
+
+    opacity: 0.7;
+
+    pointer-events: none;
+}
+
+
+.universo::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 100px;
+
+    height: 100px;
+
+    border: 1px solid currentColor;
+
+    border-radius: 50%;
+
+    right: -30px;
+
+    bottom: 50px;
+
+    opacity: 0.08;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   12. MATHCHEF
+   ========================================================= */
+
+.universo-chef {
+
+    background: var(--chef-fundo);
+
+    color: var(--texto);
+}
+
+
+.universo-chef::before {
+
+    background: var(--rosa-claro);
+}
+
+
+.universo-chef .icone-circulo {
+
+    background: var(--superficie);
+
+    box-shadow:
+        0 10px 25px var(--sombra);
+}
+
+
+/* =========================================================
+   13. MATHSPACE
+   ========================================================= */
+
+.universo-space {
+
+    background: var(--space-fundo);
+
+    color: var(--texto);
+
+    transform: translateY(35px);
+}
+
+
+.universo-space:hover {
+
+    transform: translateY(27px);
+}
+
+
+.universo-space::before {
+
+    background: rgba(150, 12, 25, 0.07);
+}
+
+
+.universo-space .icone-circulo {
+
+    background: var(--superficie);
+
+    box-shadow:
+        0 10px 25px var(--sombra);
+}
+
+
+/* =========================================================
+   14. TOPO DOS UNIVERSOS
+   ========================================================= */
+
+.universo-topo {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+
+.universo-numero {
+
+    font-size: 11px;
+
+    color: var(--texto-suave);
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+
+.universo-status {
+
+    padding: 6px 9px;
+
+    border-radius: 7px;
+
+    background: rgba(255, 255, 255, 0.6);
+
+    color: var(--texto-secundario);
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+}
+
+
+[data-theme="escuro"] .universo-status {
+
+    background: rgba(255, 255, 255, 0.06);
+}
+
+
+/* =========================================================
+   15. ÍCONE
+   ========================================================= */
+
+.universo-icone {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 25px 0;
+}
+
+
+.icone-circulo {
+
+    width: 115px;
+
+    height: 115px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    font-size: 53px;
+
+    transition: 0.4s ease;
+}
+
+
+.universo:hover .icone-circulo {
+
+    transform: scale(1.08) rotate(-3deg);
+}
+
+
+/* =========================================================
+   16. INFORMAÇÕES DO UNIVERSO
+   ========================================================= */
+
+.universo-info {
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+.universo-label {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--dourado);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+
+.universo-info h2 {
+
+    margin-bottom: 9px;
+
+    font-size: 32px;
+
+    letter-spacing: -1px;
+}
+
+
+.universo-info p {
+
+    max-width: 230px;
+
+    color: var(--texto-secundario);
+
+    font-size: 12px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   17. RODAPÉ DOS UNIVERSOS
+   ========================================================= */
+
+.universo-rodape {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding-top: 18px;
+
+    border-top: 1px solid var(--borda);
+
+    color: var(--texto-suave);
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+
+.universo-rodape span:last-child {
+
+    color: var(--vinho);
+
+    transition: var(--transicao);
+}
+
+
+.universo:hover .universo-rodape span:last-child {
+
+    transform: translateX(4px);
+}
+
+
+/* =========================================================
+   18. ELEMENTO CENTRAL
+   ========================================================= */
+
+.universos-centro {
+
+    position: absolute;
+
+    left: 50%;
+
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    width: 44px;
+
+    height: 44px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 5px solid var(--fundo);
+
+    border-radius: 50%;
+
+    background: var(--superficie);
+
+    color: var(--dourado);
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    z-index: 5;
+}
+
+
+/* =========================================================
+   19. FRASE
+   ========================================================= */
+
+.frase {
+
+    width: min(900px, 85%);
+
+    margin: 10px auto 60px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 20px;
+}
+
+
+.frase p {
+
+    color: var(--texto-suave);
+
+    font-size: 11px;
+
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+
+    text-align: center;
+}
+
+
+.linha {
+
+    height: 1px;
+
+    width: 100px;
+
+    background: var(--borda);
+}
+
+
+/* =========================================================
+   20. FOOTER
+   ========================================================= */
+
+footer {
+
+    position: relative;
+
+    z-index: 2;
+
+    min-height: 65px;
+
+    padding: 20px 6vw;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border-top: 1px solid var(--borda);
+
+    color: var(--texto-suave);
+
+    font-size: 10px;
+
+    letter-spacing: 0.5px;
+}
+
+
+footer span {
+
+    color: var(--texto-suave);
+}
+
+
+/* =========================================================
+   21. TABLET
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+    .hero {
+
+        width: 92%;
+
+        grid-template-columns: 1fr;
+
+        gap: 55px;
+
+        padding-top: 55px;
+    }
+
+
+    .hero-conteudo {
+
+        max-width: 750px;
+
+        margin: 0 auto;
+
+        text-align: center;
+    }
+
+
+    .hero-tag {
+
+        margin-left: auto;
+
+        margin-right: auto;
+    }
+
+
+    .hero-descricao {
+
+        margin-left: auto;
+
+        margin-right: auto;
+    }
+
+
+    .hero-acoes {
+
+        justify-content: center;
+    }
+
+
+    .hero-status {
+
+        justify-content: center;
+    }
+
+
+    .universos {
+
+        width: min(700px, 100%);
+
+        margin: 0 auto;
+    }
+
+
+    .universo {
+
+        min-height: 390px;
+    }
+}
+
+
+/* =========================================================
+   22. TABLET MENOR
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .topbar {
+
+        min-height: 70px;
+
+        padding: 0 20px;
+    }
+
+
+    .logo {
+
+        width: 120px;
+    }
+
+
+    .tema-texto {
+
+        display: none;
+    }
+
+
+    .hero {
+
+        width: 92%;
+
+        min-height: auto;
+
+        padding: 55px 0 35px;
+
+        gap: 45px;
+    }
+
+
+    .hero h1 {
+
+        font-size: clamp(42px, 11vw, 58px);
+
+        letter-spacing: -2.5px;
+    }
+
+
+    .hero-descricao {
+
+        font-size: 15px;
+    }
+
+
+    .hero-status {
+
+        gap: 12px;
+    }
+
+
+    .status-item small {
+
+        display: none;
+    }
+
+
+    .universos {
+
+        padding: 10px;
+
+        gap: 14px;
+    }
+
+
+    .universo {
+
+        min-height: 350px;
+
+        padding: 20px;
+    }
+
+
+    .universo-info h2 {
+
+        font-size: 27px;
+    }
+
+
+    .icone-circulo {
+
+        width: 95px;
+
+        height: 95px;
+
+        font-size: 45px;
+    }
+
+
+    .universos-centro {
+
+        width: 38px;
+
+        height: 38px;
+
+        border-width: 4px;
+    }
+}
+
+
+/* =========================================================
+   23. CELULAR
+   ========================================================= */
+
+@media (max-width: 520px) {
+
+    .topbar {
+
+        padding: 0 16px;
+    }
+
+
+    .tema-seletor {
+
+        gap: 2px;
+    }
+
+
+    .tema-seletor button {
+
+        width: 29px;
+
+        height: 29px;
+
+        font-size: 13px;
+    }
+
+
+    .hero {
+
+        width: 90%;
+
+        padding-top: 40px;
+    }
+
+
+    .hero-tag {
+
+        font-size: 8px;
+
+        letter-spacing: 1px;
+
+        text-align: center;
+    }
+
+
+    .hero h1 {
+
+        font-size: 42px;
+
+        line-height: 1.02;
+    }
+
+
+    .hero h1 span::after {
+
+        height: 3px;
+
+        bottom: -3px;
+    }
+
+
+    .hero-descricao {
+
+        font-size: 14px;
+
+        line-height: 1.6;
+    }
+
+
+    .hero-acoes {
+
+        flex-direction: column;
+
+        gap: 18px;
+
+        margin-bottom: 35px;
+    }
+
+
+    .btn-principal {
+
+        width: 100%;
+    }
+
+
+    .hero-status {
+
+        display: grid;
+
+        grid-template-columns: 1fr;
+
+        justify-items: start;
+
+        width: fit-content;
+
+        margin: 0 auto;
+
+        gap: 12px;
+    }
+
+
+    .status-linha {
+
+        display: none;
+    }
+
+
+    .universos {
+
+        grid-template-columns: 1fr;
+
+        width: 100%;
+
+        padding: 0;
+
+        gap: 16px;
+    }
+
+
+    .universo {
+
+        min-height: 350px;
+    }
+
+
+    .universo-space {
+
+        transform: none;
+    }
+
+
+    .universo-space:hover {
+
+        transform: translateY(-8px);
+    }
+
+
+    .universos-centro {
+
+        display: none;
+    }
+
+
+    .frase {
+
+        margin-top: 45px;
+
+        margin-bottom: 40px;
+
+        gap: 10px;
+    }
+
+
+    .linha {
+
+        width: 35px;
+    }
+
+
+    .frase p {
+
+        font-size: 8px;
+    }
+
+
+    footer {
+
+        flex-direction: column;
+
+        justify-content: center;
+
+        gap: 6px;
+
+        text-align: center;
+    }
+}
+
+
+/* =========================================================
+   24. ACESSIBILIDADE
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        scroll-behavior: auto !important;
+
+        transition-duration: 0.01ms !important;
+
+        animation-duration: 0.01ms !important;
+    }
+}
