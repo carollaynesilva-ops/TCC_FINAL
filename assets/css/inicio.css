@@ -46,21 +46,28 @@
    PINK
 ========================= */
 
+/* =========================
+   TEMA ROSA
+========================= */
+
 [data-theme="pink"] {
 
-    --blue: #a84d78;
-    --blue-dark: #913b65;
+    --blue: #e85d9e;
+    --blue-dark: #d8478b;
 
-    --purple: #8b4e9f;
-    --purple-dark: #743c88;
+    --purple: #c83d82;
+    --purple-dark: #a92d69;
 
-    --background: #fff7fb;
-    --surface: #ffffff;
+    --background: #fff1f7;
+    --surface: #fff9fc;
 
-    --text: #241923;
-    --text-soft: #806f7a;
+    --text: #351522;
+    --text-soft: #946276;
 
-    --border: #f0dfe8;
+    --border: #f3cddd;
+
+    --shadow:
+        0 18px 45px rgba(207, 67, 128, .12);
 }
 
 
@@ -414,30 +421,18 @@ a {
    MISSION
 ========================= */
 
-.mission {
-
-    min-height: 350px;
-
-    border-radius: 27px;
-
-    overflow: hidden;
-
-    position: relative;
-
-    color: white;
+[data-theme="pink"] .mission {
 
     background:
         linear-gradient(
             120deg,
-            #3157cf,
-            #4d4ed0 55%,
-            #794fe0
+            #d93682,
+            #e94f99 55%,
+            #c83d82
         );
 
     box-shadow:
-        0 25px 55px rgba(65, 75, 210, .20);
-
-    display: flex;
+        0 25px 55px rgba(210, 55, 125, .25);
 }
 
 .mission::before {
@@ -1234,3 +1229,104 @@ a {
     }
 
 }
+
+[data-theme="pink"] body {
+
+    background:
+        radial-gradient(
+            circle at 10% 20%,
+            rgba(232, 93, 158, .13),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 90% 50%,
+            rgba(200, 61, 130, .10),
+            transparent 25%
+        ),
+        var(--background);
+}
+
+[data-theme="pink"] .world-card.space {
+
+    color: #351522;
+
+    background:
+        linear-gradient(
+            140deg,
+            #f5b7d1,
+            #e987b0
+        );
+
+    border: 1px solid #e3a0bd;
+}
+
+[data-theme="pink"] .world-card.space {
+
+    color: #351522;
+
+    background:
+        linear-gradient(
+            140deg,
+            #f5b7d1,
+            #e987b0
+        );
+
+    border: 1px solid #e3a0bd;
+}
+
+[data-theme="pink"] .progress-fill,
+[data-theme="pink"] .xp-track div {
+
+    background:
+        linear-gradient(
+            90deg,
+            #e34d91,
+            #c52f78
+        );
+}
+
+[data-theme="pink"] body {
+
+    background:
+        radial-gradient(
+            circle at 10% 20%,
+            rgba(232, 93, 158, .13),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 90% 50%,
+            rgba(200, 61, 130, .10),
+            transparent 25%
+        ),
+        var(--background);
+}
+
+[data-theme="pink"] .navbar {
+
+    background: #fff5f9;
+
+    border-bottom-color: #f1ccdc;
+}
+
+[data-theme="pink"] .nav-links a:hover,
+[data-theme="pink"] .nav-links a.active {
+
+    color: #c83d82;
+}
+
+[data-theme="pink"] .brand span {
+
+    color: #d83f84;
+}
+
+[data-theme="pink"] .theme-switcher {
+
+    background: #f9dce9;
+}
+
+[data-theme="pink"] .theme-switcher button.active {
+
+    background: #fff9fc;
+
+    color: #c83d82;
+}   
