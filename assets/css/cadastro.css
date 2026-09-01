@@ -1,0 +1,810 @@
+/* =========================================================
+   MATHRUN - CADASTRO
+   ========================================================= */
+
+:root {
+
+    --blue: #4169e1;
+    --purple: #7b4de8;
+    --purple-dark: #5b32b8;
+
+    --background: #f7f9ff;
+    --surface: #ffffff;
+
+    --text: #171a2b;
+    --text-light: #70758a;
+
+    --border: rgba(65, 105, 225, 0.12);
+
+    --error: #d64255;
+    --success: #31946a;
+}
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+
+    margin: 0;
+
+    padding: 0;
+
+    box-sizing: border-box;
+}
+
+
+body {
+
+    min-height: 100vh;
+
+    font-family: "Outfit", sans-serif;
+
+    background: var(--background);
+
+    color: var(--text);
+
+    overflow-x: hidden;
+}
+
+
+a {
+
+    text-decoration: none;
+
+    color: inherit;
+}
+
+
+/* =========================================================
+   FUNDO
+   ========================================================= */
+
+.background {
+
+    position: fixed;
+
+    inset: 0;
+
+    overflow: hidden;
+
+    pointer-events: none;
+
+    z-index: 0;
+}
+
+
+.glow {
+
+    position: absolute;
+
+    border-radius: 50%;
+
+    filter: blur(100px);
+
+    opacity: 0.14;
+}
+
+
+.glow-1 {
+
+    width: 400px;
+
+    height: 400px;
+
+    top: -200px;
+
+    right: -100px;
+
+    background: var(--blue);
+}
+
+
+.glow-2 {
+
+    width: 350px;
+
+    height: 350px;
+
+    bottom: -180px;
+
+    left: -100px;
+
+    background: var(--purple);
+}
+
+
+.math-symbol {
+
+    position: absolute;
+
+    color: var(--blue);
+
+    opacity: 0.055;
+
+    font-size: 70px;
+
+    font-weight: 800;
+}
+
+
+.symbol-1 {
+
+    top: 20%;
+
+    left: 6%;
+
+    transform: rotate(-15deg);
+}
+
+
+.symbol-2 {
+
+    top: 70%;
+
+    left: 10%;
+
+    color: var(--purple);
+
+    transform: rotate(12deg);
+}
+
+
+.symbol-3 {
+
+    top: 18%;
+
+    right: 8%;
+
+    color: var(--purple);
+
+    transform: rotate(12deg);
+}
+
+
+.symbol-4 {
+
+    bottom: 20%;
+
+    right: 12%;
+
+    transform: rotate(-10deg);
+}
+
+
+.symbol-5 {
+
+    top: 50%;
+
+    right: 30%;
+
+    font-size: 45px;
+}
+
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+.navbar {
+
+    position: relative;
+
+    z-index: 5;
+
+    height: 76px;
+
+    padding: 0 6vw;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border-bottom: 1px solid var(--border);
+
+    background: rgba(255, 255, 255, 0.7);
+
+    backdrop-filter: blur(15px);
+}
+
+
+.brand {
+
+    font-size: 28px;
+
+    font-weight: 800;
+
+    letter-spacing: -1.5px;
+}
+
+
+.brand span {
+
+    color: var(--purple);
+}
+
+
+.login-link {
+
+    color: var(--text-light);
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    transition: 0.25s ease;
+}
+
+
+.login-link:hover {
+
+    color: var(--purple);
+}
+
+
+/* =========================================================
+   CONTAINER
+   ========================================================= */
+
+.cadastro-container {
+
+    position: relative;
+
+    z-index: 2;
+
+    width: min(1050px, 90%);
+
+    margin: auto;
+
+    padding: 55px 0;
+
+    display: grid;
+
+    grid-template-columns: 1fr 0.8fr;
+
+    gap: 70px;
+
+    align-items: center;
+}
+
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.cadastro-card {
+
+    padding: 42px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 24px;
+
+    background: var(--surface);
+
+    box-shadow:
+        0 25px 70px rgba(60, 80, 160, 0.10);
+}
+
+
+.card-header {
+
+    margin-bottom: 30px;
+}
+
+
+.tag {
+
+    display: inline-block;
+
+    margin-bottom: 13px;
+
+    color: var(--purple);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+
+.card-header h1 {
+
+    margin-bottom: 10px;
+
+    font-size: 42px;
+
+    line-height: 1;
+
+    letter-spacing: -1.8px;
+
+    font-weight: 800;
+}
+
+
+.card-header p {
+
+    color: var(--text-light);
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   MENSAGENS
+   ========================================================= */
+
+.mensagem {
+
+    margin-bottom: 20px;
+
+    padding: 12px 14px;
+
+    border-radius: 10px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+.erro {
+
+    background: #fff0f2;
+
+    color: var(--error);
+}
+
+
+.sucesso {
+
+    background: #edf9f4;
+
+    color: var(--success);
+}
+
+
+/* =========================================================
+   FORMULÁRIO
+   ========================================================= */
+
+.formulario {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 17px;
+}
+
+
+.campo {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+
+.campo label {
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+
+.campo input {
+
+    width: 100%;
+
+    height: 48px;
+
+    padding: 0 14px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    outline: none;
+
+    background: #fafbff;
+
+    color: var(--text);
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    transition: 0.25s ease;
+}
+
+
+.campo input::placeholder {
+
+    color: #a6aabd;
+}
+
+
+.campo input:focus {
+
+    border-color: var(--purple);
+
+    background: white;
+
+    box-shadow:
+        0 0 0 3px rgba(123, 77, 232, 0.08);
+}
+
+
+/* =========================================================
+   BOTÃO
+   ========================================================= */
+
+.btn-cadastrar {
+
+    width: 100%;
+
+    height: 52px;
+
+    margin-top: 8px;
+
+    padding: 0 10px 0 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    border: 0;
+
+    border-radius: 11px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--blue),
+            var(--purple)
+        );
+
+    color: white;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 12px 25px rgba(75, 74, 190, 0.22);
+
+    transition: 0.25s ease;
+}
+
+
+.btn-cadastrar strong {
+
+    width: 32px;
+
+    height: 32px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.15);
+
+    font-size: 17px;
+
+    transition: 0.25s ease;
+}
+
+
+.btn-cadastrar:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 16px 30px rgba(75, 74, 190, 0.28);
+}
+
+
+.btn-cadastrar:hover strong {
+
+    transform: translateX(4px);
+}
+
+
+/* =========================================================
+   LOGIN MOBILE
+   ========================================================= */
+
+.login-mobile {
+
+    display: none;
+
+    margin-top: 22px;
+
+    text-align: center;
+
+    color: var(--text-light);
+
+    font-size: 12px;
+}
+
+
+.login-mobile a {
+
+    color: var(--purple);
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   LADO VISUAL
+   ========================================================= */
+
+.cadastro-visual {
+
+    padding: 20px;
+}
+
+
+.visual-content {
+
+    max-width: 360px;
+}
+
+
+.xp-icon {
+
+    width: 58px;
+
+    height: 58px;
+
+    margin-bottom: 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--blue),
+            var(--purple)
+        );
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    box-shadow:
+        0 15px 30px rgba(75, 74, 190, 0.22);
+
+    transform: rotate(-5deg);
+}
+
+
+.visual-content h2 {
+
+    margin-bottom: 14px;
+
+    font-size: 42px;
+
+    line-height: 1;
+
+    letter-spacing: -2px;
+
+    font-weight: 800;
+}
+
+
+.visual-content p {
+
+    max-width: 320px;
+
+    color: var(--text-light);
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   BARRA DE XP
+   ========================================================= */
+
+.progress-example {
+
+    margin-top: 35px;
+
+    padding: 18px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 15px;
+
+    background: rgba(255, 255, 255, 0.7);
+
+    box-shadow:
+        0 15px 40px rgba(60, 80, 160, 0.08);
+}
+
+
+.progress-info {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 10px;
+}
+
+
+.progress-info span {
+
+    color: var(--text-light);
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+
+.progress-info strong {
+
+    color: var(--purple);
+
+    font-size: 10px;
+}
+
+
+.progress-bar {
+
+    width: 100%;
+
+    height: 7px;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: #e8ebf6;
+}
+
+
+.progress-bar div {
+
+    width: 18%;
+
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--blue),
+            var(--purple)
+        );
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+    .cadastro-container {
+
+        grid-template-columns: 1fr;
+
+        width: min(560px, 90%);
+
+        padding: 45px 0;
+    }
+
+
+    .cadastro-visual {
+
+        display: none;
+    }
+}
+
+
+/* =========================================================
+   CELULAR
+   ========================================================= */
+
+@media (max-width: 550px) {
+
+    .navbar {
+
+        height: 68px;
+
+        padding: 0 20px;
+    }
+
+
+    .brand {
+
+        font-size: 24px;
+    }
+
+
+    .login-link {
+
+        font-size: 11px;
+    }
+
+
+    .cadastro-container {
+
+        width: 92%;
+
+        padding: 30px 0;
+    }
+
+
+    .cadastro-card {
+
+        padding: 28px 22px;
+
+        border-radius: 19px;
+    }
+
+
+    .card-header h1 {
+
+        font-size: 35px;
+    }
+
+
+    .card-header p {
+
+        font-size: 13px;
+    }
+
+
+    .login-mobile {
+
+        display: block;
+    }
+
+
+    .math-symbol {
+
+        font-size: 45px;
+
+        opacity: 0.035;
+    }
+}
