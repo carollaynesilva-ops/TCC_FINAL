@@ -1,0 +1,622 @@
+:root {
+    --blue: #4169e1;
+    --blue-light: #eef2ff;
+    --purple: #7b4de8;
+    --purple-dark: #5b32b8;
+
+    --background: #f7f9ff;
+    --surface: #ffffff;
+
+    --text: #171a2b;
+    --text-light: #70758a;
+
+    --border: #e3e6f0;
+
+    --error-bg: #fff0f0;
+    --error-text: #c0392b;
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    font-family: "Outfit", sans-serif;
+
+    background: var(--background);
+
+    color: var(--text);
+
+    min-height: 100vh;
+
+    overflow-x: hidden;
+}
+
+
+/* =========================
+   FUNDO
+========================= */
+
+.background {
+    position: fixed;
+
+    inset: 0;
+
+    overflow: hidden;
+
+    pointer-events: none;
+
+    z-index: -1;
+}
+
+
+.glow {
+    position: absolute;
+
+    width: 400px;
+    height: 400px;
+
+    border-radius: 50%;
+
+    filter: blur(100px);
+
+    opacity: 0.15;
+}
+
+
+.glow-1 {
+    background: var(--blue);
+
+    top: -150px;
+    left: -100px;
+}
+
+
+.glow-2 {
+    background: var(--purple);
+
+    bottom: -150px;
+    right: -100px;
+}
+
+
+.math-symbol {
+    position: absolute;
+
+    font-size: 70px;
+
+    font-weight: 700;
+
+    color: #4169e1;
+
+    opacity: 0.035;
+}
+
+
+.symbol-1 {
+    top: 20%;
+    left: 8%;
+}
+
+
+.symbol-2 {
+    top: 70%;
+    left: 15%;
+}
+
+
+.symbol-3 {
+    top: 15%;
+    right: 12%;
+}
+
+
+.symbol-4 {
+    bottom: 15%;
+    right: 8%;
+}
+
+
+.symbol-5 {
+    top: 45%;
+    right: 4%;
+}
+
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar {
+    width: 100%;
+
+    padding: 28px 6%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+
+.brand {
+    text-decoration: none;
+
+    font-size: 28px;
+
+    font-weight: 800;
+
+    color: var(--text);
+
+    letter-spacing: -1px;
+}
+
+
+.brand span {
+    color: var(--purple);
+}
+
+
+.cadastro-link {
+    text-decoration: none;
+
+    color: var(--purple);
+
+    font-weight: 600;
+
+    transition: 0.2s;
+}
+
+
+.cadastro-link:hover {
+    color: var(--purple-dark);
+}
+
+
+/* =========================
+   CONTAINER
+========================= */
+
+.login-container {
+    width: min(1100px, 90%);
+
+    min-height: calc(100vh - 100px);
+
+    margin: auto;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    align-items: center;
+
+    gap: 70px;
+
+    padding-bottom: 50px;
+}
+
+
+/* =========================
+   CARD
+========================= */
+
+.login-card {
+    background: var(--surface);
+
+    padding: 48px;
+
+    border-radius: 24px;
+
+    border: 1px solid var(--border);
+
+    box-shadow: 0 20px 60px rgba(50, 60, 100, 0.08);
+}
+
+
+.card-header {
+    margin-bottom: 30px;
+}
+
+
+.tag {
+    display: inline-block;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+
+    color: var(--purple);
+
+    background: var(--blue-light);
+
+    padding: 7px 12px;
+
+    border-radius: 50px;
+
+    margin-bottom: 14px;
+}
+
+
+.card-header h1 {
+    font-size: 38px;
+
+    line-height: 1.1;
+
+    letter-spacing: -1px;
+
+    margin-bottom: 10px;
+}
+
+
+.card-header p {
+    color: var(--text-light);
+
+    font-size: 16px;
+}
+
+
+/* =========================
+   MENSAGEM
+========================= */
+
+.mensagem {
+    padding: 13px 16px;
+
+    border-radius: 10px;
+
+    margin-bottom: 20px;
+
+    font-size: 14px;
+
+    font-weight: 500;
+}
+
+
+.erro {
+    background: var(--error-bg);
+
+    color: var(--error-text);
+
+    border: 1px solid #ffd3d3;
+}
+
+
+/* =========================
+   FORMULÁRIO
+========================= */
+
+.formulario {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+
+.campo {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+.campo label {
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+
+.campo input {
+    width: 100%;
+
+    height: 52px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    padding: 0 16px;
+
+    font-family: inherit;
+
+    font-size: 15px;
+
+    color: var(--text);
+
+    outline: none;
+
+    background: #fff;
+
+    transition: 0.2s;
+}
+
+
+.campo input::placeholder {
+    color: #a3a7b7;
+}
+
+
+.campo input:focus {
+    border-color: var(--purple);
+
+    box-shadow: 0 0 0 4px rgba(123, 77, 232, 0.08);
+}
+
+
+/* =========================
+   BOTÃO
+========================= */
+
+.btn-entrar {
+    width: 100%;
+
+    height: 54px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    margin-top: 8px;
+
+    background: linear-gradient(
+        135deg,
+        var(--blue),
+        var(--purple)
+    );
+
+    color: white;
+
+    font-family: inherit;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    transition: 0.2s;
+}
+
+
+.btn-entrar strong {
+    font-size: 21px;
+
+    font-weight: 500;
+}
+
+
+.btn-entrar:hover {
+    transform: translateY(-2px);
+
+    box-shadow: 0 10px 25px rgba(88, 67, 220, 0.25);
+}
+
+
+.btn-entrar:active {
+    transform: translateY(0);
+}
+
+
+/* =========================
+   LINK MOBILE
+========================= */
+
+.cadastro-mobile {
+    text-align: center;
+
+    margin-top: 25px;
+
+    color: var(--text-light);
+
+    font-size: 14px;
+
+    display: none;
+}
+
+
+.cadastro-mobile a {
+    color: var(--purple);
+
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+
+/* =========================
+   LADO VISUAL
+========================= */
+
+.login-visual {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+.visual-content {
+    max-width: 420px;
+}
+
+
+.xp-icon {
+    width: 65px;
+    height: 65px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 18px;
+
+    background: linear-gradient(
+        135deg,
+        var(--blue),
+        var(--purple)
+    );
+
+    color: white;
+
+    font-weight: 800;
+
+    font-size: 18px;
+
+    margin-bottom: 25px;
+
+    box-shadow: 0 12px 30px rgba(65, 105, 225, 0.2);
+}
+
+
+.visual-content h2 {
+    font-size: 42px;
+
+    line-height: 1.05;
+
+    letter-spacing: -1.5px;
+
+    margin-bottom: 16px;
+}
+
+
+.visual-content p {
+    color: var(--text-light);
+
+    font-size: 17px;
+
+    line-height: 1.6;
+
+    max-width: 390px;
+}
+
+
+/* =========================
+   ESTATÍSTICAS
+========================= */
+
+.stats-example {
+    display: flex;
+
+    gap: 12px;
+
+    margin-top: 35px;
+}
+
+
+.stat {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    padding: 16px 20px;
+
+    min-width: 90px;
+}
+
+
+.stat span {
+    display: block;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    color: var(--text-light);
+
+    margin-bottom: 5px;
+}
+
+
+.stat strong {
+    font-size: 22px;
+
+    color: var(--purple);
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 850px) {
+
+    .login-container {
+        grid-template-columns: 1fr;
+
+        width: min(550px, 90%);
+
+        gap: 40px;
+    }
+
+
+    .login-visual {
+        display: none;
+    }
+
+
+    .cadastro-mobile {
+        display: block;
+    }
+
+}
+
+
+@media (max-width: 500px) {
+
+    .navbar {
+        padding: 22px 5%;
+    }
+
+
+    .brand {
+        font-size: 25px;
+    }
+
+
+    .cadastro-link {
+        font-size: 14px;
+    }
+
+
+    .login-card {
+        padding: 32px 24px;
+
+        border-radius: 20px;
+    }
+
+
+    .card-header h1 {
+        font-size: 31px;
+    }
+
+
+    .card-header p {
+        font-size: 14px;
+    }
+
+}
