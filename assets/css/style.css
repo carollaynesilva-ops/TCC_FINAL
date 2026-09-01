@@ -1,105 +1,110 @@
 /* =========================================================
-   CORATECH
-   STYLE.CSS
-   Tela inicial
+   MATHRUN
    ========================================================= */
 
 
 /* =========================================================
-   1. VARIÁVEIS - TEMA CLARO
+   VARIÁVEIS
    ========================================================= */
 
 :root {
 
-    --fundo: #f5f4f2;
-    --superficie: #ffffff;
+    --blue: #4169e1;
+    --blue-dark: #2948b8;
+    --blue-light: #e9efff;
 
-    --texto: #292728;
-    --texto-secundario: #777274;
-    --texto-suave: #aaa5a6;
+    --purple: #7b4de8;
+    --purple-dark: #5b32b8;
+    --purple-light: #f0eaff;
 
-    --vinho: #960c19;
-    --vinho-escuro: #760812;
+    --white: #ffffff;
 
-    --dourado: #bf9460;
+    --background: #f7f9ff;
+    --surface: #ffffff;
 
-    --rosa: #d45d8d;
-    --rosa-claro: #f5dce7;
+    --text: #171a2b;
+    --text-light: #6d7185;
 
-    --borda: rgba(41, 39, 40, 0.10);
+    --border: rgba(65, 105, 225, 0.12);
 
-    --sombra: rgba(41, 39, 40, 0.08);
+    --shadow:
+        0 20px 50px rgba(56, 76, 160, 0.12);
 
-    --transicao: 0.3s ease;
+    --transition: 0.25s ease;
 }
 
 
 /* =========================================================
-   2. TEMA ESCURO
+   TEMA ESCURO
    ========================================================= */
 
 [data-theme="escuro"] {
 
-    --fundo: #111114;
-    --superficie: #1c1c21;
+    --background: #0d1020;
 
-    --texto: #f4f1f2;
-    --texto-secundario: #aaa5a7;
-    --texto-suave: #777276;
+    --surface: #171b31;
 
-    --vinho: #c52a3a;
-    --vinho-escuro: #a51d2c;
+    --text: #f5f7ff;
 
-    --dourado: #c8a477;
+    --text-light: #9ca4c2;
 
-    --rosa: #db719e;
-    --rosa-claro: #382530;
+    --blue-light: #1b2445;
 
-    --borda: rgba(255, 255, 255, 0.08);
+    --purple-light: #251b43;
 
-    --sombra: rgba(0, 0, 0, 0.35);
+    --border: rgba(255, 255, 255, 0.08);
+
+    --shadow:
+        0 20px 60px rgba(0, 0, 0, 0.4);
 }
 
 
 /* =========================================================
-   3. TEMA ROSA
+   TEMA ROSA
    ========================================================= */
 
 [data-theme="rosa"] {
 
-    --fundo: #fff5f8;
-    --superficie: #ffffff;
+    --blue: #6a63e8;
 
-    --texto: #382a30;
-    --texto-secundario: #806d75;
-    --texto-suave: #ad989f;
+    --blue-dark: #5149c8;
 
-    --vinho: #a52a48;
-    --vinho-escuro: #861f39;
+    --blue-light: #eeecff;
 
-    --dourado: #bf9460;
+    --purple: #c05ad9;
 
-    --rosa: #d45d8d;
-    --rosa-claro: #f5d4e1;
+    --purple-dark: #9f42b8;
 
-    --borda: rgba(100, 55, 72, 0.10);
+    --purple-light: #f8eaff;
 
-    --sombra: rgba(130, 60, 90, 0.10);
+    --background: #fff7fc;
+
+    --surface: #ffffff;
+
+    --text: #292033;
+
+    --text-light: #7e7186;
+
+    --border: rgba(192, 90, 217, 0.13);
 }
 
 
 /* =========================================================
-   4. RESET
+   RESET
    ========================================================= */
 
 * {
+
     margin: 0;
+
     padding: 0;
+
     box-sizing: border-box;
 }
 
 
 html {
+
     scroll-behavior: smooth;
 }
 
@@ -108,45 +113,39 @@ body {
 
     min-height: 100vh;
 
+    overflow-x: hidden;
+
     font-family:
-        Inter,
-        "Segoe UI",
-        Arial,
+        "Outfit",
         sans-serif;
 
-    background: var(--fundo);
+    background: var(--background);
 
-    color: var(--texto);
-
-    overflow-x: hidden;
+    color: var(--text);
 
     display: flex;
 
     flex-direction: column;
 
     transition:
-        background var(--transicao),
-        color var(--transicao);
+        background var(--transition),
+        color var(--transition);
 }
 
 
 a {
+
     text-decoration: none;
 
     color: inherit;
 }
 
 
-button {
-    font-family: inherit;
-}
-
-
 /* =========================================================
-   5. FUNDO MATEMÁTICO
+   BACKGROUND
    ========================================================= */
 
-.background-math {
+.background {
 
     position: fixed;
 
@@ -160,45 +159,117 @@ button {
 }
 
 
+/* Gradientes */
+
+.glow {
+
+    position: absolute;
+
+    border-radius: 50%;
+
+    filter: blur(90px);
+
+    opacity: 0.18;
+}
+
+
+.glow-1 {
+
+    width: 400px;
+
+    height: 400px;
+
+    top: -180px;
+
+    right: -100px;
+
+    background: var(--blue);
+}
+
+
+.glow-2 {
+
+    width: 350px;
+
+    height: 350px;
+
+    bottom: -180px;
+
+    left: -120px;
+
+    background: var(--purple);
+}
+
+
+/* Grid */
+
+.grid {
+
+    position: absolute;
+
+    inset: 0;
+
+    opacity: 0.035;
+
+    background-image:
+        linear-gradient(
+            var(--blue) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            var(--blue) 1px,
+            transparent 1px
+        );
+
+    background-size: 45px 45px;
+
+    mask-image:
+        linear-gradient(
+            to bottom,
+            black,
+            transparent 85%
+        );
+}
+
+
+/* =========================================================
+   SÍMBOLOS MATEMÁTICOS
+   ========================================================= */
+
 .math-symbol {
 
     position: absolute;
 
-    color: var(--texto);
+    color: var(--blue);
 
-    opacity: 0.045;
+    opacity: 0.07;
 
-    font-weight: 700;
+    font-size: 70px;
+
+    font-weight: 800;
 
     user-select: none;
-
-    transition:
-        color var(--transicao),
-        opacity var(--transicao);
 }
 
 
-/* Símbolos individuais */
-
 .symbol-1 {
 
-    top: 14%;
+    top: 17%;
 
     left: 7%;
 
-    font-size: 75px;
-
-    transform: rotate(-15deg);
+    transform: rotate(-12deg);
 }
 
 
 .symbol-2 {
 
-    top: 65%;
+    top: 70%;
 
-    left: 10%;
+    left: 11%;
 
-    font-size: 65px;
+    color: var(--purple);
 
     transform: rotate(12deg);
 }
@@ -206,93 +277,75 @@ button {
 
 .symbol-3 {
 
-    top: 20%;
+    top: 18%;
 
     right: 8%;
 
-    font-size: 80px;
-
-    transform: rotate(15deg);
-}
-
-
-.symbol-4 {
-
-    bottom: 13%;
-
-    right: 9%;
-
-    font-size: 70px;
-
-    transform: rotate(-10deg);
-}
-
-
-.symbol-5 {
-
-    top: 43%;
-
-    left: 16%;
-
-    font-size: 45px;
-
-    transform: rotate(8deg);
-}
-
-
-.symbol-6 {
-
-    top: 12%;
-
-    right: 28%;
-
-    font-size: 48px;
-
-    transform: rotate(-8deg);
-}
-
-
-.symbol-7 {
-
-    bottom: 28%;
-
-    right: 28%;
-
-    font-size: 43px;
+    color: var(--purple);
 
     transform: rotate(10deg);
 }
 
 
-.symbol-8 {
+.symbol-4 {
 
-    bottom: 18%;
+    bottom: 14%;
 
-    left: 30%;
+    right: 10%;
 
-    font-size: 52px;
-
-    transform: rotate(-12deg);
+    transform: rotate(-8deg);
 }
 
 
-.symbol-9 {
+.symbol-5 {
 
     top: 36%;
 
-    right: 17%;
+    left: 15%;
+
+    font-size: 45px;
+}
+
+
+.symbol-6 {
+
+    top: 57%;
+
+    right: 14%;
+
+    color: var(--purple);
+
+    font-size: 48px;
+}
+
+
+.symbol-7 {
+
+    bottom: 24%;
+
+    left: 30%;
+
+    font-size: 42px;
+}
+
+
+.symbol-8 {
+
+    top: 11%;
+
+    right: 28%;
+
+    color: var(--purple);
 
     font-size: 40px;
-
-    transform: rotate(5deg);
 }
 
 
 /* =========================================================
-   6. HEADER
+   NAVBAR
    ========================================================= */
 
-.topbar {
+.navbar {
 
     position: relative;
 
@@ -300,7 +353,7 @@ button {
 
     width: 100%;
 
-    min-height: 78px;
+    height: 76px;
 
     padding: 0 6vw;
 
@@ -310,49 +363,49 @@ button {
 
     justify-content: space-between;
 
-    border-bottom: 1px solid var(--borda);
+    border-bottom: 1px solid var(--border);
 
-    background: rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.65);
 
-    backdrop-filter: blur(14px);
+    backdrop-filter: blur(15px);
 
-    -webkit-backdrop-filter: blur(14px);
-
-    transition:
-        background var(--transicao),
-        border-color var(--transicao);
+    -webkit-backdrop-filter: blur(15px);
 }
 
 
-[data-theme="escuro"] .topbar {
+[data-theme="escuro"] .navbar {
 
-    background: rgba(17, 17, 20, 0.65);
-}
-
-
-.logo-link {
-
-    display: flex;
-
-    align-items: center;
-}
-
-
-.logo {
-
-    width: 145px;
-
-    max-height: 58px;
-
-    object-fit: contain;
+    background: rgba(13, 16, 32, 0.7);
 }
 
 
 /* =========================================================
-   7. SELETOR DE TEMA
+   LOGO TEXTO
    ========================================================= */
 
-.topbar-direita {
+.brand {
+
+    font-size: 28px;
+
+    font-weight: 800;
+
+    letter-spacing: -1.5px;
+
+    color: var(--text);
+}
+
+
+.brand span {
+
+    color: var(--purple);
+}
+
+
+/* =========================================================
+   TEMA
+   ========================================================= */
+
+.navbar-right {
 
     display: flex;
 
@@ -360,94 +413,604 @@ button {
 }
 
 
-.tema-seletor {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 3px;
+.theme-switch {
 
     padding: 4px;
 
-    border: 1px solid var(--borda);
+    display: flex;
+
+    gap: 3px;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
 
     border-radius: 12px;
 
-    background: var(--superficie);
-
-    box-shadow:
-        0 5px 15px var(--sombra);
+    box-shadow: 0 5px 20px var(--shadow);
 }
 
 
-.tema-seletor button {
+.theme-switch button {
 
-    width: 31px;
+    width: 30px;
 
-    height: 31px;
+    height: 30px;
 
-    border: none;
+    border: 0;
 
     border-radius: 8px;
 
     background: transparent;
 
-    color: var(--texto-secundario);
-
-    font-size: 14px;
+    color: var(--text-light);
 
     cursor: pointer;
 
-    transition: var(--transicao);
+    transition: var(--transition);
 }
 
 
-.tema-seletor button:hover {
+.theme-switch button:hover {
 
-    color: var(--rosa);
+    background: var(--purple-light);
 
-    background: var(--rosa-claro);
+    color: var(--purple);
 
-    transform: translateY(-1px);
-}
-
-
-.tema-seletor button:focus-visible {
-
-    outline: 2px solid var(--rosa);
-
-    outline-offset: 2px;
+    transform: translateY(-2px);
 }
 
 
 /* =========================================================
-   8. MAIN
+   HERO
    ========================================================= */
 
-main {
+.hero {
 
     position: relative;
 
-    z-index: 1;
+    z-index: 2;
+
+    width: min(1180px, 88%);
 
     flex: 1;
 
-    display: flex;
+    margin: auto;
+
+    display: grid;
+
+    grid-template-columns: 1.05fr 0.95fr;
+
+    align-items: center;
+
+    gap: 70px;
+
+    padding: 70px 0;
 }
 
 
 /* =========================================================
-   9. HERO MINIMALISTA
+   HERO CONTENT
    ========================================================= */
 
-.hero-minimal {
+.hero-content {
 
-    width: min(900px, 90%);
+    max-width: 620px;
+}
 
-    margin: auto;
 
-    padding: 70px 0 80px;
+/* =========================================================
+   BADGE
+   ========================================================= */
+
+.badge {
+
+    width: fit-content;
+
+    margin-bottom: 24px;
+
+    padding: 8px 13px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 50px;
+
+    background: var(--surface);
+
+    color: var(--purple);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    box-shadow:
+        0 8px 25px var(--shadow);
+}
+
+
+.badge-dot {
+
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--purple);
+
+    box-shadow:
+        0 0 0 4px var(--purple-light);
+}
+
+
+/* =========================================================
+   TÍTULO
+   ========================================================= */
+
+.hero h1 {
+
+    margin-bottom: 22px;
+
+    font-size: clamp(52px, 6vw, 78px);
+
+    line-height: 0.98;
+
+    letter-spacing: -3px;
+
+    font-weight: 800;
+}
+
+
+.hero h1 span {
+
+    display: inline-block;
+
+    color: var(--purple);
+
+    position: relative;
+}
+
+
+.hero h1 span::after {
+
+    content: "";
+
+    position: absolute;
+
+    height: 8px;
+
+    left: 3px;
+
+    right: 3px;
+
+    bottom: -5px;
+
+    border-radius: 20px;
+
+    background: var(--blue);
+
+    opacity: 0.85;
+}
+
+
+/* =========================================================
+   TEXTO
+   ========================================================= */
+
+.hero-content > p {
+
+    max-width: 520px;
+
+    margin-bottom: 32px;
+
+    color: var(--text-light);
+
+    font-size: 17px;
+
+    line-height: 1.65;
+}
+
+
+/* =========================================================
+   BOTÕES
+   ========================================================= */
+
+.hero-buttons {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+
+    margin-bottom: 45px;
+}
+
+
+.btn-primary {
+
+    min-width: 190px;
+
+    height: 55px;
+
+    padding: 0 10px 0 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--blue),
+            var(--purple)
+        );
+
+    color: white;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    box-shadow:
+        0 14px 30px rgba(75, 74, 190, 0.25);
+
+    transition: var(--transition);
+}
+
+
+.btn-primary strong {
+
+    width: 34px;
+
+    height: 34px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.16);
+
+    font-size: 18px;
+
+    transition: var(--transition);
+}
+
+
+.btn-primary:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 18px 35px rgba(75, 74, 190, 0.32);
+}
+
+
+.btn-primary:hover strong {
+
+    transform: translateX(4px);
+}
+
+
+.btn-secondary {
+
+    color: var(--text-light);
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    border-bottom: 1px solid transparent;
+
+    transition: var(--transition);
+}
+
+
+.btn-secondary:hover {
+
+    color: var(--purple);
+
+    border-color: var(--purple);
+}
+
+
+/* =========================================================
+   MINI STATS
+   ========================================================= */
+
+.mini-stats {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+}
+
+
+.mini-stats div:not(.stats-line) {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.mini-stats strong {
+
+    color: var(--purple);
+
+    font-size: 16px;
+
+    font-weight: 800;
+}
+
+
+.mini-stats span {
+
+    color: var(--text-light);
+
+    font-size: 10px;
+
+    font-weight: 500;
+}
+
+
+.stats-line {
+
+    width: 1px;
+
+    height: 30px;
+
+    background: var(--border);
+}
+
+
+/* =========================================================
+   GAME CARD
+   ========================================================= */
+
+.hero-visual {
+
+    position: relative;
+
+    min-height: 430px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+.game-card {
+
+    position: relative;
+
+    width: min(390px, 100%);
+
+    padding: 25px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 25px;
+
+    background: var(--surface);
+
+    box-shadow:
+        0 30px 70px rgba(50, 65, 150, 0.15);
+
+    transform: rotate(2deg);
+
+    transition: var(--transition);
+}
+
+
+.game-card:hover {
+
+    transform:
+        rotate(0deg)
+        translateY(-5px);
+}
+
+
+/* =========================================================
+   CARD TOPO
+   ========================================================= */
+
+.card-top {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 35px;
+}
+
+
+.card-label {
+
+    color: var(--purple);
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+
+.card-level {
+
+    padding: 6px 9px;
+
+    border-radius: 7px;
+
+    background: var(--blue-light);
+
+    color: var(--blue);
+
+    font-size: 9px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   PERGUNTA
+   ========================================================= */
+
+.card-question {
+
+    margin-bottom: 25px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    text-align: center;
+}
+
+
+.card-question span {
+
+    color: var(--text-light);
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: 2px;
+}
+
+
+.card-question strong {
+
+    font-size: 35px;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   ALTERNATIVAS
+   ========================================================= */
+
+.answers {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+}
+
+
+.answers div {
+
+    padding: 14px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 11px;
+
+    background: var(--background);
+
+    color: var(--text);
+
+    text-align: center;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+.answers .correct {
+
+    border-color: var(--blue);
+
+    background: var(--blue-light);
+
+    color: var(--blue);
+
+    box-shadow:
+        inset 0 0 0 1px var(--blue);
+}
+
+
+/* =========================================================
+   CARD FOOTER
+   ========================================================= */
+
+.card-footer {
+
+    margin-top: 25px;
+
+    padding-top: 17px;
+
+    border-top: 1px solid var(--border);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    color: var(--text-light);
+
+    font-size: 10px;
+
+    font-weight: 700;
+}
+
+
+.card-footer span:first-child {
+
+    color: var(--purple);
+}
+
+
+/* =========================================================
+   ELEMENTOS FLUTUANTES
+   ========================================================= */
+
+.floating-xp {
+
+    position: absolute;
+
+    top: 50px;
+
+    right: 5px;
+
+    width: 75px;
+
+    height: 75px;
 
     display: flex;
 
@@ -457,281 +1020,99 @@ main {
 
     justify-content: center;
 
-    text-align: center;
+    border-radius: 20px;
+
+    background: var(--purple);
+
+    color: white;
+
+    box-shadow:
+        0 15px 35px rgba(123, 77, 232, 0.3);
+
+    transform: rotate(8deg);
 }
 
 
-/* =========================================================
-   10. OVERLINE
-   ========================================================= */
+.floating-xp strong {
 
-.hero-overline {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
-    margin-bottom: 27px;
-
-    color: var(--texto-suave);
-
-    font-size: 10px;
-
-    font-weight: 700;
-
-    letter-spacing: 3px;
-}
-
-
-.hero-overline span {
-
-    width: 22px;
-
-    height: 1px;
-
-    background: var(--dourado);
-}
-
-
-/* =========================================================
-   11. TÍTULO
-   ========================================================= */
-
-.hero-minimal h1 {
-
-    max-width: 850px;
-
-    margin-bottom: 28px;
-
-    font-size: clamp(48px, 7vw, 82px);
-
-    line-height: 0.98;
-
-    letter-spacing: -4px;
+    font-size: 20px;
 
     font-weight: 800;
 }
 
 
-.hero-minimal h1 span {
-
-    color: var(--vinho);
-
-    position: relative;
-}
-
-
-.hero-minimal h1 span::after {
-
-    content: "";
-
-    position: absolute;
-
-    left: 3px;
-
-    right: 5px;
-
-    bottom: -8px;
-
-    height: 5px;
-
-    border-radius: 20px;
-
-    background: var(--dourado);
-
-    opacity: 0.85;
-}
-
-
-/* =========================================================
-   12. DESCRIÇÃO
-   ========================================================= */
-
-.hero-descricao {
-
-    width: min(500px, 90%);
-
-    margin-bottom: 35px;
-
-    color: var(--texto-secundario);
-
-    font-size: 16px;
-
-    line-height: 1.7;
-}
-
-
-/* =========================================================
-   13. AÇÕES
-   ========================================================= */
-
-.hero-acoes {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 22px;
-
-    margin-bottom: 50px;
-}
-
-
-/* Botão principal */
-
-.btn-principal {
-
-    min-width: 185px;
-
-    min-height: 52px;
-
-    padding: 0 12px 0 22px;
-
-    display: inline-flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 18px;
-
-    border-radius: 11px;
-
-    background: var(--vinho);
-
-    color: #ffffff;
-
-    font-size: 13px;
-
-    font-weight: 700;
-
-    box-shadow:
-        0 12px 28px var(--sombra);
-
-    transition: var(--transicao);
-}
-
-
-.btn-principal span {
-
-    width: 30px;
-
-    height: 30px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border-radius: 8px;
-
-    background: rgba(255, 255, 255, 0.14);
-
-    font-size: 17px;
-
-    transition: var(--transicao);
-}
-
-
-.btn-principal:hover {
-
-    background: var(--vinho-escuro);
-
-    transform: translateY(-3px);
-
-    box-shadow:
-        0 16px 30px var(--sombra);
-}
-
-
-.btn-principal:hover span {
-
-    transform: translateX(3px);
-}
-
-
-/* Login */
-
-.btn-login {
-
-    padding: 10px 2px;
-
-    color: var(--texto-secundario);
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    border-bottom: 1px solid transparent;
-
-    transition: var(--transicao);
-}
-
-
-.btn-login:hover {
-
-    color: var(--vinho);
-
-    border-color: var(--vinho);
-}
-
-
-/* =========================================================
-   14. INDICADOR INFERIOR
-   ========================================================= */
-
-.hero-indicador {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 15px;
-
-    color: var(--texto-suave);
+.floating-xp span {
 
     font-size: 9px;
 
-    font-weight: 600;
+    font-weight: 700;
 
-    letter-spacing: 1.8px;
-
-    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 
-.indicador-linha {
+.floating-level {
 
-    width: 45px;
+    position: absolute;
 
-    height: 1px;
+    bottom: 50px;
 
-    background: var(--borda);
+    left: 0;
+
+    padding: 13px 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    border-radius: 13px;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    box-shadow:
+        0 15px 35px var(--shadow);
+
+    transform: rotate(-5deg);
+}
+
+
+.floating-level span {
+
+    color: var(--text-light);
+
+    font-size: 8px;
+
+    font-weight: 700;
+}
+
+
+.floating-level strong {
+
+    color: var(--blue);
+
+    font-size: 15px;
+
+    font-weight: 800;
 }
 
 
 /* =========================================================
-   15. FOOTER
+   FOOTER
    ========================================================= */
 
 footer {
 
     position: relative;
 
-    z-index: 2;
+    z-index: 3;
 
-    width: 100%;
+    min-height: 60px;
 
-    min-height: 65px;
-
-    padding: 18px 6vw;
+    padding: 15px 6vw;
 
     display: flex;
 
@@ -739,288 +1120,301 @@ footer {
 
     justify-content: space-between;
 
-    border-top: 1px solid var(--borda);
+    border-top: 1px solid var(--border);
 
-    color: var(--texto-suave);
+    color: var(--text-light);
 
     font-size: 9px;
 
-    letter-spacing: 0.7px;
+    letter-spacing: 0.5px;
 }
 
 
 /* =========================================================
-   16. TABLET
+   TABLET
    ========================================================= */
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
 
-    .topbar {
+    .hero {
 
-        padding: 0 30px;
-    }
+        grid-template-columns: 1fr;
 
-
-    .hero-minimal {
+        gap: 40px;
 
         padding: 60px 0;
+
+        text-align: center;
     }
 
 
-    .hero-minimal h1 {
+    .hero-content {
 
-        font-size: clamp(46px, 9vw, 68px);
+        max-width: 700px;
+
+        margin: auto;
     }
 
 
-    .math-symbol {
+    .badge {
 
-        opacity: 0.035;
+        margin-left: auto;
+
+        margin-right: auto;
     }
 
 
-    .symbol-1 {
+    .hero-content > p {
 
-        left: 2%;
+        margin-left: auto;
+
+        margin-right: auto;
     }
 
 
-    .symbol-3 {
+    .hero-buttons {
 
-        right: 2%;
+        justify-content: center;
+    }
+
+
+    .mini-stats {
+
+        justify-content: center;
+    }
+
+
+    .hero-visual {
+
+        min-height: 380px;
+    }
+
+
+    .floating-xp {
+
+        right: 12%;
+    }
+
+
+    .floating-level {
+
+        left: 12%;
     }
 }
 
 
 /* =========================================================
-   17. CELULAR
+   CELULAR
    ========================================================= */
 
 @media (max-width: 550px) {
 
-    .topbar {
+    .navbar {
 
-        min-height: 68px;
+        height: 68px;
 
-        padding: 0 18px;
+        padding: 0 20px;
     }
 
 
-    .logo {
+    .brand {
 
-        width: 115px;
-
-        max-height: 48px;
+        font-size: 24px;
     }
 
 
-    .tema-seletor {
-
-        padding: 3px;
-
-        border-radius: 10px;
-    }
-
-
-    .tema-seletor button {
+    .theme-switch button {
 
         width: 28px;
 
         height: 28px;
-
-        font-size: 13px;
     }
 
 
-    .hero-minimal {
+    .hero {
 
         width: 90%;
 
-        padding: 50px 0 55px;
+        padding: 45px 0 55px;
+
+        gap: 30px;
     }
 
 
-    .hero-overline {
-
-        margin-bottom: 22px;
-
-        gap: 8px;
+    .badge {
 
         font-size: 8px;
 
-        letter-spacing: 2.2px;
+        letter-spacing: 0.7px;
+
+        padding: 7px 10px;
     }
 
 
-    .hero-overline span {
+    .hero h1 {
 
-        width: 16px;
-    }
+        font-size: 45px;
 
-
-    .hero-minimal h1 {
-
-        margin-bottom: 24px;
-
-        font-size: 43px;
+        letter-spacing: -2px;
 
         line-height: 1;
-
-        letter-spacing: -2.5px;
     }
 
 
-    .hero-minimal h1 span::after {
+    .hero h1 span::after {
 
-        height: 3px;
+        height: 5px;
 
-        bottom: -5px;
+        bottom: -3px;
     }
 
 
-    .hero-descricao {
-
-        width: 100%;
-
-        margin-bottom: 30px;
+    .hero-content > p {
 
         font-size: 14px;
 
-        line-height: 1.65;
+        line-height: 1.6;
     }
 
 
-    .hero-acoes {
-
-        width: 100%;
+    .hero-buttons {
 
         flex-direction: column;
 
-        gap: 17px;
+        gap: 15px;
 
-        margin-bottom: 38px;
+        margin-bottom: 35px;
     }
 
 
-    .btn-principal {
+    .btn-primary {
 
         width: min(300px, 100%);
-
-        min-height: 52px;
     }
 
 
-    .btn-login {
+    .mini-stats {
 
-        font-size: 12px;
+        gap: 12px;
     }
 
 
-    .hero-indicador {
-
-        gap: 9px;
-
-        font-size: 7px;
-
-        letter-spacing: 1.2px;
-    }
-
-
-    .indicador-linha {
-
-        width: 25px;
-    }
-
-
-    footer {
-
-        min-height: 70px;
-
-        padding: 15px 20px;
-
-        flex-direction: column;
-
-        justify-content: center;
-
-        gap: 6px;
-
-        text-align: center;
+    .mini-stats span {
 
         font-size: 8px;
     }
 
 
-    /* Símbolos mais discretos no celular */
+    .mini-stats strong {
 
-    .math-symbol {
-
-        opacity: 0.025;
+        font-size: 14px;
     }
 
 
-    .symbol-1 {
+    .hero-visual {
 
-        top: 17%;
-
-        left: -5%;
-
-        font-size: 55px;
+        min-height: 330px;
     }
 
 
-    .symbol-2 {
+    .game-card {
 
-        top: 70%;
+        width: min(330px, 92%);
 
-        left: 2%;
+        padding: 20px;
 
-        font-size: 50px;
+        border-radius: 20px;
     }
 
 
-    .symbol-3 {
+    .card-question strong {
 
-        top: 25%;
-
-        right: -5%;
-
-        font-size: 58px;
+        font-size: 29px;
     }
 
 
-    .symbol-4 {
+    .answers div {
 
-        bottom: 16%;
+        padding: 12px 8px;
+
+        font-size: 11px;
+    }
+
+
+    .floating-xp {
+
+        top: 15px;
 
         right: 0;
 
-        font-size: 52px;
+        width: 63px;
+
+        height: 63px;
+
+        border-radius: 16px;
+    }
+
+
+    .floating-xp strong {
+
+        font-size: 16px;
+    }
+
+
+    .floating-level {
+
+        bottom: 20px;
+
+        left: 0;
+
+        padding: 10px 13px;
+    }
+
+
+    .math-symbol {
+
+        opacity: 0.04;
+
+        font-size: 45px;
     }
 
 
     .symbol-5,
     .symbol-6,
     .symbol-7,
-    .symbol-8,
-    .symbol-9 {
+    .symbol-8 {
 
         font-size: 30px;
+    }
+
+
+    footer {
+
+        padding: 14px 20px;
+
+        min-height: 65px;
+
+        flex-direction: column;
+
+        justify-content: center;
+
+        gap: 5px;
+
+        text-align: center;
     }
 }
 
 
 /* =========================================================
-   18. ACESSIBILIDADE
+   ACESSIBILIDADE
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
 
-    *,
-    *::before,
-    *::after {
+    * {
 
         scroll-behavior: auto !important;
 
-        transition-duration: 0.01ms !important;
+        transition: none !important;
     }
 }

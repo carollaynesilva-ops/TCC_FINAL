@@ -21,10 +21,26 @@ if (isset($_SESSION['usuario_id'])) {
 
     <meta
         name="description"
-        content="CoraTech - Plataforma educacional gamificada."
+        content="MathRun - Aprenda matemática jogando."
     >
 
-    <title>CoraTech | Aprenda de um jeito diferente</title>
+    <title>MathRun | Aprenda jogando</title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
 
     <link
         rel="stylesheet"
@@ -37,90 +53,75 @@ if (isset($_SESSION['usuario_id'])) {
 <body data-theme="claro">
 
 
-    <!-- ================================================
-         FUNDO MATEMÁTICO
-         ================================================ -->
+    <!-- ==================================================
+         FUNDO
+         ================================================== -->
 
-    <div
-        class="background-math"
-        aria-hidden="true"
-    >
+    <div class="background">
 
-        <span class="math-symbol symbol-1">+</span>
+        <div class="glow glow-1"></div>
 
-        <span class="math-symbol symbol-2">÷</span>
+        <div class="glow glow-2"></div>
 
-        <span class="math-symbol symbol-3">×</span>
+        <div class="grid"></div>
 
-        <span class="math-symbol symbol-4">=</span>
 
-        <span class="math-symbol symbol-5">π</span>
+        <div class="math-symbol symbol-1">+</div>
 
-        <span class="math-symbol symbol-6">½</span>
+        <div class="math-symbol symbol-2">÷</div>
 
-        <span class="math-symbol symbol-7">%</span>
+        <div class="math-symbol symbol-3">×</div>
 
-        <span class="math-symbol symbol-8">√</span>
+        <div class="math-symbol symbol-4">=</div>
 
-        <span class="math-symbol symbol-9">∑</span>
+        <div class="math-symbol symbol-5">π</div>
+
+        <div class="math-symbol symbol-6">√</div>
+
+        <div class="math-symbol symbol-7">½</div>
+
+        <div class="math-symbol symbol-8">%</div>
 
     </div>
 
 
-    <!-- ================================================
+    <!-- ==================================================
          HEADER
-         ================================================ -->
+         ================================================== -->
 
-    <header class="topbar">
-
+    <header class="navbar">
 
         <a
             href="index.php"
-            class="logo-link"
-            aria-label="CoraTech - Página inicial"
+            class="brand"
         >
-
-            <img
-                src="assets/img/logo.png"
-                alt="CoraTech"
-                class="logo"
-            >
-
+            Math<span>Run</span>
         </a>
 
 
-        <div class="topbar-direita">
+        <div class="navbar-right">
 
-
-            <div
-                class="tema-seletor"
-                aria-label="Selecionar tema"
-            >
+            <div class="theme-switch">
 
                 <button
                     type="button"
                     onclick="mudarTema('claro')"
-                    aria-label="Tema claro"
                     title="Tema claro"
                 >
                     ☀
                 </button>
 
-
                 <button
                     type="button"
                     onclick="mudarTema('escuro')"
-                    aria-label="Tema escuro"
                     title="Tema escuro"
                 >
                     ◐
                 </button>
 
-
                 <button
                     type="button"
                     onclick="mudarTema('rosa')"
-                    aria-label="Tema rosa"
                     title="Tema rosa"
                 >
                     ♡
@@ -133,116 +134,202 @@ if (isset($_SESSION['usuario_id'])) {
     </header>
 
 
-    <!-- ================================================
-         CONTEÚDO PRINCIPAL
-         ================================================ -->
+    <!-- ==================================================
+         CONTEÚDO
+         ================================================== -->
 
-    <main>
-
-
-        <section class="hero-minimal">
+    <main class="hero">
 
 
-            <!-- Pequeno detalhe de identificação -->
+        <div class="hero-content">
 
-            <div class="hero-overline">
 
-                <span></span>
+            <div class="badge">
 
-                CORATECH
+                <span class="badge-dot"></span>
 
-                <span></span>
+                MATEMÁTICA + DESAFIOS + DIVERSÃO
 
             </div>
 
 
-            <!-- Título principal -->
-
             <h1>
 
-                Matemática
-
-                <br>
-
-                <span>de um jeito diferente.</span>
+                Quantos níveis você aguentaria 
+                <span>antes de travar?</span>
 
             </h1>
 
 
-            <!-- Descrição -->
+            <p>
 
-            <p class="hero-descricao">
-
-                Uma nova forma de aprender, praticar
-                e evoluir através de experiências
-                interativas.
+                Aceite o desafio no MathRun, conquiste XP a cada segundo e mostre do que você é capaz.
 
             </p>
 
 
-            <!-- Ações -->
-
-            <div class="hero-acoes">
-
+            <div class="hero-buttons">
 
                 <a
                     href="cadastro.php"
-                    class="btn-principal"
+                    class="btn-primary"
                 >
 
-                    Começar agora
+                    <span>Começar agora</span>
 
-                    <span>→</span>
+                    <strong>→</strong>
 
                 </a>
 
 
                 <a
                     href="login.php"
-                    class="btn-login"
+                    class="btn-secondary"
                 >
 
                     Já tenho uma conta
 
                 </a>
 
+            </div>
+
+
+            <div class="mini-stats">
+
+                <div>
+
+                    <strong>XP</strong>
+
+                    <span>Ganhe pontos</span>
+
+                </div>
+
+
+                <div class="stats-line"></div>
+
+
+                <div>
+
+                    <strong>🏆</strong>
+
+                    <span>Conquiste medalhas</span>
+
+                </div>
+
+
+                <div class="stats-line"></div>
+
+
+                <div>
+
+                    <strong>↗</strong>
+
+                    <span>Suba de nível</span>
+
+                </div>
 
             </div>
 
 
-            <!-- Pequeno indicador -->
+        </div>
 
-            <div class="hero-indicador">
 
-                <span class="indicador-linha"></span>
+        <!-- ==================================================
+             ELEMENTO VISUAL
+             ================================================== -->
 
-                <span>
-                    Aprender • Jogar • Evoluir
-                </span>
+        <div class="hero-visual">
 
-                <span class="indicador-linha"></span>
+
+            <div class="game-card">
+
+
+                <div class="card-top">
+
+                    <span class="card-label">
+                        MATHRUN
+                    </span>
+
+                    <span class="card-level">
+                        LVL 01
+                    </span>
+
+                </div>
+
+
+                <div class="card-question">
+
+                    <span>DESAFIO</span>
+
+                    <strong>
+
+                        1/4 de 1kg
+
+                    </strong>
+
+                </div>
+
+
+                <div class="answers">
+
+                    <div>25g</div>
+
+                    <div class="correct">250g</div>
+
+                    <div>400g</div>
+
+                    <div>750g</div>
+
+                </div>
+
+
+                <div class="card-footer">
+
+                    <span>+100 XP</span>
+
+                    <span>● ● ● ○</span>
+
+                </div>
+
 
             </div>
 
 
-        </section>
+            <div class="floating-xp">
 
+                <strong>+100</strong>
+
+                <span>XP</span>
+
+            </div>
+
+
+            <div class="floating-level">
+
+                <span>LEVEL</span>
+
+                <strong>UP!</strong>
+
+            </div>
+
+
+        </div>
 
     </main>
 
 
-    <!-- ================================================
+    <!-- ==================================================
          FOOTER
-         ================================================ -->
+         ================================================== -->
 
     <footer>
 
         <span>
-            © 2026 CoraTech
+            © 2026 MathRun
         </span>
 
         <span>
-            Educação • Tecnologia • Inovação
+            Aprenda. Jogue. Evolua.
         </span>
 
     </footer>
