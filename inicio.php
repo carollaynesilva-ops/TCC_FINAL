@@ -403,9 +403,10 @@ if ($hora < 12) {
 
         <div class="nav-user">
 
-            <div class="avatar">
+            <a href="perfil.php"><div class="avatar">
                 <?= strtoupper(substr($nome, 0, 1)) ?>
-            </div>
+            </div></a>
+
 
             <div class="user-info">
 
