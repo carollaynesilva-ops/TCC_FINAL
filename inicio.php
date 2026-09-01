@@ -1,301 +1,147 @@
 <?php
-
 session_start();
-
-require_once 'config/config.php';
-
-/*
-|--------------------------------------------------------------------------
-| Verificar login
-|--------------------------------------------------------------------------
-*/
 
 if (!isset($_SESSION["usuario_id"])) {
     header("Location: login.php");
     exit;
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Buscar dados atualizados do usuário
-|--------------------------------------------------------------------------
-*/
+require_once "config/config.php";
 
 $usuarioId = $_SESSION["usuario_id"];
 
-$sql = "
-    SELECT
-        id,
-        nome,
-        email,
-        tipo,
-        nivel,
-        xp,
-        pontuacao_total
+/* =========================
+   USUÁRIO
+========================= */
+
+$stmt = $pdo->prepare("
+    SELECT *
     FROM usuarios
-    WHERE id = :id
-";
-
-$stmt = $pdo->prepare($sql);
-
-$stmt->execute([
-    ":id" => $usuarioId
-]);
+    WHERE id = ?
+");
+$stmt->execute([$usuarioId]);
 
 $usuario = $stmt->fetch();
 
-
 if (!$usuario) {
-
     session_destroy();
-
     header("Location: login.php");
     exit;
 }
 
+/* =========================
+   JOGOS
+========================= */
 
-$nome = $usuario["nome"];
-$nivel = (int) $usuario["nivel"];
-$xp = (int) $usuario["xp"];
-$pontuacao = (int) $usuario["pontuacao_total"];
+$stmt = $pdo->query("
+    SELECT *
+    FROM jogos
+    WHERE ativo = TRUE
+    ORDER BY id
+");
 
+$jogos = $stmt->fetchAll();
 
-/*
-|--------------------------------------------------------------------------
-| Sistema de XP
-|--------------------------------------------------------------------------
-*/
+/* =========================
+   PROGRESSO DOS JOGOS
+========================= */
+
+$progressoJogos = [];
+
+foreach ($jogos as $jogo) {
+
+    $stmt = $pdo->prepare("
+        SELECT
+            COUNT(f.id) AS total_fases,
+            COUNT(
+                CASE
+                    WHEN p.concluida = TRUE THEN 1
+                END
+            ) AS fases_concluidas
+        FROM fases f
+        LEFT JOIN progresso_usuario p
+            ON p.fase_id = f.id
+            AND p.usuario_id = ?
+        WHERE f.jogo_id = ?
+    ");
+
+    $stmt->execute([
+        $usuarioId,
+        $jogo["id"]
+    ]);
+
+    $progresso = $stmt->fetch();
+
+    $progressoJogos[$jogo["id"]] = $progresso;
+}
+
+/* =========================
+   PRÓXIMA FASE
+========================= */
+
+$stmt = $pdo->prepare("
+    SELECT
+        f.*,
+        j.nome AS jogo_nome,
+        j.imagem AS jogo_imagem
+    FROM fases f
+    INNER JOIN jogos j
+        ON j.id = f.jogo_id
+    LEFT JOIN progresso_usuario p
+        ON p.fase_id = f.id
+        AND p.usuario_id = ?
+    WHERE
+        j.ativo = TRUE
+        AND (
+            p.concluida IS NULL
+            OR p.concluida = FALSE
+        )
+    ORDER BY
+        j.id,
+        f.numero
+    LIMIT 1
+");
+
+$stmt->execute([$usuarioId]);
+
+$proximaFase = $stmt->fetch();
+
+/* =========================
+   MEDALHAS
+========================= */
+
+$stmt = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM usuario_medalhas
+    WHERE usuario_id = ?
+");
+
+$stmt->execute([$usuarioId]);
+
+$totalMedalhas = (int)$stmt->fetchColumn();
+
+/* =========================
+   NÍVEL / XP
+========================= */
+
+$xp = (int)$usuario["xp"];
+$nivel = (int)$usuario["nivel"];
 
 $xpPorNivel = 500;
 
 $xpAtualNivel = $xp % $xpPorNivel;
 
-$xpRestante = $xpPorNivel - $xpAtualNivel;
+$porcentagemXP = ($xpAtualNivel / $xpPorNivel) * 100;
 
-$proximoNivel = $nivel + 1;
-
-$porcentagemXp = ($xpAtualNivel / $xpPorNivel) * 100;
-
-
-/*
-|--------------------------------------------------------------------------
-| Buscar jogos
-|--------------------------------------------------------------------------
-*/
-
-$sqlJogos = "
-    SELECT
-        id,
-        nome,
-        descricao,
-        imagem
-    FROM jogos
-    WHERE ativo = TRUE
-    ORDER BY id ASC
-";
-
-$stmtJogos = $pdo->query($sqlJogos);
-
-$jogos = $stmtJogos->fetchAll();
-
-
-/*
-|--------------------------------------------------------------------------
-| Buscar progresso das fases
-|--------------------------------------------------------------------------
-*/
-
-$sqlProgresso = "
-    SELECT
-        j.id AS jogo_id,
-        j.nome AS jogo_nome,
-        COUNT(f.id) AS total_fases,
-        COUNT(
-            CASE
-                WHEN p.concluida = TRUE THEN 1
-            END
-        ) AS fases_concluidas
-    FROM jogos j
-
-    LEFT JOIN fases f
-        ON f.jogo_id = j.id
-
-    LEFT JOIN progresso_usuario p
-        ON p.fase_id = f.id
-        AND p.usuario_id = :usuario_id
-
-    WHERE j.ativo = TRUE
-
-    GROUP BY
-        j.id,
-        j.nome
-
-    ORDER BY j.id ASC
-";
-
-$stmtProgresso = $pdo->prepare($sqlProgresso);
-
-$stmtProgresso->execute([
-    ":usuario_id" => $usuarioId
-]);
-
-$progressos = $stmtProgresso->fetchAll();
-
-
-/*
-|--------------------------------------------------------------------------
-| Transformar progresso em array fácil de usar
-|--------------------------------------------------------------------------
-*/
-
-$progressoJogos = [];
-
-foreach ($progressos as $progresso) {
-
-    $progressoJogos[$progresso["jogo_id"]] = [
-        "total" => (int) $progresso["total_fases"],
-        "concluidas" => (int) $progresso["fases_concluidas"]
-    ];
+if ($porcentagemXP > 100) {
+    $porcentagemXP = 100;
 }
 
+/* =========================
+   HORÁRIO
+========================= */
 
-/*
-|--------------------------------------------------------------------------
-| Buscar próxima fase
-|--------------------------------------------------------------------------
-*/
-
-$sqlProximaFase = "
-    SELECT
-        f.id,
-        f.nome,
-        f.descricao,
-        f.nivel_dificuldade,
-        f.numero,
-        j.id AS jogo_id,
-        j.nome AS jogo_nome
-    FROM fases f
-
-    INNER JOIN jogos j
-        ON j.id = f.jogo_id
-
-    LEFT JOIN progresso_usuario p
-        ON p.fase_id = f.id
-        AND p.usuario_id = :usuario_id
-
-    WHERE
-        j.ativo = TRUE
-        AND (
-            p.id IS NULL
-            OR p.concluida = FALSE
-        )
-
-    ORDER BY
-        j.id ASC,
-        f.numero ASC
-
-    LIMIT 1
-";
-
-$stmtProxima = $pdo->prepare($sqlProximaFase);
-
-$stmtProxima->execute([
-    ":usuario_id" => $usuarioId
-]);
-
-$proximaFase = $stmtProxima->fetch();
-
-
-/*
-|--------------------------------------------------------------------------
-| Buscar medalhas
-|--------------------------------------------------------------------------
-*/
-
-$sqlMedalhas = "
-    SELECT
-        m.nome,
-        m.descricao,
-        m.imagem
-    FROM usuario_medalhas um
-
-    INNER JOIN medalhas m
-        ON m.id = um.medalha_id
-
-    WHERE um.usuario_id = :usuario_id
-
-    ORDER BY um.data_conquista DESC
-
-    LIMIT 1
-";
-
-$stmtMedalhas = $pdo->prepare($sqlMedalhas);
-
-$stmtMedalhas->execute([
-    ":usuario_id" => $usuarioId
-]);
-
-$ultimaMedalha = $stmtMedalhas->fetch();
-
-
-/*
-|--------------------------------------------------------------------------
-| Quantidade total de medalhas
-|--------------------------------------------------------------------------
-*/
-
-$sqlTotalMedalhas = "
-    SELECT COUNT(*) AS total
-    FROM usuario_medalhas
-    WHERE usuario_id = :usuario_id
-";
-
-$stmtTotalMedalhas = $pdo->prepare($sqlTotalMedalhas);
-
-$stmtTotalMedalhas->execute([
-    ":usuario_id" => $usuarioId
-]);
-
-$totalMedalhas = (int) $stmtTotalMedalhas->fetch()["total"];
-
-
-/*
-|--------------------------------------------------------------------------
-| Definir dados visuais da próxima missão
-|--------------------------------------------------------------------------
-*/
-
-if ($proximaFase) {
-
-    if ($proximaFase["jogo_nome"] === "MathChef") {
-
-        $iconeMissao = "🍳";
-        $classeMissao = "chef";
-        $tituloMissao = "MATHCHEF";
-
-    } else {
-
-        $iconeMissao = "🚀";
-        $classeMissao = "space";
-        $tituloMissao = "MATHSPACE";
-    }
-
-} else {
-
-    $iconeMissao = "🏆";
-    $classeMissao = "completed";
-    $tituloMissao = "JORNADA COMPLETA";
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Saudação
-|--------------------------------------------------------------------------
-*/
-
-$hora = (int) date("H");
+$hora = (int)date("H");
 
 if ($hora < 12) {
     $saudacao = "Bom dia";
@@ -304,11 +150,9 @@ if ($hora < 12) {
 } else {
     $saudacao = "Boa noite";
 }
-
 ?>
 
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 
 <head>
@@ -317,76 +161,27 @@ if ($hora < 12) {
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
-    <title>MathRun | Sua jornada</title>
+    <title>MathRun | Início</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="assets/css/inicio.css">
 
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-    <link
-        rel="stylesheet"
-        href="assets/css/inicio.css"
-    >
+    <script src="assets/js/tema.js" defer></script>
 
 </head>
 
 <body>
 
-    <!-- ==========================================
-         FUNDO
-    =========================================== -->
-
-    <div class="background">
-
-        <div class="glow glow-1"></div>
-
-        <div class="glow glow-2"></div>
-
-        <span class="math-symbol symbol-1">+</span>
-
-        <span class="math-symbol symbol-2">×</span>
-
-        <span class="math-symbol symbol-3">π</span>
-
-        <span class="math-symbol symbol-4">√</span>
-
-        <span class="math-symbol symbol-5">÷</span>
-
-    </div>
-
-
-    <!-- ==========================================
-         NAVBAR
-    =========================================== -->
-
     <header class="navbar">
 
-        <a
-            href="inicio.php"
-            class="brand"
-        >
+        <a href="inicio.php" class="brand">
             Math<span>Run</span>
         </a>
 
-
         <nav class="nav-links">
 
-            <a
-                href="inicio.php"
-                class="active"
-            >
+            <a href="inicio.php" class="active">
                 Início
             </a>
 
@@ -400,18 +195,44 @@ if ($hora < 12) {
 
         </nav>
 
+        <!-- CONTROLE DE TEMA -->
+        <div class="theme-switcher">
+
+            <button
+                type="button"
+                data-theme-option="light"
+                title="Tema claro">
+                ☀
+            </button>
+
+            <button
+                type="button"
+                data-theme-option="dark"
+                title="Tema escuro">
+                ☾
+            </button>
+
+            <button
+                type="button"
+                data-theme-option="pink"
+                title="Tema rosa">
+                ♡
+            </button>
+
+        </div>
 
         <div class="nav-user">
 
-            <a href="perfil.php"><div class="avatar">
-                <?= strtoupper(substr($nome, 0, 1)) ?>
-            </div></a>
-
+            <a href="perfil.php">
+                <div class="avatar">
+                    <?= strtoupper(substr($usuario["nome"], 0, 1)) ?>
+                </div>
+            </a>
 
             <div class="user-info">
 
                 <strong>
-                    <?= htmlspecialchars($nome) ?>
+                    <?= htmlspecialchars($usuario["nome"]) ?>
                 </strong>
 
                 <span>
@@ -420,11 +241,7 @@ if ($hora < 12) {
 
             </div>
 
-            <a
-                href="logout.php"
-                class="logout"
-                title="Sair"
-            >
+            <a href="logout.php" class="logout">
                 ↪
             </a>
 
@@ -433,33 +250,34 @@ if ($hora < 12) {
     </header>
 
 
-    <!-- ==========================================
-         CONTEÚDO
-    =========================================== -->
+    <main class="home">
 
-    <main class="main-container">
+        <!-- =========================
+         INTRO
+    ========================== -->
 
-
-        <!-- ======================================
-             CABEÇALHO
-        ======================================= -->
-
-        <section class="welcome-header">
+        <section class="intro">
 
             <div>
 
-                <span class="mini-tag">
-                    <?= $saudacao ?>, <?= htmlspecialchars($nome) ?>
+                <span class="intro-label">
+                    <?= $saudacao ?>,
+                    <?= htmlspecialchars($usuario["nome"]) ?>
                 </span>
 
                 <h1>
-                    Sua próxima missão<br>
-                    <span>está esperando.</span>
+                    Continue sua
+                    <span>jornada matemática.</span>
                 </h1>
+
+                <p>
+                    Resolva desafios, conquiste XP e desbloqueie novos mundos.
+                </p>
 
             </div>
 
-            <div class="level-mini">
+
+            <div class="level-badge">
 
                 <div class="level-number">
                     <?= $nivel ?>
@@ -467,9 +285,9 @@ if ($hora < 12) {
 
                 <div>
 
-                    <span>
+                    <small>
                         LEVEL ATUAL
-                    </span>
+                    </small>
 
                     <strong>
                         <?= $xp ?> XP
@@ -482,38 +300,34 @@ if ($hora < 12) {
         </section>
 
 
-        <!-- ======================================
-             HERO / PRÓXIMA MISSÃO
-        ======================================= -->
+        <!-- =========================
+         PRÓXIMA MISSÃO
+    ========================== -->
 
-        <section class="mission-hero <?= $classeMissao ?>">
+        <?php if ($proximaFase): ?>
 
-            <div class="mission-content">
+            <section class="mission">
 
-                <span class="mission-label">
-                    ⚡ SUA PRÓXIMA MISSÃO
-                </span>
+                <div class="mission-content">
 
+                    <span class="mission-label">
+                        ⚡ PRÓXIMA MISSÃO
+                    </span>
 
-                <?php if ($proximaFase): ?>
-
-                    <div class="mission-game">
-                        <?= $iconeMissao ?>
-                        <?= $tituloMissao ?>
-                    </div>
-
+                    <span class="mission-game">
+                        <?= strtoupper(htmlspecialchars($proximaFase["jogo_nome"])) ?>
+                    </span>
 
                     <h2>
                         <?= htmlspecialchars($proximaFase["nome"]) ?>
                     </h2>
-
 
                     <p>
                         <?= htmlspecialchars($proximaFase["descricao"]) ?>
                     </p>
 
 
-                    <div class="mission-meta">
+                    <div class="mission-tags">
 
                         <span>
                             FASE <?= $proximaFase["numero"] ?>
@@ -524,284 +338,166 @@ if ($hora < 12) {
                         </span>
 
                         <span>
-                            +100 XP
+                            +<?= $proximaFase["numero"] * 100 ?> XP
                         </span>
 
                     </div>
 
 
                     <a
-                        href="jogos/<?= strtolower($proximaFase["jogo_nome"]) ?>/index.php"
-                        class="mission-button"
-                    >
-
+                        href="jogar.php?fase=<?= $proximaFase["id"] ?>"
+                        class="mission-button">
                         CONTINUAR MISSÃO
-
-                        <strong>
-                            →
-                        </strong>
-
+                        <span>→</span>
                     </a>
 
-                <?php else: ?>
+                </div>
 
-                    <div class="mission-game">
-                        🏆 JORNADA COMPLETA
+
+                <div class="mission-art">
+
+                    <div class="math-symbol symbol-one">
+                        π
                     </div>
 
-                    <h2>
-                        Você zerou o MathRun!
-                    </h2>
+                    <div class="math-symbol symbol-two">
+                        +
+                    </div>
 
-                    <p>
-                        Todas as missões disponíveis foram concluídas.
-                        Seu próximo desafio é superar sua própria pontuação.
-                    </p>
+                    <div class="math-symbol symbol-three">
+                        ×
+                    </div>
 
-                    <a
-                        href="ranking.php"
-                        class="mission-button"
-                    >
-                        VER RANKING →
-                    </a>
+                    <div class="orbit orbit-one"></div>
+                    <div class="orbit orbit-two"></div>
+                    <div class="orbit orbit-three"></div>
 
-                <?php endif; ?>
+                    <div class="mission-object">
 
-            </div>
+                        <?php if ($proximaFase["jogo_nome"] === "MathChef"): ?>
 
+                            🍳
 
-            <div class="mission-visual">
+                        <?php else: ?>
 
-                <div class="orbit orbit-1"></div>
+                            🚀
 
-                <div class="orbit orbit-2"></div>
+                        <?php endif; ?>
 
-                <div class="planet">
+                    </div>
 
-                    <?= $iconeMissao ?>
-
-                </div>
-
-                <div class="floating-xp">
-                    +100 XP
-                </div>
-
-                <div class="floating-symbol symbol-a">
-                    +
-                </div>
-
-                <div class="floating-symbol symbol-b">
-                    π
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ======================================
-             STATUS
-        ======================================= -->
-
-        <section class="status-bar">
-
-            <div class="status-item">
-
-                <div class="status-icon">
-                    ⚡
-                </div>
-
-                <div>
-
-                    <span>
-                        XP TOTAL
-                    </span>
-
-                    <strong>
-                        <?= number_format($xp, 0, ",", ".") ?>
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="status-divider"></div>
-
-
-            <div class="status-item">
-
-                <div class="status-icon">
-                    ★
-                </div>
-
-                <div>
-
-                    <span>
-                        PONTOS
-                    </span>
-
-                    <strong>
-                        <?= number_format($pontuacao, 0, ",", ".") ?>
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="status-divider"></div>
-
-
-            <div class="status-item">
-
-                <div class="status-icon">
-                    ◆
-                </div>
-
-                <div>
-
-                    <span>
-                        CONQUISTAS
-                    </span>
-
-                    <strong>
-                        <?= $totalMedalhas ?>
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="status-divider"></div>
-
-
-            <div class="status-item level-progress">
-
-                <div class="status-icon">
-                    <?= $nivel ?>
-                </div>
-
-                <div>
-
-                    <span>
-                        PRÓXIMO LEVEL
-                    </span>
-
-                    <div class="small-progress">
-
-                        <div
-                            style="width: <?= $porcentagemXp ?>%;"
-                        ></div>
-
+                    <div class="xp-floating">
+                        +100 XP
                     </div>
 
                 </div>
 
-            </div>
+            </section>
 
-        </section>
+        <?php endif; ?>
 
 
-        <!-- ======================================
-             ESCOLHA SUA MISSÃO
-        ======================================= -->
+        <!-- =========================
+         MUNDOS
+    ========================== -->
 
-        <section class="games-section">
+        <section class="world-section">
 
-            <div class="section-title">
+            <div class="section-heading">
 
                 <div>
 
-                    <span class="mini-tag">
-                        DESAFIOS
+                    <span>
+                        EXPLORE
                     </span>
 
                     <h2>
-                        Escolha sua missão.
+                        Escolha seu mundo
                     </h2>
 
                 </div>
 
                 <p>
-                    Dois mundos. Oito fases.<br>
-                    Uma jornada matemática.
+                    Cada missão é uma nova forma de aprender.
                 </p>
 
             </div>
 
 
-            <div class="games-grid">
+            <div class="world-grid">
 
                 <?php foreach ($jogos as $jogo): ?>
 
                     <?php
 
-                    $idJogo = (int) $jogo["id"];
+                    $totalFases =
+                        (int)$progressoJogos[$jogo["id"]]["total_fases"];
 
-                    $nomeJogo = $jogo["nome"];
+                    $fasesConcluidas =
+                        (int)$progressoJogos[$jogo["id"]]["fases_concluidas"];
 
-                    $isChef = $nomeJogo === "MathChef";
-
-                    $icone = $isChef ? "🍳" : "🚀";
-
-                    $classe = $isChef ? "chef-card" : "space-card";
-
-                    $progresso = $progressoJogos[$idJogo] ?? [
-                        "total" => 0,
-                        "concluidas" => 0
-                    ];
-
-                    $totalFases = $progresso["total"];
-
-                    $fasesConcluidas = $progresso["concluidas"];
-
-                    $porcentagemJogo = $totalFases > 0
+                    $progresso =
+                        $totalFases > 0
                         ? ($fasesConcluidas / $totalFases) * 100
                         : 0;
 
+                    $isChef =
+                        $jogo["nome"] === "MathChef";
+
                     ?>
 
-                    <article class="game-card <?= $classe ?>">
+                    <a
+                        href="jogos.php?id=<?= $jogo["id"] ?>"
+                        class="world-card <?= $isChef ? 'chef' : 'space' ?>">
 
-                        <div class="game-art">
+                        <div class="world-background">
 
-                            <div class="game-glow"></div>
+                            <?php if ($isChef): ?>
 
-                            <div class="game-big-icon">
-                                <?= $icone ?>
-                            </div>
+                                <span>⅓</span>
+                                <span>¼</span>
+                                <span>½</span>
+                                <span>⅔</span>
 
-                            <span class="game-decoration decoration-1">
-                                <?= $isChef ? "½" : "∞" ?>
-                            </span>
+                            <?php else: ?>
 
-                            <span class="game-decoration decoration-2">
-                                <?= $isChef ? "⅓" : "π" ?>
-                            </span>
+                                <span>✦</span>
+                                <span>+</span>
+                                <span>π</span>
+                                <span>×</span>
+
+                            <?php endif; ?>
 
                         </div>
 
 
-                        <div class="game-info">
+                        <div class="world-icon">
 
-                            <span class="game-type">
-                                <?= $isChef ? "CULINÁRIA" : "EXPLORAÇÃO ESPACIAL" ?>
+                            <?= $isChef ? "🍳" : "🚀" ?>
+
+                        </div>
+
+
+                        <div class="world-info">
+
+                            <span class="world-kicker">
+                                <?= $isChef ? "COZINHA MATEMÁTICA" : "EXPEDIÇÃO ESPACIAL" ?>
                             </span>
 
-
                             <h3>
-                                <?= htmlspecialchars($nomeJogo) ?>
+                                <?= htmlspecialchars($jogo["nome"]) ?>
                             </h3>
-
 
                             <p>
                                 <?= htmlspecialchars($jogo["descricao"]) ?>
                             </p>
 
+                        </div>
 
-                            <div class="game-progress-info">
+
+                        <div class="world-progress">
+
+                            <div>
 
                                 <span>
                                     PROGRESSO
@@ -813,32 +509,22 @@ if ($hora < 12) {
 
                             </div>
 
-
-                            <div class="game-progress">
+                            <div class="progress-track">
 
                                 <div
-                                    style="width: <?= $porcentagemJogo ?>%;"
-                                ></div>
+                                    class="progress-fill"
+                                    style="width: <?= $progresso ?>%"></div>
 
                             </div>
 
-
-                            <a
-                                href="jogos/<?= strtolower($nomeJogo) ?>/index.php"
-                                class="game-button"
-                            >
-
-                                <?= $fasesConcluidas > 0 ? "CONTINUAR" : "COMEÇAR" ?>
-
-                                <strong>
-                                    →
-                                </strong>
-
-                            </a>
-
                         </div>
 
-                    </article>
+
+                        <span class="world-arrow">
+                            →
+                        </span>
+
+                    </a>
 
                 <?php endforeach; ?>
 
@@ -847,155 +533,81 @@ if ($hora < 12) {
         </section>
 
 
-        <!-- ======================================
-             PROGRESSO + CONQUISTA
-        ======================================= -->
+        <!-- =========================
+         STATUS
+    ========================== -->
 
-        <section class="bottom-grid">
+        <section class="status-grid">
 
 
-            <!-- PROGRESSO DE XP -->
+            <article class="status-card level-card">
 
-            <article class="progress-card">
+                <div class="status-icon">
+                    ⚡
+                </div>
 
-                <div class="card-heading">
+                <div class="status-content">
 
-                    <div>
+                    <span>
+                        SEU PROGRESSO
+                    </span>
 
-                        <span class="mini-tag">
-                            EVOLUÇÃO
+                    <h3>
+                        Level <?= $nivel ?>
+                    </h3>
+
+                    <div class="xp-row">
+
+                        <strong>
+                            <?= $xpAtualNivel ?>
+                        </strong>
+
+                        <span>
+                            / <?= $xpPorNivel ?> XP
                         </span>
 
-                        <h3>
-                            Seu próximo nível
-                        </h3>
+                    </div>
+
+                    <div class="xp-track">
+
+                        <div
+                            style="width: <?= $porcentagemXP ?>%"></div>
 
                     </div>
 
-                    <strong>
-                        <?= $xpAtualNivel ?>/<?= $xpPorNivel ?> XP
-                    </strong>
-
                 </div>
-
-
-                <div class="big-progress">
-
-                    <div
-                        style="width: <?= $porcentagemXp ?>%;"
-                    ></div>
-
-                </div>
-
-
-                <div class="progress-footer">
-
-                    <span>
-                        LEVEL <?= $nivel ?>
-                    </span>
-
-                    <span>
-                        LEVEL <?= $proximoNivel ?>
-                    </span>
-
-                </div>
-
-
-                <p>
-                    Faltam <strong><?= $xpRestante ?> XP</strong>
-                    para desbloquear o próximo nível.
-                </p>
 
             </article>
 
 
-            <!-- CONQUISTA -->
+            <article class="status-card achievement-card">
 
-            <article class="achievement-card">
+                <div class="status-icon">
+                    🏆
+                </div>
 
-                <?php if ($ultimaMedalha): ?>
+                <div class="status-content">
 
-                    <span class="mini-tag">
-                        ÚLTIMA CONQUISTA
+                    <span>
+                        CONQUISTAS
                     </span>
 
+                    <h3>
+                        <?= $totalMedalhas ?>
+                    </h3>
 
-                    <div class="achievement-content">
+                    <p>
+                        medalhas desbloqueadas
+                    </p>
 
-                        <div class="medal-icon">
+                </div>
 
-                            <?php if (!empty($ultimaMedalha["imagem"])): ?>
-
-                                <img
-                                    src="assets/img/medalhas/<?= htmlspecialchars($ultimaMedalha["imagem"]) ?>"
-                                    alt=""
-                                >
-
-                            <?php else: ?>
-
-                                🏅
-
-                            <?php endif; ?>
-
-                        </div>
-
-
-                        <div>
-
-                            <h3>
-                                <?= htmlspecialchars($ultimaMedalha["nome"]) ?>
-                            </h3>
-
-                            <p>
-                                <?= htmlspecialchars($ultimaMedalha["descricao"]) ?>
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <a href="conquistas.php">
-                        VER TODAS →
-                    </a>
-
-                <?php else: ?>
-
-                    <span class="mini-tag">
-                        PRÓXIMA CONQUISTA
-                    </span>
-
-
-                    <div class="achievement-content">
-
-                        <div class="medal-icon locked">
-                            ?
-                        </div>
-
-
-                        <div>
-
-                            <h3>
-                                Sua primeira medalha
-                            </h3>
-
-                            <p>
-                                Complete uma missão para começar
-                                sua coleção.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <a href="conquistas.php">
-                        VER CONQUISTAS →
-                    </a>
-
-                <?php endif; ?>
+                <a href="conquistas.php">
+                    →
+                </a>
 
             </article>
+
 
         </section>
 
