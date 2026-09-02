@@ -1,0 +1,997 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+
+
+/* =========================================================
+   TEMA CLARO
+========================================================= */
+
+:root {
+
+    --blue: #4169e1;
+    --blue-dark: #3154c8;
+
+    --purple: #7b4de8;
+    --purple-dark: #6136c7;
+
+    --background: #f7f9ff;
+    --surface: #ffffff;
+
+    --text: #171a2b;
+    --text-soft: #70758a;
+
+    --border: #e8eaf3;
+
+    --locked: #b9bdcc;
+
+    --shadow:
+        0 18px 45px rgba(55, 64, 120, .08);
+}
+
+
+/* =========================================================
+   TEMA ESCURO
+========================================================= */
+
+[data-theme="dark"] {
+
+    --blue: #607df0;
+    --blue-dark: #4d69d5;
+
+    --purple: #956cf0;
+    --purple-dark: #7951d4;
+
+    --background: #0d1020;
+    --surface: #171a2d;
+
+    --text: #f5f5fb;
+    --text-soft: #9b9eb5;
+
+    --border: #292d46;
+
+    --locked: #666a7d;
+
+    --shadow:
+        0 20px 50px rgba(0, 0, 0, .30);
+}
+
+
+/* =========================================================
+   TEMA ROSA
+========================================================= */
+
+[data-theme="pink"] {
+
+    --blue: #e85d9e;
+    --blue-dark: #d8478b;
+
+    --purple: #c83d82;
+    --purple-dark: #a92d69;
+
+    --background: #fff0f7;
+    --surface: #fff8fc;
+
+    --text: #351522;
+    --text-soft: #946276;
+
+    --border: #f2c9da;
+
+    --locked: #c79aac;
+
+    --shadow:
+        0 18px 45px rgba(207, 67, 128, .12);
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+
+    min-height: 100vh;
+
+    font-family: 'Outfit', sans-serif;
+
+    color: var(--text);
+
+    background:
+        radial-gradient(
+            circle at 10% 20%,
+            rgba(65, 105, 225, .07),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 90% 65%,
+            rgba(123, 77, 232, .07),
+            transparent 25%
+        ),
+        var(--background);
+
+    transition:
+        background .3s ease,
+        color .3s ease;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+.navbar {
+
+    height: 72px;
+
+    padding: 0 6%;
+
+    display: flex;
+
+    align-items: center;
+
+    position: relative;
+
+    z-index: 20;
+
+    background: var(--surface);
+
+    border-bottom:
+        1px solid var(--border);
+}
+
+
+/* LOGO */
+
+.brand {
+
+    font-size: 27px;
+
+    font-weight: 800;
+
+    letter-spacing: -1.5px;
+}
+
+.brand span {
+    color: var(--purple);
+}
+
+
+/* MENU */
+
+.nav-links {
+
+    position: absolute;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    display: flex;
+
+    gap: 38px;
+}
+
+.nav-links a {
+
+    color: var(--text-soft);
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    transition: color .2s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+
+    color: var(--purple);
+}
+
+
+/* USUÁRIO */
+
+.nav-user {
+
+    margin-left: auto;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+}
+
+.avatar {
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 13px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--blue),
+            var(--purple)
+        );
+
+    color: white;
+
+    font-weight: 800;
+}
+
+.user-info {
+
+    display: flex;
+
+    flex-direction: column;
+
+    line-height: 1.1;
+}
+
+.user-info strong {
+    font-size: 13px;
+}
+
+.user-info span {
+
+    margin-top: 3px;
+
+    color: var(--text-soft);
+
+    font-size: 10px;
+}
+
+.logout {
+
+    margin-left: 15px;
+
+    color: var(--text-soft);
+
+    font-size: 22px;
+
+    transform: rotate(180deg);
+
+    transition: color .2s ease;
+}
+
+.logout:hover {
+    color: var(--purple);
+}
+
+
+/* =========================================================
+   TEMA
+========================================================= */
+
+.theme-switcher {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 3px;
+
+    padding: 4px;
+
+    margin-right: 8px;
+
+    border-radius: 10px;
+
+    background: var(--background);
+
+    border:
+        1px solid var(--border);
+}
+
+.theme-switcher button {
+
+    width: 27px;
+    height: 27px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: transparent;
+
+    color: var(--text-soft);
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    transition: .2s ease;
+}
+
+.theme-switcher button:hover {
+
+    color: var(--purple);
+
+    transform: translateY(-1px);
+}
+
+.theme-switcher button.active {
+
+    color: var(--purple);
+
+    background: var(--surface);
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, .08);
+}
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.achievements-container {
+
+    width: min(1150px, 88%);
+
+    margin: 0 auto;
+
+    padding: 55px 0 80px;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.achievements-header {
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-between;
+
+    gap: 30px;
+
+    margin-bottom: 30px;
+}
+
+.section-label {
+
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: var(--purple);
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+.achievements-header h1 {
+
+    font-size: clamp(38px, 5vw, 53px);
+
+    line-height: 1;
+
+    letter-spacing: -2px;
+}
+
+.achievements-header p {
+
+    margin-top: 12px;
+
+    color: var(--text-soft);
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   CONTADOR
+========================================================= */
+
+.achievement-counter {
+
+    display: flex;
+
+    align-items: baseline;
+
+    gap: 3px;
+}
+
+.achievement-counter strong {
+
+    color: var(--purple);
+
+    font-size: 42px;
+
+    line-height: 1;
+}
+
+.achievement-counter span {
+
+    color: var(--text-soft);
+
+    font-size: 16px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   PROGRESSO
+========================================================= */
+
+.achievement-progress {
+
+    padding: 24px 27px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 19px;
+
+    background: var(--surface);
+
+    box-shadow: var(--shadow);
+
+    margin-bottom: 45px;
+}
+
+.progress-heading {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-end;
+}
+
+.progress-heading > div span {
+
+    display: block;
+
+    color: var(--text-soft);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+}
+
+.progress-heading > div strong {
+
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 14px;
+}
+
+.progress-heading > strong {
+
+    color: var(--purple);
+
+    font-size: 15px;
+}
+
+.progress-bar {
+
+    height: 8px;
+
+    margin-top: 13px;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    background: var(--border);
+}
+
+.progress-bar div {
+
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--blue),
+            var(--purple)
+        );
+
+    transition: width .5s ease;
+}
+
+.achievement-progress > p {
+
+    margin-top: 9px;
+
+    color: var(--text-soft);
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   COLLECTION HEADING
+========================================================= */
+
+.collection-heading {
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+.collection-heading > div span {
+
+    color: var(--purple);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.3px;
+}
+
+.collection-heading h2 {
+
+    margin-top: 4px;
+
+    font-size: 27px;
+
+    letter-spacing: -.8px;
+}
+
+.collection-count {
+
+    color: var(--text-soft);
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.achievement-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 18px;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.achievement-card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    min-height: 355px;
+
+    padding: 25px;
+
+    border-radius: 21px;
+
+    border:
+        1px solid var(--border);
+
+    background: var(--surface);
+
+    box-shadow: var(--shadow);
+
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease,
+        border-color .25s ease;
+}
+
+.achievement-card:hover {
+
+    transform: translateY(-4px);
+
+    box-shadow:
+        0 22px 45px rgba(50, 60, 120, .12);
+}
+
+
+/* =========================================================
+   MEDAL AREA
+========================================================= */
+
+.medal-area {
+
+    position: relative;
+
+    width: 82px;
+    height: 82px;
+
+    margin-bottom: 20px;
+}
+
+.medal-image {
+
+    width: 82px;
+    height: 82px;
+
+    object-fit: contain;
+
+    border-radius: 22px;
+}
+
+.medal-placeholder {
+
+    width: 82px;
+    height: 82px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(65, 105, 225, .10),
+            rgba(123, 77, 232, .13)
+        );
+
+    font-size: 36px;
+}
+
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.unlocked-badge,
+.locked-badge {
+
+    position: absolute;
+
+    right: -5px;
+
+    bottom: -5px;
+
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    font-size: 11px;
+}
+
+.unlocked-badge {
+
+    color: white;
+
+    background: var(--purple);
+
+    border:
+        3px solid var(--surface);
+}
+
+.locked-badge {
+
+    color: white;
+
+    background: var(--locked);
+
+    border:
+        3px solid var(--surface);
+}
+
+
+/* =========================================================
+   CONTEÚDO
+========================================================= */
+
+.achievement-status {
+
+    display: inline-block;
+
+    padding: 5px 8px;
+
+    border-radius: 6px;
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: .8px;
+}
+
+.unlocked .achievement-status {
+
+    color: var(--purple);
+
+    background:
+        rgba(123, 77, 232, .10);
+}
+
+.locked .achievement-status {
+
+    color: var(--locked);
+
+    background:
+        rgba(120, 120, 140, .08);
+}
+
+.achievement-content h3 {
+
+    margin-top: 9px;
+
+    font-size: 21px;
+
+    letter-spacing: -.4px;
+}
+
+.achievement-content > p {
+
+    margin-top: 7px;
+
+    color: var(--text-soft);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   CRITÉRIO
+========================================================= */
+
+.achievement-criterion {
+
+    margin-top: 17px;
+
+    padding-top: 14px;
+
+    border-top:
+        1px solid var(--border);
+}
+
+.achievement-criterion > span {
+
+    color: var(--text-soft);
+
+    font-size: 8px;
+
+    font-weight: 800;
+
+    letter-spacing: .9px;
+}
+
+.achievement-criterion p {
+
+    margin-top: 4px;
+
+    color: var(--text-soft);
+
+    font-size: 10px;
+
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   DATA
+========================================================= */
+
+.achievement-date {
+
+    position: absolute;
+
+    left: 25px;
+
+    bottom: 23px;
+
+    color: var(--purple);
+
+    font-size: 9px;
+
+    font-weight: 700;
+}
+
+.locked-text {
+
+    color: var(--locked);
+}
+
+
+/* =========================================================
+   MEDALHAS BLOQUEADAS
+========================================================= */
+
+.achievement-card.locked {
+
+    opacity: .72;
+}
+
+.achievement-card.locked:hover {
+
+    opacity: .90;
+}
+
+.locked .medal-placeholder {
+
+    filter: grayscale(.8);
+
+    background:
+        var(--background);
+}
+
+
+/* =========================================================
+   ROSA
+========================================================= */
+
+[data-theme="pink"] .achievement-card {
+
+    border-color: #f0cada;
+}
+
+[data-theme="pink"] .medal-placeholder {
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(232, 93, 158, .13),
+            rgba(200, 61, 130, .14)
+        );
+}
+
+[data-theme="pink"] .progress-bar div {
+
+    background:
+        linear-gradient(
+            90deg,
+            #e34d91,
+            #c52f78
+        );
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE
+========================================================= */
+
+@media (max-width: 1000px) {
+
+    .achievement-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+}
+
+
+@media (max-width: 800px) {
+
+    .nav-links {
+        display: none;
+    }
+
+    .achievements-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .achievement-counter {
+
+        margin-top: 5px;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .navbar {
+
+        padding: 0 20px;
+    }
+
+    .user-info {
+        display: none;
+    }
+
+    .logout {
+
+        margin-left: 3px;
+    }
+
+    .achievements-container {
+
+        width: 90%;
+
+        padding-top: 35px;
+    }
+
+    .achievements-header h1 {
+
+        font-size: 40px;
+    }
+
+    .achievement-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+    .achievement-progress {
+
+        padding: 20px;
+    }
+
+    .collection-heading {
+
+        align-items: flex-start;
+
+        gap: 10px;
+
+        flex-direction: column;
+    }
+}
+
+
+@media (max-width: 400px) {
+
+    .brand {
+        font-size: 23px;
+    }
+
+    .theme-switcher button {
+
+        width: 24px;
+        height: 24px;
+    }
+
+    .avatar {
+
+        width: 38px;
+        height: 38px;
+    }
+}
