@@ -1,76 +1,84 @@
 <?php
-
 session_start();
 
 require_once __DIR__ . '/config/config.php';
 
 if (!isset($_SESSION['usuario_id'])) {
-    header("Location: login.php");
+    header('Location: login.php');
     exit;
 }
 
 $usuarioId = $_SESSION['usuario_id'];
 
-
 /* =========================================================
-   USUÁRIO LOGADO
+   BUSCAR USUÁRIO LOGADO
 ========================================================= */
 
-$sqlUsuario = "SELECT id, nome, nivel, xp, pontuacao_total
-               FROM usuarios
-               WHERE id = :id";
+$stmtUsuario = $pdo->prepare("
+    SELECT 
+        id,
+        nome,
+        email,
+        nivel,
+        xp,
+        pontuacao_total
+    FROM usuarios
+    WHERE id = ?
+");
 
-$stmtUsuario = $pdo->prepare($sqlUsuario);
-
-$stmtUsuario->execute([
-    ':id' => $usuarioId
-]);
-
+$stmtUsuario->execute([$usuarioId]);
 $usuario = $stmtUsuario->fetch();
 
 if (!$usuario) {
     session_destroy();
-
-    header("Location: login.php");
-
+    header('Location: login.php');
     exit;
 }
 
-
 /* =========================================================
-   RANKING DOS ALUNOS
+   BUSCAR RANKING
 ========================================================= */
 
-$sqlRanking = "SELECT
-                    id,
-                    nome,
-                    nivel,
-                    xp,
-                    pontuacao_total
-               FROM usuarios
-               WHERE tipo = 'aluno'
-               ORDER BY
-                    pontuacao_total DESC,
-                    xp DESC,
-                    nome ASC";
-
-$stmtRanking = $pdo->query($sqlRanking);
+$stmtRanking = $pdo->query("
+    SELECT
+        id,
+        nome,
+        nivel,
+        xp,
+        pontuacao_total
+    FROM usuarios
+    WHERE tipo = 'aluno'
+    ORDER BY
+        pontuacao_total DESC,
+        xp DESC,
+        nome ASC
+");
 
 $ranking = $stmtRanking->fetchAll();
 
-
 /* =========================================================
-   DEFINIR POSIÇÃO
+   DEFINIR POSIÇÕES
 ========================================================= */
 
-foreach ($ranking as $indice => &$aluno) {
-
-    $aluno['posicao'] = $indice + 1;
-
+foreach ($ranking as $index => &$aluno) {
+    $aluno['posicao'] = $index + 1;
 }
 
 unset($aluno);
 
+/* =========================================================
+   SEPARAR PÓDIO
+========================================================= */
+
+$primeiro = $ranking[0] ?? null;
+$segundo = $ranking[1] ?? null;
+$terceiro = $ranking[2] ?? null;
+
+/*
+ * A lista começa no 4º lugar.
+ * Assim os três primeiros aparecem somente no pódio.
+ */
+$restantes = array_slice($ranking, 3);
 
 /* =========================================================
    POSIÇÃO DO USUÁRIO LOGADO
@@ -79,52 +87,23 @@ unset($aluno);
 $posicaoUsuario = null;
 
 foreach ($ranking as $aluno) {
-
     if ((int)$aluno['id'] === (int)$usuarioId) {
-
         $posicaoUsuario = $aluno['posicao'];
-
         break;
     }
 }
 
-
 /* =========================================================
-   TOP 3
+   FUNÇÃO PARA PEGAR INICIAL DO NOME
 ========================================================= */
 
-$primeiro = $ranking[0] ?? null;
-$segundo  = $ranking[1] ?? null;
-$terceiro = $ranking[2] ?? null;
-
-
-/* =========================================================
-   RANKING A PARTIR DO 4º LUGAR
-========================================================= */
-
-$restantes = array_slice($ranking, 3);
-
-
-/* =========================================================
-   PEGAR INICIAL DO NOME
-========================================================= */
-
-function obterInicial($nome)
+function inicialNome($nome)
 {
-    return strtoupper(
-        mb_substr(
-            trim($nome),
-            0,
-            1,
-            'UTF-8'
-        )
-    );
+    return strtoupper(mb_substr(trim($nome), 0, 1, 'UTF-8'));
 }
 
 ?>
-
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 
 <head>
@@ -138,28 +117,14 @@ function obterInicial($nome)
 
     <title>Ranking | MathRun</title>
 
-
-    <!-- =====================================================
-         FONTE
-    ====================================================== -->
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet"
     >
-
-
-    <!-- =====================================================
-         CSS
-    ====================================================== -->
 
     <link
         rel="stylesheet"
@@ -168,680 +133,529 @@ function obterInicial($nome)
 
 </head>
 
-
 <body>
 
+    <!-- =====================================================
+         NAVBAR
+    ====================================================== -->
 
-<!-- =========================================================
-     NAVBAR
-========================================================= -->
+    <header class="navbar">
 
-<header class="navbar">
+        <div class="nav-container">
 
+            <!-- LOGO -->
 
-    <!-- LOGO -->
-
-    <a
-        href="inicio.php"
-        class="logo"
-    >
-        Math<span>Run</span>
-    </a>
+            <a href="inicio.php" class="logo">
+                Math<span>Run</span>
+            </a>
 
 
-    <!-- MENU -->
+            <!-- MENU -->
 
-    <nav class="nav-links">
+            <nav class="nav-menu">
 
-        <a href="inicio.php">
-            Início
-        </a>
+                <a href="inicio.php">
+                    Início
+                </a>
 
-        <a
-            href="ranking.php"
-            class="active"
-        >
-            Ranking
-        </a>
+                <a href="ranking.php" class="active">
+                    Ranking
+                </a>
 
-        <a href="conquistas.php">
-            Conquistas
-        </a>
+                <a href="conquistas.php">
+                    Conquistas
+                </a>
 
-    </nav>
+            </nav>
 
 
-    <!-- USUÁRIO -->
+            <!-- ÁREA DO USUÁRIO -->
 
-    <div class="nav-user">
+            <div class="nav-user">
 
+                <!-- TEMA -->
 
-        <!-- TEMA -->
-
-        <button
-            class="theme-toggle"
-            id="themeToggle"
-            type="button"
-            aria-label="Alterar tema"
-        >
-            ◐
-        </button>
-
-
-        <!-- PERFIL -->
-
-        <a
-            href="editar_perfil.php"
-            class="user-info"
-        >
-
-            <div class="user-avatar">
-
-                <?= htmlspecialchars(
-                    obterInicial($usuario['nome'])
-                ) ?>
-
-            </div>
+                <button
+                    type="button"
+                    class="theme-toggle"
+                    id="themeToggle"
+                    aria-label="Alterar tema"
+                    title="Alterar tema"
+                >
+                    <span class="theme-icon">☀</span>
+                </button>
 
 
-            <div class="user-data">
+                <!-- USUÁRIO -->
 
-                <strong>
+                <a
+                    href="editar_perfil.php"
+                    class="user-profile"
+                >
 
-                    <?= htmlspecialchars(
-                        $usuario['nome']
-                    ) ?>
+                    <div class="user-avatar">
+                        <?= htmlspecialchars(inicialNome($usuario['nome'])) ?>
+                    </div>
 
-                </strong>
+                    <div class="user-info">
 
-                <span>
+                        <strong>
+                            <?= htmlspecialchars($usuario['nome']) ?>
+                        </strong>
 
-                    Nível <?= (int)$usuario['nivel'] ?>
+                        <span>
+                            Nível <?= (int)$usuario['nivel'] ?>
+                        </span>
 
-                </span>
+                    </div>
+
+                </a>
+
+
+                <!-- SAIR -->
+
+                <a
+                    href="logout.php"
+                    class="logout-btn"
+                >
+                    Sair
+                </a>
 
             </div>
 
-        </a>
+        </div>
 
-
-        <!-- SAIR -->
-
-        <a
-            href="logout.php"
-            class="logout"
-        >
-            Sair
-        </a>
-
-    </div>
-
-</header>
-
-
-
-<!-- =========================================================
-     CONTEÚDO
-========================================================= -->
-
-<main class="ranking-page">
+    </header>
 
 
     <!-- =====================================================
-         CABEÇALHO
+         CONTEÚDO
     ====================================================== -->
 
-    <section class="ranking-header">
+    <main class="ranking-page">
 
+        <!-- CABEÇALHO -->
 
-        <div>
+        <section class="ranking-header">
 
-            <span class="section-tag">
-                CLASSIFICAÇÃO
+            <span class="ranking-tag">
+                🏆 COMPETIÇÃO
             </span>
 
             <h1>
-                Ranking MathRun
+                Ranking
             </h1>
 
             <p>
-                Os jogadores com maior pontuação total.
+                Veja quem está dominando o MathRun.
             </p>
 
-        </div>
+            <?php if ($posicaoUsuario !== null): ?>
 
+                <div class="my-position">
 
-        <!-- POSIÇÃO DO USUÁRIO -->
-
-        <div class="my-position">
-
-            <span>
-                SUA POSIÇÃO
-            </span>
-
-            <strong>
-
-                <?= $posicaoUsuario !== null
-                    ? '#' . $posicaoUsuario
-                    : '--'
-                ?>
-
-            </strong>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- =====================================================
-         PÓDIO
-    ====================================================== -->
-
-    <?php if ($primeiro): ?>
-
-        <section class="podium">
-
-
-            <!-- =================================================
-                 2º LUGAR
-            ================================================== -->
-
-            <?php if ($segundo): ?>
-
-                <article
-                    class="
-                        podium-player
-                        second-place
-
-                        <?= (int)$segundo['id'] === (int)$usuarioId
-                            ? 'current-player'
-                            : ''
-                        ?>
-                    "
-                >
-
-
-                    <div class="podium-medal">
-
-                        <img
-                            src="assets/img/segundo.png"
-                            alt="Medalha de segundo lugar"
-                        >
-
-                    </div>
-
-
-                    <div class="podium-position">
-
-                        <strong>
-                            2º
-                        </strong>
-
-                        <span>
-                            LUGAR
-                        </span>
-
-                    </div>
-
-
-                    <div class="player-icon">
-
-                        <span>
-                            <?= htmlspecialchars(
-                                obterInicial($segundo['nome'])
-                            ) ?>
-                        </span>
-
-                    </div>
-
-
-                    <h2>
-
-                        <?= htmlspecialchars(
-                            $segundo['nome']
-                        ) ?>
-
-                    </h2>
-
-
-                    <span class="player-level">
-
-                        Nível <?= (int)$segundo['nivel'] ?>
-
+                    <span>
+                        Sua posição
                     </span>
-
-
-                    <div class="player-points">
-
-                        <strong>
-
-                            <?= number_format(
-                                (int)$segundo['pontuacao_total'],
-                                0,
-                                ',',
-                                '.'
-                            ) ?>
-
-                        </strong>
-
-                        <span>
-                            PONTOS
-                        </span>
-
-                    </div>
-
-
-                    <div class="podium-base">
-                        2
-                    </div>
-
-                </article>
-
-            <?php endif; ?>
-
-
-
-            <!-- =================================================
-                 1º LUGAR
-            ================================================== -->
-
-            <article
-                class="
-                    podium-player
-                    first-place
-
-                    <?= (int)$primeiro['id'] === (int)$usuarioId
-                        ? 'current-player'
-                        : ''
-                    ?>
-                "
-            >
-
-
-                <div class="podium-medal">
-
-                    <img
-                        src="assets/img/primeiro.png"
-                        alt="Medalha de primeiro lugar"
-                    >
-
-                </div>
-
-
-                <div class="podium-position">
 
                     <strong>
-                        1º
+                        #<?= (int)$posicaoUsuario ?>
                     </strong>
 
-                    <span>
-                        LUGAR
-                    </span>
-
                 </div>
-
-
-                <div class="player-icon">
-
-                    <span>
-                        <?= htmlspecialchars(
-                            obterInicial($primeiro['nome'])
-                        ) ?>
-                    </span>
-
-                </div>
-
-
-                <h2>
-
-                    <?= htmlspecialchars(
-                        $primeiro['nome']
-                    ) ?>
-
-                </h2>
-
-
-                <span class="player-level">
-
-                    Nível <?= (int)$primeiro['nivel'] ?>
-
-                </span>
-
-
-                <div class="player-points">
-
-                    <strong>
-
-                        <?= number_format(
-                            (int)$primeiro['pontuacao_total'],
-                            0,
-                            ',',
-                            '.'
-                        ) ?>
-
-                    </strong>
-
-                    <span>
-                        PONTOS
-                    </span>
-
-                </div>
-
-
-                <div class="podium-base">
-                    1
-                </div>
-
-            </article>
-
-
-
-            <!-- =================================================
-                 3º LUGAR
-            ================================================== -->
-
-            <?php if ($terceiro): ?>
-
-                <article
-                    class="
-                        podium-player
-                        third-place
-
-                        <?= (int)$terceiro['id'] === (int)$usuarioId
-                            ? 'current-player'
-                            : ''
-                        ?>
-                    "
-                >
-
-
-                    <div class="podium-medal">
-
-                        <img
-                            src="assets/img/terceiro.png"
-                            alt="Medalha de terceiro lugar"
-                        >
-
-                    </div>
-
-
-                    <div class="podium-position">
-
-                        <strong>
-                            3º
-                        </strong>
-
-                        <span>
-                            LUGAR
-                        </span>
-
-                    </div>
-
-
-                    <div class="player-icon">
-
-                        <span>
-                            <?= htmlspecialchars(
-                                obterInicial($terceiro['nome'])
-                            ) ?>
-                        </span>
-
-                    </div>
-
-
-                    <h2>
-
-                        <?= htmlspecialchars(
-                            $terceiro['nome']
-                        ) ?>
-
-                    </h2>
-
-
-                    <span class="player-level">
-
-                        Nível <?= (int)$terceiro['nivel'] ?>
-
-                    </span>
-
-
-                    <div class="player-points">
-
-                        <strong>
-
-                            <?= number_format(
-                                (int)$terceiro['pontuacao_total'],
-                                0,
-                                ',',
-                                '.'
-                            ) ?>
-
-                        </strong>
-
-                        <span>
-                            PONTOS
-                        </span>
-
-                    </div>
-
-
-                    <div class="podium-base">
-                        3
-                    </div>
-
-                </article>
 
             <?php endif; ?>
-
 
         </section>
-
-    <?php else: ?>
 
 
         <!-- =================================================
-             RANKING VAZIO
+             PÓDIO
         ================================================== -->
 
-        <section class="empty-ranking">
+        <?php if ($primeiro || $segundo || $terceiro): ?>
 
-            <div class="empty-icon">
-                🏆
-            </div>
+            <section class="podium">
 
-            <h2>
-                Ainda não há jogadores no ranking.
-            </h2>
+                <!-- =========================================
+                     SEGUNDO LUGAR
+                ========================================== -->
 
-            <p>
-                Complete uma missão para aparecer aqui.
-            </p>
+                <?php if ($segundo): ?>
 
-        </section>
+                    <div class="podium-card second">
 
-    <?php endif; ?>
+                        <div class="podium-position">
+                            2
+                        </div>
+
+                        <div class="podium-avatar">
+
+                            <?php
+                            $imagemSegundo = 'assets/img/segundo.png';
+                            ?>
+
+                            <?php if (file_exists($imagemSegundo)): ?>
+
+                                <img
+                                    src="<?= htmlspecialchars($imagemSegundo) ?>"
+                                    alt="Segundo lugar"
+                                >
+
+                            <?php else: ?>
+
+                                <span>
+                                    <?= htmlspecialchars(inicialNome($segundo['nome'])) ?>
+                                </span>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                        <div class="podium-place">
+                            2º LUGAR
+                        </div>
+
+                        <h2>
+                            <?= htmlspecialchars($segundo['nome']) ?>
+                        </h2>
+
+                        <div class="podium-score">
+
+                            <strong>
+                                <?= number_format((int)$segundo['pontuacao_total'], 0, ',', '.') ?>
+                            </strong>
+
+                            <span>
+                                pontos
+                            </span>
+
+                        </div>
+
+                        <div class="podium-xp">
+                            <?= number_format((int)$segundo['xp'], 0, ',', '.') ?> XP
+                        </div>
+
+                    </div>
+
+                <?php endif; ?>
 
 
+                <!-- =========================================
+                     PRIMEIRO LUGAR
+                ========================================== -->
 
-    <!-- =====================================================
-         RANKING DO 4º EM DIANTE
-    ====================================================== -->
+                <?php if ($primeiro): ?>
 
-    <?php if (count($restantes) > 0): ?>
+                    <div class="podium-card first">
 
-        <section class="ranking-list-section">
+                        <div class="crown">
+                            👑
+                        </div>
+
+                        <div class="podium-position">
+                            1
+                        </div>
+
+                        <div class="podium-avatar">
+
+                            <?php
+                            $imagemPrimeiro = 'assets/img/primeiro.png';
+                            ?>
+
+                            <?php if (file_exists($imagemPrimeiro)): ?>
+
+                                <img
+                                    src="<?= htmlspecialchars($imagemPrimeiro) ?>"
+                                    alt="Primeiro lugar"
+                                >
+
+                            <?php else: ?>
+
+                                <span>
+                                    <?= htmlspecialchars(inicialNome($primeiro['nome'])) ?>
+                                </span>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                        <div class="podium-place">
+                            1º LUGAR
+                        </div>
+
+                        <h2>
+                            <?= htmlspecialchars($primeiro['nome']) ?>
+                        </h2>
+
+                        <div class="podium-score">
+
+                            <strong>
+                                <?= number_format((int)$primeiro['pontuacao_total'], 0, ',', '.') ?>
+                            </strong>
+
+                            <span>
+                                pontos
+                            </span>
+
+                        </div>
+
+                        <div class="podium-xp">
+                            <?= number_format((int)$primeiro['xp'], 0, ',', '.') ?> XP
+                        </div>
+
+                    </div>
+
+                <?php endif; ?>
 
 
-            <div class="list-header">
+                <!-- =========================================
+                     TERCEIRO LUGAR
+                ========================================== -->
 
-                <div>
+                <?php if ($terceiro): ?>
 
-                    <span class="section-tag">
-                        CLASSIFICAÇÃO
-                    </span>
+                    <div class="podium-card third">
 
-                    <h2>
-                        Ranking completo
-                    </h2>
+                        <div class="podium-position">
+                            3
+                        </div>
+
+                        <div class="podium-avatar">
+
+                            <?php
+                            $imagemTerceiro = 'assets/img/terceiro.png';
+                            ?>
+
+                            <?php if (file_exists($imagemTerceiro)): ?>
+
+                                <img
+                                    src="<?= htmlspecialchars($imagemTerceiro) ?>"
+                                    alt="Terceiro lugar"
+                                >
+
+                            <?php else: ?>
+
+                                <span>
+                                    <?= htmlspecialchars(inicialNome($terceiro['nome'])) ?>
+                                </span>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                        <div class="podium-place">
+                            3º LUGAR
+                        </div>
+
+                        <h2>
+                            <?= htmlspecialchars($terceiro['nome']) ?>
+                        </h2>
+
+                        <div class="podium-score">
+
+                            <strong>
+                                <?= number_format((int)$terceiro['pontuacao_total'], 0, ',', '.') ?>
+                            </strong>
+
+                            <span>
+                                pontos
+                            </span>
+
+                        </div>
+
+                        <div class="podium-xp">
+                            <?= number_format((int)$terceiro['xp'], 0, ',', '.') ?> XP
+                        </div>
+
+                    </div>
+
+                <?php endif; ?>
+
+            </section>
+
+        <?php else: ?>
+
+            <section class="empty-ranking">
+
+                <div class="empty-icon">
+                    🏆
+                </div>
+
+                <h2>
+                    Ainda não há jogadores no ranking
+                </h2>
+
+                <p>
+                    Complete missões para começar a aparecer aqui.
+                </p>
+
+            </section>
+
+        <?php endif; ?>
+
+
+        <!-- =================================================
+             DEMAIS JOGADORES
+        ================================================== -->
+
+        <?php if (!empty($restantes)): ?>
+
+            <section class="ranking-list-section">
+
+                <div class="section-title">
+
+                    <div>
+                        <span>
+                            CLASSIFICAÇÃO
+                        </span>
+
+                        <h2>
+                            Demais jogadores
+                        </h2>
+                    </div>
+
+                    <div class="total-players">
+                        <?= count($ranking) ?> jogadores
+                    </div>
 
                 </div>
 
 
-                <span class="players-count">
+                <div class="ranking-list">
 
-                    <?= count($restantes) ?>
+                    <?php foreach ($restantes as $aluno): ?>
 
-                    <?= count($restantes) === 1
-                        ? ' jogador'
-                        : ' jogadores'
-                    ?>
+                        <?php
+                        $ehUsuario =
+                            (int)$aluno['id'] === (int)$usuarioId;
+                        ?>
 
-                </span>
+                        <div
+                            class="ranking-row <?= $ehUsuario ? 'current-user' : '' ?>"
+                        >
 
-            </div>
+                            <!-- POSIÇÃO -->
 
-
-
-            <div class="ranking-list">
-
-
-                <?php foreach ($restantes as $aluno): ?>
-
-                    <article
-                        class="
-                            ranking-row
-
-                            <?= (int)$aluno['id'] === (int)$usuarioId
-                                ? 'current-user'
-                                : ''
-                            ?>
-                        "
-                    >
+                            <div class="ranking-number">
+                                #<?= (int)$aluno['posicao'] ?>
+                            </div>
 
 
-                        <!-- POSIÇÃO -->
+                            <!-- AVATAR -->
 
-                        <div class="row-position">
-
-                            #<?= (int)$aluno['posicao'] ?>
-
-                        </div>
-
-
-                        <!-- AVATAR -->
-
-                        <div class="row-avatar">
-
-                            <?= htmlspecialchars(
-                                obterInicial($aluno['nome'])
-                            ) ?>
-
-                        </div>
-
-
-                        <!-- USUÁRIO -->
-
-                        <div class="row-user">
-
-                            <strong>
+                            <div class="ranking-row-avatar">
 
                                 <?= htmlspecialchars(
-                                    $aluno['nome']
+                                    inicialNome($aluno['nome'])
                                 ) ?>
 
-                            </strong>
+                            </div>
 
-                            <span>
 
-                                Nível <?= (int)$aluno['nivel'] ?>
+                            <!-- NOME -->
 
-                            </span>
+                            <div class="ranking-player">
+
+                                <strong>
+                                    <?= htmlspecialchars($aluno['nome']) ?>
+                                </strong>
+
+                                <span>
+                                    Nível <?= (int)$aluno['nivel'] ?>
+                                </span>
+
+                            </div>
+
+
+                            <!-- XP -->
+
+                            <div class="ranking-xp">
+
+                                <span>
+                                    XP
+                                </span>
+
+                                <strong>
+                                    <?= number_format(
+                                        (int)$aluno['xp'],
+                                        0,
+                                        ',',
+                                        '.'
+                                    ) ?>
+                                </strong>
+
+                            </div>
+
+
+                            <!-- PONTUAÇÃO -->
+
+                            <div class="ranking-points">
+
+                                <strong>
+                                    <?= number_format(
+                                        (int)$aluno['pontuacao_total'],
+                                        0,
+                                        ',',
+                                        '.'
+                                    ) ?>
+                                </strong>
+
+                                <span>
+                                    pontos
+                                </span>
+
+                            </div>
+
+
+                            <!-- VOCÊ -->
+
+                            <?php if ($ehUsuario): ?>
+
+                                <div class="you-badge">
+                                    VOCÊ
+                                </div>
+
+                            <?php endif; ?>
 
                         </div>
 
+                    <?php endforeach; ?>
 
-                        <!-- XP -->
+                </div>
 
-                        <div class="row-xp">
+            </section>
 
-                            <span>
-                                XP
-                            </span>
-
-                            <strong>
-
-                                <?= number_format(
-                                    (int)$aluno['xp'],
-                                    0,
-                                    ',',
-                                    '.'
-                                ) ?>
-
-                            </strong>
-
-                        </div>
+        <?php endif; ?>
 
 
-                        <!-- PONTOS -->
+        <!-- =================================================
+             RODAPÉ DO RANKING
+        ================================================== -->
 
-                        <div class="row-score">
+        <?php if (count($ranking) < 4 && count($ranking) > 0): ?>
 
-                            <span>
-                                PONTUAÇÃO TOTAL
-                            </span>
+            <div class="ranking-end">
 
-                            <strong>
+                <span>🏆</span>
 
-                                <?= number_format(
-                                    (int)$aluno['pontuacao_total'],
-                                    0,
-                                    ',',
-                                    '.'
-                                ) ?>
-
-                            </strong>
-
-                        </div>
-
-
-                        <!-- VOCÊ -->
-
-                        <?php if (
-                            (int)$aluno['id'] ===
-                            (int)$usuarioId
-                        ): ?>
-
-                            <span class="you-badge">
-                                VOCÊ
-                            </span>
-
-                        <?php endif; ?>
-
-
-                    </article>
-
-                <?php endforeach; ?>
-
+                <p>
+                    Você chegou ao final do ranking.
+                </p>
 
             </div>
 
-        </section>
+        <?php endif; ?>
 
-    <?php endif; ?>
-
-
-</main>
+    </main>
 
 
+    <!-- =====================================================
+         TEMA
+    ====================================================== -->
 
-<!-- =========================================================
-     TEMA
-========================================================= -->
-
-<script src="assets/js/tema.js"></script>
-
+    <script src="assets/js/tema.js"></script>
 
 </body>
 
-</html>
+</html> 
