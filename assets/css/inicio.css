@@ -1,7 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
 
-:root {
+/* =========================================================
+   VARIÁVEIS - TEMA CLARO
+========================================================= */
 
+:root {
     --blue: #4169e1;
     --blue-dark: #3154c8;
 
@@ -16,20 +19,25 @@
 
     --border: #e8eaf3;
 
-    --shadow:
-        0 18px 45px rgba(55, 64, 120, .08);
+    --shadow: 0 18px 45px rgba(55, 64, 120, .08);
+    --mission-shadow: 0 25px 55px rgba(65, 75, 210, .20);
 
     --radius: 24px;
 }
 
 
-/* =========================
-   DARK
-========================= */
+/* =========================================================
+   TEMA ESCURO
+========================================================= */
 
 [data-theme="dark"] {
+    --blue: #607df0;
+    --blue-dark: #4d69d5;
 
-    --background: #0e1020;
+    --purple: #956cf0;
+    --purple-dark: #7951d4;
+
+    --background: #0d1020;
     --surface: #171a2d;
 
     --text: #f5f5fb;
@@ -37,43 +45,38 @@
 
     --border: #292d46;
 
-    --shadow:
-        0 20px 50px rgba(0, 0, 0, .30);
+    --shadow: 0 20px 50px rgba(0, 0, 0, .30);
+    --mission-shadow: 0 25px 60px rgba(38, 35, 100, .35);
 }
 
 
-/* =========================
-   PINK
-========================= */
-
-/* =========================
+/* =========================================================
    TEMA ROSA
-========================= */
+========================================================= */
 
 [data-theme="pink"] {
-
     --blue: #e85d9e;
     --blue-dark: #d8478b;
 
     --purple: #c83d82;
     --purple-dark: #a92d69;
 
-    --background: #fff1f7;
-    --surface: #fff9fc;
+    --background: #fff0f7;
+    --surface: #fff8fc;
 
     --text: #351522;
     --text-soft: #946276;
 
-    --border: #f3cddd;
+    --border: #f2c9da;
 
-    --shadow:
-        0 18px 45px rgba(207, 67, 128, .12);
+    --shadow: 0 18px 45px rgba(207, 67, 128, .12);
+    --mission-shadow: 0 25px 55px rgba(210, 55, 125, .25);
 }
 
 
-/* =========================
+/* =========================================================
    RESET
-========================= */
+========================================================= */
 
 * {
     margin: 0;
@@ -81,8 +84,11 @@
     box-sizing: border-box;
 }
 
-body {
+html {
+    scroll-behavior: smooth;
+}
 
+body {
     font-family: 'Outfit', sans-serif;
 
     background:
@@ -112,13 +118,56 @@ a {
     color: inherit;
 }
 
+button {
+    font-family: inherit;
+}
 
-/* =========================
+
+/* =========================================================
+   FUNDO - TEMA ESCURO
+========================================================= */
+
+[data-theme="dark"] body {
+    background:
+        radial-gradient(
+            circle at 10% 20%,
+            rgba(96, 125, 240, .07),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 90% 50%,
+            rgba(149, 108, 240, .07),
+            transparent 25%
+        ),
+        var(--background);
+}
+
+
+/* =========================================================
+   FUNDO - TEMA ROSA
+========================================================= */
+
+[data-theme="pink"] body {
+    background:
+        radial-gradient(
+            circle at 10% 20%,
+            rgba(232, 93, 158, .13),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 90% 50%,
+            rgba(200, 61, 130, .10),
+            transparent 25%
+        ),
+        var(--background);
+}
+
+
+/* =========================================================
    NAVBAR
-========================= */
+========================================================= */
 
 .navbar {
-
     height: 72px;
 
     background: var(--surface);
@@ -131,23 +180,38 @@ a {
     padding: 0 6%;
 
     position: relative;
-    z-index: 10;
+    z-index: 20;
+
+    transition:
+        background .3s ease,
+        border-color .3s ease;
 }
 
-.brand {
 
+/* =========================================================
+   LOGO
+========================================================= */
+
+.brand {
     font-size: 27px;
+
     font-weight: 800;
 
     letter-spacing: -1.5px;
+
+    flex-shrink: 0;
 }
 
 .brand span {
     color: var(--purple);
 }
 
-.nav-links {
 
+/* =========================================================
+   MENU
+========================================================= */
+
+.nav-links {
     position: absolute;
 
     left: 50%;
@@ -155,37 +219,41 @@ a {
     transform: translateX(-50%);
 
     display: flex;
+
     gap: 38px;
 }
 
 .nav-links a {
-
     color: var(--text-soft);
 
     font-size: 14px;
+
     font-weight: 600;
 
-    transition: .2s;
+    transition: color .2s ease;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
-
     color: var(--purple);
 }
 
-.nav-user {
 
+/* =========================================================
+   USUÁRIO
+========================================================= */
+
+.nav-user {
     margin-left: auto;
-    text-decoration: none;
+
     display: flex;
+
     align-items: center;
 
     gap: 11px;
 }
 
 .avatar {
-
     width: 42px;
     height: 42px;
 
@@ -201,15 +269,18 @@ a {
     color: white;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
     font-weight: 800;
+
+    flex-shrink: 0;
 }
 
 .user-info {
-
     display: flex;
+
     flex-direction: column;
 
     line-height: 1.1;
@@ -220,7 +291,6 @@ a {
 }
 
 .user-info span {
-
     font-size: 10px;
 
     color: var(--text-soft);
@@ -229,7 +299,6 @@ a {
 }
 
 .logout {
-
     color: var(--text-soft);
 
     font-size: 22px;
@@ -237,30 +306,42 @@ a {
     margin-left: 15px;
 
     transform: rotate(180deg);
+
+    transition: color .2s ease;
+}
+
+.logout:hover {
+    color: var(--purple);
 }
 
 
-/* =========================
-   THEME
-========================= */
+/* =========================================================
+   SELETOR DE TEMA
+========================================================= */
 
 .theme-switcher {
-
     display: flex;
+
+    align-items: center;
 
     gap: 3px;
 
-    margin-right: 22px;
-
     padding: 4px;
+
+    margin-right: 8px;
 
     border-radius: 10px;
 
     background: var(--background);
+
+    border: 1px solid var(--border);
+
+    transition:
+        background .3s ease,
+        border-color .3s ease;
 }
 
 .theme-switcher button {
-
     width: 27px;
     height: 27px;
 
@@ -275,24 +356,34 @@ a {
     cursor: pointer;
 
     font-size: 13px;
+
+    transition:
+        background .2s ease,
+        color .2s ease,
+        transform .2s ease;
+}
+
+.theme-switcher button:hover {
+    color: var(--purple);
+
+    transform: translateY(-1px);
 }
 
 .theme-switcher button.active {
-
     background: var(--surface);
 
     color: var(--purple);
 
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, .08);
 }
 
 
-/* =========================
+/* =========================================================
    HOME
-========================= */
+========================================================= */
 
 .home {
-
     width: min(1200px, 88%);
 
     margin: 0 auto;
@@ -301,11 +392,13 @@ a {
 }
 
 
-/* =========================
-   INTRO
-========================= */
+/* =========================================================
+   INTRODUÇÃO
+========================================================= */
 
 .intro {
+    position: relative;
+    z-index: 3;
 
     display: flex;
 
@@ -313,11 +406,12 @@ a {
 
     align-items: flex-end;
 
+    gap: 30px;
+
     margin-bottom: 38px;
 }
 
 .intro-label {
-
     display: block;
 
     color: var(--purple);
@@ -332,7 +426,6 @@ a {
 }
 
 .intro h1 {
-
     font-size: clamp(35px, 4vw, 55px);
 
     line-height: .98;
@@ -343,14 +436,12 @@ a {
 }
 
 .intro h1 span {
-
     display: block;
 
     color: var(--purple);
 }
 
 .intro p {
-
     color: var(--text-soft);
 
     margin-top: 15px;
@@ -358,7 +449,15 @@ a {
     font-size: 15px;
 }
 
+
+/* =========================================================
+   LEVEL
+========================================================= */
+
 .level-badge {
+    position: relative;
+
+    z-index: 5;
 
     display: flex;
 
@@ -370,6 +469,9 @@ a {
 }
 
 .level-number {
+    position: relative;
+
+    z-index: 2;
 
     width: 52px;
     height: 52px;
@@ -377,12 +479,14 @@ a {
     border-radius: 16px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
     color: white;
 
     font-size: 21px;
+
     font-weight: 800;
 
     background:
@@ -397,7 +501,6 @@ a {
 }
 
 .level-badge small {
-
     display: block;
 
     font-size: 9px;
@@ -408,7 +511,6 @@ a {
 }
 
 .level-badge strong {
-
     display: block;
 
     font-size: 14px;
@@ -417,26 +519,37 @@ a {
 }
 
 
-/* =========================
-   MISSION
-========================= */
+/* =========================================================
+   MISSÃO
+========================================================= */
 
-[data-theme="pink"] .mission {
+.mission {
+    position: relative;
+
+    isolation: isolate;
+
+    overflow: hidden;
+
+    min-height: 350px;
+
+    border-radius: 27px;
+
+    color: white;
 
     background:
         linear-gradient(
             120deg,
-            #d93682,
-            #e94f99 55%,
-            #c83d82
+            #3157cf,
+            #4d4ed0 55%,
+            #794fe0
         );
 
-    box-shadow:
-        0 25px 55px rgba(210, 55, 125, .25);
+    box-shadow: var(--mission-shadow);
+
+    display: flex;
 }
 
 .mission::before {
-
     content: "";
 
     position: absolute;
@@ -446,16 +559,65 @@ a {
 
     border-radius: 50%;
 
-    background: rgba(255,255,255,.07);
+    background:
+        rgba(255, 255, 255, .07);
 
     right: -160px;
+
     top: -250px;
+
+    z-index: 1;
 }
 
-.mission-content {
 
+/* =========================================================
+   MISSÃO - ESCURO
+========================================================= */
+
+[data-theme="dark"] .mission {
+    background:
+        linear-gradient(
+            120deg,
+            #253b91,
+            #3f3ca5 55%,
+            #6842b9
+        );
+}
+
+
+/* =========================================================
+   MISSÃO - ROSA
+========================================================= */
+
+[data-theme="pink"] .mission {
+    background:
+        linear-gradient(
+            120deg,
+            #d93682,
+            #e94f99 55%,
+            #c83d82
+        );
+
+    color: white;
+
+    box-shadow:
+        0 25px 55px rgba(210, 55, 125, .25);
+}
+
+[data-theme="pink"] .mission::before {
+    background:
+        rgba(255, 255, 255, .10);
+}
+
+
+/* =========================================================
+   CONTEÚDO DA MISSÃO
+========================================================= */
+
+.mission-content {
     position: relative;
-    z-index: 2;
+
+    z-index: 3;
 
     padding: 55px;
 
@@ -463,7 +625,6 @@ a {
 }
 
 .mission-label {
-
     display: block;
 
     font-size: 11px;
@@ -476,7 +637,6 @@ a {
 }
 
 .mission-game {
-
     font-size: 12px;
 
     font-weight: 700;
@@ -485,7 +645,6 @@ a {
 }
 
 .mission h2 {
-
     font-size: 40px;
 
     line-height: 1;
@@ -496,10 +655,9 @@ a {
 }
 
 .mission p {
-
     max-width: 520px;
 
-    color: rgba(255,255,255,.78);
+    color: rgba(255, 255, 255, .78);
 
     font-size: 14px;
 
@@ -507,8 +665,9 @@ a {
 }
 
 .mission-tags {
-
     display: flex;
+
+    flex-wrap: wrap;
 
     gap: 8px;
 
@@ -516,10 +675,10 @@ a {
 }
 
 .mission-tags span {
+    border: 1px solid rgba(255, 255, 255, .20);
 
-    border: 1px solid rgba(255,255,255,.2);
-
-    background: rgba(255,255,255,.10);
+    background:
+        rgba(255, 255, 255, .10);
 
     border-radius: 7px;
 
@@ -531,7 +690,6 @@ a {
 }
 
 .mission-button {
-
     display: inline-flex;
 
     align-items: center;
@@ -552,15 +710,16 @@ a {
 
     font-weight: 800;
 
-    transition: .2s;
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
 }
 
 .mission-button:hover {
-
     transform: translateY(-3px);
 
     box-shadow:
-        0 10px 25px rgba(0,0,0,.15);
+        0 10px 25px rgba(0, 0, 0, .15);
 }
 
 .mission-button span {
@@ -568,26 +727,29 @@ a {
 }
 
 
-/* =========================
-   MISSION ART
-========================= */
+/* =========================================================
+   ARTE DA MISSÃO
+========================================================= */
 
 .mission-art {
-
     position: absolute;
 
+    z-index: 2;
+
     right: 0;
+
     top: 0;
 
     width: 40%;
+
     height: 100%;
 }
 
 .mission-object {
-
     position: absolute;
 
     right: 30%;
+
     top: 42%;
 
     transform: translate(50%, -50%);
@@ -598,55 +760,58 @@ a {
     border-radius: 50%;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
-    background: rgba(255,255,255,.94);
+    background:
+        rgba(255, 255, 255, .94);
 
     font-size: 42px;
 
     box-shadow:
-        0 15px 35px rgba(20,20,80,.20);
+        0 15px 35px rgba(20, 20, 80, .20);
 
-    animation: float 4s ease-in-out infinite;
+    animation:
+        float 4s ease-in-out infinite;
 }
 
 .orbit {
-
     position: absolute;
 
-    border: 1px solid rgba(255,255,255,.22);
+    border:
+        1px solid rgba(255, 255, 255, .22);
 
     border-radius: 50%;
 
     right: 8%;
+
     top: 18%;
 
     width: 310px;
+
     height: 110px;
 
     transform: rotate(25deg);
 }
 
 .orbit-two {
-
     transform: rotate(-25deg);
 
     width: 300px;
 }
 
 .orbit-three {
-
     transform: rotate(65deg);
 
     width: 260px;
 }
 
 .math-symbol {
-
     position: absolute;
 
-    color: rgba(255,255,255,.22);
+    color:
+        rgba(255, 255, 255, .22);
 
     font-size: 22px;
 
@@ -669,19 +834,25 @@ a {
 }
 
 .xp-floating {
-
     position: absolute;
 
+    z-index: 5;
+
     top: 70px;
+
     right: 40px;
 
     padding: 9px 13px;
 
-    border: 1px solid rgba(255,255,255,.25);
+    border:
+        1px solid rgba(255, 255, 255, .25);
 
-    background: rgba(255,255,255,.10);
+    background:
+        rgba(255, 255, 255, .10);
 
     border-radius: 9px;
+
+    color: white;
 
     font-size: 11px;
 
@@ -689,39 +860,42 @@ a {
 }
 
 @keyframes float {
-
-    0%,100% {
-        transform: translate(50%, -50%) translateY(0);
+    0%,
+    100% {
+        transform:
+            translate(50%, -50%)
+            translateY(0);
     }
 
     50% {
-        transform: translate(50%, -50%) translateY(-8px);
+        transform:
+            translate(50%, -50%)
+            translateY(-8px);
     }
 }
 
 
-/* =========================
-   SECTION
-========================= */
+/* =========================================================
+   MUNDOS
+========================================================= */
 
 .world-section {
-
     margin-top: 65px;
 }
 
 .section-heading {
-
     display: flex;
 
     justify-content: space-between;
 
     align-items: flex-end;
 
+    gap: 25px;
+
     margin-bottom: 22px;
 }
 
 .section-heading span {
-
     color: var(--purple);
 
     font-size: 10px;
@@ -732,7 +906,6 @@ a {
 }
 
 .section-heading h2 {
-
     font-size: 28px;
 
     letter-spacing: -1px;
@@ -741,19 +914,17 @@ a {
 }
 
 .section-heading p {
-
     color: var(--text-soft);
 
     font-size: 13px;
 }
 
 
-/* =========================
-   WORLDS
-========================= */
+/* =========================================================
+   GRID
+========================================================= */
 
 .world-grid {
-
     display: grid;
 
     grid-template-columns: 1fr 1fr;
@@ -761,8 +932,12 @@ a {
     gap: 20px;
 }
 
-.world-card {
 
+/* =========================================================
+   CARDS
+========================================================= */
+
+.world-card {
     min-height: 290px;
 
     border-radius: 23px;
@@ -779,7 +954,8 @@ a {
 
     justify-content: space-between;
 
-    border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
     transition:
         transform .25s ease,
@@ -787,14 +963,19 @@ a {
 }
 
 .world-card:hover {
-
     transform: translateY(-5px);
 
     box-shadow:
-        0 20px 40px rgba(30,40,100,.12);
+        0 20px 40px rgba(30, 40, 100, .12);
 }
 
+
+/* =========================================================
+   MATHCHEF
+========================================================= */
+
 .world-card.chef {
+    color: #171a2b;
 
     background:
         linear-gradient(
@@ -804,8 +985,12 @@ a {
         );
 }
 
-.world-card.space {
 
+/* =========================================================
+   MATHSPACE
+========================================================= */
+
+.world-card.space {
     color: white;
 
     background:
@@ -818,8 +1003,81 @@ a {
     border: none;
 }
 
-.world-background {
 
+/* =========================================================
+   MATHCHEF - ESCURO
+========================================================= */
+
+[data-theme="dark"] .world-card.chef {
+    color: #171a2b;
+
+    background:
+        linear-gradient(
+            140deg,
+            #fff9f3,
+            #f0e7ff
+        );
+
+    border-color: #ded9ec;
+}
+
+
+/* =========================================================
+   MATHSPACE - ESCURO
+========================================================= */
+
+[data-theme="dark"] .world-card.space {
+    background:
+        linear-gradient(
+            140deg,
+            #18234e,
+            #39307a
+        );
+}
+
+
+/* =========================================================
+   MATHCHEF - ROSA
+========================================================= */
+
+[data-theme="pink"] .world-card.chef {
+    color: #4a1730;
+
+    background:
+        linear-gradient(
+            140deg,
+            #ffe3ef,
+            #ffc9df
+        );
+
+    border-color: #efb5cc;
+}
+
+
+/* =========================================================
+   MATHSPACE - ROSA
+========================================================= */
+
+[data-theme="pink"] .world-card.space {
+    color: #4a1730;
+
+    background:
+        linear-gradient(
+            140deg,
+            #f6b6d0,
+            #e987b0
+        );
+
+    border:
+        1px solid #e2a0bc;
+}
+
+
+/* =========================================================
+   FUNDO DOS CARDS
+========================================================= */
+
+.world-background {
     position: absolute;
 
     inset: 0;
@@ -828,7 +1086,6 @@ a {
 }
 
 .world-background span {
-
     position: absolute;
 
     font-size: 50px;
@@ -858,40 +1115,66 @@ a {
     bottom: 5%;
 }
 
-.world-icon {
 
+/* =========================================================
+   ÍCONE DOS MUNDOS
+========================================================= */
+
+.world-icon {
     position: relative;
 
     width: 68px;
     height: 68px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
     border-radius: 20px;
 
-    background: rgba(255,255,255,.7);
+    background:
+        rgba(255, 255, 255, .70);
 
     font-size: 34px;
 
     box-shadow:
-        0 10px 25px rgba(30,30,80,.10);
+        0 10px 25px rgba(30, 30, 80, .10);
 }
 
 .space .world-icon {
-    background: rgba(255,255,255,.12);
+    background:
+        rgba(255, 255, 255, .12);
 }
 
-.world-info {
 
+/* ROSA */
+
+[data-theme="pink"] .world-icon {
+    background:
+        rgba(255, 255, 255, .65);
+
+    box-shadow:
+        0 10px 25px rgba(177, 49, 103, .12);
+}
+
+[data-theme="pink"] .space .world-icon {
+    background:
+        rgba(255, 255, 255, .35);
+}
+
+
+/* =========================================================
+   INFORMAÇÕES
+========================================================= */
+
+.world-info {
     position: relative;
 
     margin-top: 12px;
 }
 
 .world-kicker {
-
     font-size: 9px;
 
     font-weight: 800;
@@ -902,7 +1185,6 @@ a {
 }
 
 .world-info h3 {
-
     font-size: 29px;
 
     letter-spacing: -1px;
@@ -911,7 +1193,6 @@ a {
 }
 
 .world-info p {
-
     font-size: 12px;
 
     line-height: 1.5;
@@ -923,15 +1204,33 @@ a {
     margin-top: 5px;
 }
 
-.world-progress {
 
+/* =========================================================
+   TEXTOS DOS CARDS ROSA
+========================================================= */
+
+[data-theme="pink"] .world-card.chef .world-info p,
+[data-theme="pink"] .world-card.chef .world-kicker {
+    color: #8d4d6a;
+}
+
+[data-theme="pink"] .world-card.space .world-info p,
+[data-theme="pink"] .world-card.space .world-kicker {
+    color: #6f3552;
+}
+
+
+/* =========================================================
+   PROGRESSO DOS MUNDOS
+========================================================= */
+
+.world-progress {
     position: relative;
 
     margin-top: 20px;
 }
 
 .world-progress > div:first-child {
-
     display: flex;
 
     justify-content: space-between;
@@ -942,7 +1241,6 @@ a {
 }
 
 .world-progress span {
-
     font-size: 8px;
 
     font-weight: 800;
@@ -955,22 +1253,22 @@ a {
 }
 
 .progress-track {
-
     height: 6px;
 
     border-radius: 10px;
 
-    background: rgba(80,70,130,.12);
+    background:
+        rgba(80, 70, 130, .12);
 
     overflow: hidden;
 }
 
 .space .progress-track {
-    background: rgba(255,255,255,.15);
+    background:
+        rgba(255, 255, 255, .15);
 }
 
 .progress-fill {
-
     height: 100%;
 
     border-radius: inherit;
@@ -983,31 +1281,58 @@ a {
         );
 }
 
-.world-arrow {
 
+/* =========================================================
+   PROGRESSO ROSA
+========================================================= */
+
+[data-theme="pink"] .progress-fill {
+    background:
+        linear-gradient(
+            90deg,
+            #e34d91,
+            #c52f78
+        );
+}
+
+[data-theme="pink"] .space .progress-track {
+    background:
+        rgba(255, 255, 255, .30);
+}
+
+
+/* =========================================================
+   SETA
+========================================================= */
+
+.world-arrow {
     position: absolute;
 
     right: 25px;
+
     bottom: 27px;
 
     font-size: 23px;
 
     opacity: .55;
 
-    transition: .2s;
+    transition:
+        transform .2s ease,
+        opacity .2s ease;
 }
 
 .world-card:hover .world-arrow {
     transform: translateX(5px);
+
+    opacity: .9;
 }
 
 
-/* =========================
+/* =========================================================
    STATUS
-========================= */
+========================================================= */
 
 .status-grid {
-
     display: grid;
 
     grid-template-columns: 1fr 1fr;
@@ -1018,10 +1343,10 @@ a {
 }
 
 .status-card {
-
     background: var(--surface);
 
-    border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
     border-radius: 20px;
 
@@ -1034,16 +1359,21 @@ a {
     gap: 17px;
 
     box-shadow: var(--shadow);
+
+    transition:
+        background .3s ease,
+        border-color .3s ease,
+        box-shadow .3s ease;
 }
 
 .status-icon {
-
     width: 50px;
     height: 50px;
 
     border-radius: 15px;
 
-    background: rgba(123,77,232,.10);
+    background:
+        rgba(123, 77, 232, .10);
 
     display: flex;
 
@@ -1053,12 +1383,24 @@ a {
     font-size: 22px;
 }
 
+
+/* ROSA */
+
+[data-theme="pink"] .status-icon {
+    background:
+        rgba(232, 93, 158, .15);
+}
+
+
+/* =========================================================
+   STATUS - CONTEÚDO
+========================================================= */
+
 .status-content {
     flex: 1;
 }
 
 .status-content > span {
-
     font-size: 9px;
 
     font-weight: 800;
@@ -1069,14 +1411,12 @@ a {
 }
 
 .status-content h3 {
-
     font-size: 21px;
 
     margin-top: 3px;
 }
 
 .xp-row {
-
     margin-top: 3px;
 
     display: flex;
@@ -1091,14 +1431,12 @@ a {
 }
 
 .xp-row span {
-
     color: var(--text-soft);
 
     font-size: 10px;
 }
 
 .xp-track {
-
     height: 5px;
 
     margin-top: 8px;
@@ -1111,8 +1449,9 @@ a {
 }
 
 .xp-track div {
-
     height: 100%;
+
+    border-radius: inherit;
 
     background:
         linear-gradient(
@@ -1122,24 +1461,72 @@ a {
         );
 }
 
-.achievement-card p {
 
+/* =========================================================
+   XP ROSA
+========================================================= */
+
+[data-theme="pink"] .xp-track div {
+    background:
+        linear-gradient(
+            90deg,
+            #e34d91,
+            #c52f78
+        );
+}
+
+
+/* =========================================================
+   CONQUISTAS
+========================================================= */
+
+.achievement-card p {
     color: var(--text-soft);
 
     font-size: 11px;
 }
 
 .achievement-card > a {
-
     font-size: 22px;
 
     color: var(--purple);
+
+    transition:
+        transform .2s ease;
+}
+
+.achievement-card > a:hover {
+    transform: translateX(4px);
 }
 
 
-/* =========================
-   RESPONSIVE
-========================= */
+/* =========================================================
+   TEMA ROSA - NAVBAR
+========================================================= */
+
+[data-theme="pink"] .navbar {
+    background: #fff7fb;
+
+    border-bottom-color: #f1ccdc;
+}
+
+[data-theme="pink"] .brand span {
+    color: #d83f84;
+}
+
+[data-theme="pink"] .nav-links a:hover,
+[data-theme="pink"] .nav-links a.active {
+    color: #c83d82;
+}
+
+[data-theme="pink"] .logout:hover {
+    color: #c83d82;
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE - TABLET
+========================================================= */
 
 @media (max-width: 850px) {
 
@@ -1149,7 +1536,9 @@ a {
 
     .intro {
         align-items: flex-start;
+
         gap: 25px;
+
         flex-direction: column;
     }
 
@@ -1159,11 +1548,13 @@ a {
 
     .mission-content {
         width: 100%;
+
         padding: 40px;
     }
 
     .mission-art {
         opacity: .35;
+
         width: 55%;
     }
 
@@ -1174,11 +1565,17 @@ a {
 
     .section-heading {
         align-items: flex-start;
+
         flex-direction: column;
+
         gap: 8px;
     }
-
 }
+
+
+/* =========================================================
+   RESPONSIVIDADE - CELULAR
+========================================================= */
 
 @media (max-width: 600px) {
 
@@ -1187,7 +1584,7 @@ a {
     }
 
     .theme-switcher {
-        margin-right: 10px;
+        margin-right: 5px;
     }
 
     .user-info {
@@ -1200,11 +1597,16 @@ a {
 
     .home {
         width: 90%;
+
         padding-top: 35px;
     }
 
     .intro h1 {
         font-size: 39px;
+    }
+
+    .intro p {
+        font-size: 14px;
     }
 
     .mission {
@@ -1221,6 +1623,7 @@ a {
 
     .mission-art {
         width: 100%;
+
         opacity: .22;
     }
 
@@ -1228,105 +1631,49 @@ a {
         min-height: 270px;
     }
 
+    .status-card {
+        padding: 20px;
+    }
 }
 
-[data-theme="pink"] body {
 
-    background:
-        radial-gradient(
-            circle at 10% 20%,
-            rgba(232, 93, 158, .13),
-            transparent 25%
-        ),
-        radial-gradient(
-            circle at 90% 50%,
-            rgba(200, 61, 130, .10),
-            transparent 25%
-        ),
-        var(--background);
+/* =========================================================
+   CELULAR MUITO PEQUENO
+========================================================= */
+
+@media (max-width: 400px) {
+
+    .brand {
+        font-size: 23px;
+    }
+
+    .theme-switcher {
+        gap: 1px;
+
+        margin-right: 5px;
+    }
+
+    .theme-switcher button {
+        width: 24px;
+
+        height: 24px;
+    }
+
+    .avatar {
+        width: 38px;
+
+        height: 38px;
+    }
+
+    .intro h1 {
+        font-size: 34px;
+    }
+
+    .mission-content {
+        padding: 25px;
+    }
+
+    .mission h2 {
+        font-size: 29px;
+    }
 }
-
-[data-theme="pink"] .world-card.space {
-
-    color: #351522;
-
-    background:
-        linear-gradient(
-            140deg,
-            #f5b7d1,
-            #e987b0
-        );
-
-    border: 1px solid #e3a0bd;
-}
-
-[data-theme="pink"] .world-card.space {
-
-    color: #351522;
-
-    background:
-        linear-gradient(
-            140deg,
-            #f5b7d1,
-            #e987b0
-        );
-
-    border: 1px solid #e3a0bd;
-}
-
-[data-theme="pink"] .progress-fill,
-[data-theme="pink"] .xp-track div {
-
-    background:
-        linear-gradient(
-            90deg,
-            #e34d91,
-            #c52f78
-        );
-}
-
-[data-theme="pink"] body {
-
-    background:
-        radial-gradient(
-            circle at 10% 20%,
-            rgba(232, 93, 158, .13),
-            transparent 25%
-        ),
-        radial-gradient(
-            circle at 90% 50%,
-            rgba(200, 61, 130, .10),
-            transparent 25%
-        ),
-        var(--background);
-}
-
-[data-theme="pink"] .navbar {
-
-    background: #fff5f9;
-
-    border-bottom-color: #f1ccdc;
-}
-
-[data-theme="pink"] .nav-links a:hover,
-[data-theme="pink"] .nav-links a.active {
-
-    color: #c83d82;
-}
-
-[data-theme="pink"] .brand span {
-
-    color: #d83f84;
-}
-
-[data-theme="pink"] .theme-switcher {
-
-    background: #f9dce9;
-}
-
-[data-theme="pink"] .theme-switcher button.active {
-
-    background: #fff9fc;
-
-    color: #c83d82;
-}   

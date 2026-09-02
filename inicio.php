@@ -180,70 +180,48 @@ if ($hora < 12) {
         </a>
 
         <nav class="nav-links">
-
-            <a href="inicio.php" class="active">
-                Início
-            </a>
-
-            <a href="ranking.php">
-                Ranking
-            </a>
-
-            <a href="conquistas.php">
-                Conquistas
-            </a>
-
+            <a href="inicio.php" class="active">Início</a>
+            <a href="ranking.php">Ranking</a>
+            <a href="conquistas.php">Conquistas</a>
         </nav>
-
-        <!-- CONTROLE DE TEMA -->
-        <div class="theme-switcher">
-
-            <button
-                type="button"
-                data-theme-option="light"
-                title="Tema claro">
-                ☀
-            </button>
-
-            <button
-                type="button"
-                data-theme-option="dark"
-                title="Tema escuro">
-                ☾
-            </button>
-
-            <button
-                type="button"
-                data-theme-option="pink"
-                title="Tema rosa">
-                ♡
-            </button>
-
-        </div>
 
         <div class="nav-user">
 
-            <a href="perfil.php">
-                <div class="avatar">
-                    <?= strtoupper(substr($usuario["nome"], 0, 1)) ?>
-                </div>
-            </a>
+            <div class="theme-switcher">
 
-            <div class="user-info">
+                <button
+                    type="button"
+                    data-theme-option="light"
+                    title="Tema claro">
+                    ☀
+                </button>
 
-                <strong>
-                    <?= htmlspecialchars($usuario["nome"]) ?>
-                </strong>
+                <button
+                    type="button"
+                    data-theme-option="dark"
+                    title="Tema escuro">
+                    ☾
+                </button>
 
-                <span>
-                    LEVEL <?= $nivel ?>
-                </span>
+                <button
+                    type="button"
+                    data-theme-option="pink"
+                    title="Tema rosa">
+                    ♡
+                </button>
 
             </div>
 
-            <a href="logout.php" class="logout">
-                ↪
-            </a>
+            <div class="avatar">
+                <?= strtoupper(substr($usuario['nome'], 0, 1)) ?>
+            </div>
+
+            <div class="user-info">
+                <strong><?= htmlspecialchars($usuario['nome']) ?></strong>
+                <span>LEVEL <?= $nivel ?></span>
+            </div>
+
+            <a href="logout.php" class="logout">↪</a>
 
         </div>
 
