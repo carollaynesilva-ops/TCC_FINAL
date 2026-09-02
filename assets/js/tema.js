@@ -1,71 +1,102 @@
-const temas = ["light", "dark", "pink"];
+document.addEventListener("DOMContentLoaded", function () {
 
-const temaSalvo =
-    localStorage.getItem("mathrun-theme") || "light";
+    const botoesTema = document.querySelectorAll(
+        "[data-theme-option]"
+    );
 
-document.documentElement.setAttribute(
-    "data-theme",
-    temaSalvo
-);
+    const body = document.body;
+
+    // Tema salvo anteriormente
+    const temaSalvo = localStorage.getItem("mathrun-tema");
+
+    // Se não existir tema salvo, usa o claro
+    const temaInicial = temaSalvo || "light";
+
+    aplicarTema(temaInicial);
 
 
-function atualizarBotoesTema() {
+    // Quando clicar em um dos três botões
+    botoesTema.forEach(function (botao) {
 
-    const botoes =
-        document.querySelectorAll("[data-theme-option]");
+        botao.addEventListener("click", function () {
 
-    botoes.forEach(botao => {
+            const tema = botao.getAttribute(
+                "data-theme-option"
+            );
 
-        const tema =
-            botao.dataset.themeOption;
+            aplicarTema(tema);
 
-        botao.classList.toggle(
-            "active",
-            tema ===
-            document.documentElement
-                .getAttribute("data-theme")
-        );
+            // Salva a escolha
+            localStorage.setItem(
+                "mathrun-tema",
+                tema
+            );
+        });
 
     });
-}
 
 
-function alterarTema(tema) {
+    function aplicarTema(tema) {
 
-    if (!temas.includes(tema)) {
-        return;
-    }
+        // Remove todos os temas anteriores
+        body.classList.remove(
+            "dark",
+            "pink",
+            "tema-escuro",
+            "tema-rosa"
+        );
 
-    document.documentElement.setAttribute(
-        "data-theme",
-        tema
-    );
-
-    localStorage.setItem(
-        "mathrun-theme",
-        tema
-    );
-
-    atualizarBotoesTema();
-}
+        body.removeAttribute("data-theme");
 
 
-document.addEventListener("DOMContentLoaded", () => {
+        // Aplica o tema escolhido
+        if (tema === "dark") {
 
-    atualizarBotoesTema();
+            body.classList.add("dark");
 
-    document
-        .querySelectorAll("[data-theme-option]")
-        .forEach(botao => {
+            body.setAttribute(
+                "data-theme",
+                "dark"
+            );
 
-            botao.addEventListener("click", () => {
+        }
 
-                alterarTema(
-                    botao.dataset.themeOption
+        else if (tema === "pink") {
+
+            body.classList.add("pink");
+
+            body.setAttribute(
+                "data-theme",
+                "pink"
+            );
+
+        }
+
+        else {
+
+            body.setAttribute(
+                "data-theme",
+                "light"
+            );
+
+        }
+
+
+        // Atualiza o botão ativo
+        botoesTema.forEach(function (botao) {
+
+            const temaBotao =
+                botao.getAttribute(
+                    "data-theme-option"
                 );
 
-            });
+            botao.classList.toggle(
+                "active",
+                temaBotao === tema
+            );
 
         });
+
+    }
 
 });
