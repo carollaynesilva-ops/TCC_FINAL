@@ -18,9 +18,17 @@
 
     --border: #e4e7f2;
 
-    --gold: #f4b740;
-    --silver: #9da7ba;
-    --bronze: #c98252;
+    --gold: #f5c542;
+    --gold-dark: #c99718;
+    --gold-light: #fff1a8;
+
+    --silver: #b9c2d0;
+    --silver-dark: #7d899b;
+    --silver-blue: #aebfd4;
+
+    --copper: #c47a4a;
+    --copper-dark: #8e4d2d;
+    --copper-light: #e0a77d;
 
     --shadow: 0 15px 40px rgba(62, 72, 130, 0.10);
 
@@ -121,11 +129,12 @@ button {
 }
 
 
-/* LINKS */
+/* MENU */
 
 .nav-links {
     display: flex;
     align-items: center;
+
     gap: 7px;
 }
 
@@ -155,11 +164,14 @@ button {
 }
 
 
-/* USUÁRIO */
+/* =========================================================
+   USUÁRIO
+========================================================= */
 
 .nav-user {
     display: flex;
     align-items: center;
+
     gap: 12px;
 }
 
@@ -196,11 +208,12 @@ button {
 }
 
 
-/* INFORMAÇÕES DO USUÁRIO */
+/* PERFIL */
 
 .user-info {
     display: flex;
     align-items: center;
+
     gap: 9px;
 }
 
@@ -245,6 +258,9 @@ button {
 
     font-size: 11px;
 }
+
+
+/* SAIR */
 
 .logout {
     padding-left: 4px;
@@ -319,7 +335,9 @@ button {
 }
 
 
-/* SUA POSIÇÃO */
+/* =========================================================
+   POSIÇÃO DO USUÁRIO
+========================================================= */
 
 .my-position {
     min-width: 150px;
@@ -372,27 +390,27 @@ button {
 
     grid-template-columns:
         1fr
-        1.08fr
+        1.12fr
         1fr;
 
     align-items: end;
 
     gap: 22px;
 
-    margin-bottom: 65px;
+    margin-bottom: 70px;
 
-    padding: 20px 15px 0;
+    padding: 20px 10px 0;
 }
 
 
 /* =========================================================
-   CARD DO JOGADOR
+   CARD BASE
 ========================================================= */
 
 .podium-player {
     position: relative;
 
-    min-height: 465px;
+    min-height: 455px;
 
     padding: 30px 25px 0;
 
@@ -402,11 +420,11 @@ button {
 
     text-align: center;
 
-    background: var(--surface);
+    border-radius: 28px 28px 0 0;
 
     border: 1px solid var(--border);
 
-    border-radius: 28px 28px 0 0;
+    background: var(--surface);
 
     box-shadow: var(--shadow);
 
@@ -418,59 +436,229 @@ button {
 }
 
 .podium-player:hover {
-    transform: translateY(-7px);
+    transform: translateY(-8px);
 
     box-shadow:
-        0 20px 50px rgba(62, 72, 130, 0.16);
+        0 22px 55px rgba(62, 72, 130, 0.18);
 }
 
 
 /* =========================================================
-   1º LUGAR
+   1º LUGAR - OURO
 ========================================================= */
 
 .first-place {
+
     min-height: 535px;
 
-    padding-top: 20px;
+    padding-top: 25px;
 
-    border: 2px solid rgba(123, 77, 232, 0.35);
+    border: 2px solid var(--gold-dark);
 
     background:
         linear-gradient(
             180deg,
-            rgba(123, 77, 232, 0.13),
-            var(--surface) 46%
+            #fff3a8 0%,
+            #ffe276 15%,
+            #fff8d2 42%,
+            var(--surface) 72%
         );
+
+    box-shadow:
+        0 18px 50px rgba(213, 166, 43, 0.22);
+}
+
+.first-place:hover {
+    transform: translateY(-12px);
+
+    box-shadow:
+        0 25px 60px rgba(213, 166, 43, 0.28);
+}
+
+
+/* brilho dourado */
+
+.first-place::before {
+    content: "";
+
+    position: absolute;
+
+    top: -90px;
+    left: 50%;
+
+    width: 230px;
+    height: 180px;
+
+    transform: translateX(-50%);
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,0.72),
+            transparent 68%
+        );
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   2º LUGAR - PRATA / AZUL
+========================================================= */
+
+.second-place {
+
+    background:
+        linear-gradient(
+            180deg,
+            #dbe5f0 0%,
+            #b7c7d9 18%,
+            #eef3f8 43%,
+            var(--surface) 72%
+        );
+
+    border-color: var(--silver-dark);
+
+    box-shadow:
+        0 16px 45px rgba(120, 140, 165, 0.20);
+}
+
+.second-place:hover {
+    box-shadow:
+        0 23px 55px rgba(120, 140, 165, 0.28);
+}
+
+
+/* brilho prata */
+
+.second-place::before {
+    content: "";
+
+    position: absolute;
+
+    top: -85px;
+    left: 50%;
+
+    width: 220px;
+    height: 170px;
+
+    transform: translateX(-50%);
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,0.75),
+            transparent 68%
+        );
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   3º LUGAR - COBRE
+========================================================= */
+
+.third-place {
+
+    background:
+        linear-gradient(
+            180deg,
+            #e6b08c 0%,
+            #c98255 18%,
+            #f0c4a3 43%,
+            var(--surface) 72%
+        );
+
+    border-color: var(--copper-dark);
+
+    box-shadow:
+        0 16px 45px rgba(170, 95, 55, 0.20);
+}
+
+.third-place:hover {
+    box-shadow:
+        0 23px 55px rgba(170, 95, 55, 0.28);
+}
+
+
+/* brilho cobre */
+
+.third-place::before {
+    content: "";
+
+    position: absolute;
+
+    top: -85px;
+    left: 50%;
+
+    width: 220px;
+    height: 170px;
+
+    transform: translateX(-50%);
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,0.55),
+            transparent 68%
+        );
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   MEDALHA
+========================================================= */
+
+.podium-medal {
+    width: 112px;
+    height: 112px;
+
+    margin-bottom: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
 
     z-index: 2;
 }
 
-.first-place:hover {
-    transform: translateY(-10px);
+.podium-medal img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    filter:
+        drop-shadow(
+            0 8px 12px rgba(0,0,0,0.15)
+        );
+
+    transition: transform 0.3s ease;
+}
+
+.podium-player:hover .podium-medal img {
+    transform: scale(1.08);
 }
 
 
-/* =========================================================
-   2º E 3º
-========================================================= */
+/* PRIMEIRA MAIOR */
 
-.second-place {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(65, 105, 225, 0.08),
-            var(--surface) 48%
-        );
-}
+.first-place .podium-medal {
+    width: 135px;
+    height: 135px;
 
-.third-place {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(201, 130, 82, 0.08),
-            var(--surface) 48%
-        );
+    margin-bottom: 5px;
 }
 
 
@@ -479,26 +667,28 @@ button {
 ========================================================= */
 
 .podium-position {
+
+    position: relative;
+    z-index: 2;
+
     display: flex;
     flex-direction: column;
-
     align-items: center;
 
-    margin-bottom: 15px;
+    margin-bottom: 13px;
+}
+
+.podium-position strong {
+    font-size: 32px;
+
+    line-height: 1;
+
+    font-weight: 800;
 }
 
 .podium-position span {
-    font-size: 31px;
 
-    font-weight: 800;
-
-    line-height: 1;
-}
-
-.podium-position small {
     margin-top: 4px;
-
-    color: var(--text-light);
 
     font-size: 9px;
 
@@ -508,32 +698,54 @@ button {
 }
 
 
-/* CORES DAS POSIÇÕES */
+/* CORES */
+
+.first-place .podium-position strong {
+    color: #b9870b;
+
+    text-shadow:
+        0 1px 0 #fff4a8;
+}
 
 .first-place .podium-position span {
-    color: var(--purple);
+    color: #a67a12;
+}
+
+
+.second-place .podium-position strong {
+    color: #64758c;
+
+    text-shadow:
+        0 1px 0 #ffffff;
 }
 
 .second-place .podium-position span {
-    color: var(--silver);
+    color: #65778c;
+}
+
+
+.third-place .podium-position strong {
+    color: #8b4e30;
+
+    text-shadow:
+        0 1px 0 #f5d2bc;
 }
 
 .third-place .podium-position span {
-    color: var(--bronze);
+    color: #875039;
 }
 
 
 /* =========================================================
-   ÍCONE
+   ÍCONE DO JOGADOR
 ========================================================= */
 
-.podium-icon {
-    width: 145px;
-    height: 145px;
+.player-icon {
 
-    margin-bottom: 17px;
+    width: 76px;
+    height: 76px;
 
-    position: relative;
+    margin-bottom: 13px;
 
     display: flex;
     align-items: center;
@@ -544,101 +756,23 @@ button {
     background:
         linear-gradient(
             135deg,
-            rgba(65, 105, 225, 0.12),
-            rgba(123, 77, 232, 0.12)
-        );
-
-    border: 5px solid var(--surface);
-
-    box-shadow:
-        0 8px 25px rgba(60, 65, 120, 0.13);
-
-    overflow: hidden;
-}
-
-.podium-icon img {
-    width: 100%;
-    height: 100%;
-
-    object-fit: contain;
-
-    position: relative;
-    z-index: 2;
-}
-
-
-/* FALLBACK */
-
-.initial-fallback {
-    position: absolute;
-
-    inset: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: white;
-
-    font-size: 45px;
-    font-weight: 800;
-
-    background:
-        linear-gradient(
-            135deg,
             var(--blue),
             var(--purple)
         );
-}
 
-.podium-icon:not(.no-image) .initial-fallback {
-    display: none;
-}
-
-.podium-icon.no-image .initial-fallback {
-    display: flex;
-}
-
-
-/* ÍCONE DO PRIMEIRO */
-
-.first-place .podium-icon {
-    width: 170px;
-    height: 170px;
-
-    border-width: 6px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(123, 77, 232, 0.18),
-            rgba(65, 105, 225, 0.15)
-        );
+    border: 4px solid var(--surface);
 
     box-shadow:
-        0 12px 35px rgba(123, 77, 232, 0.22);
-}
+        0 7px 20px rgba(60, 65, 120, 0.15);
 
+    color: white;
 
-/* =========================================================
-   COROA / DETALHE DO 1º
-========================================================= */
+    font-size: 27px;
 
-.crown {
-    height: 36px;
+    font-weight: 800;
 
-    margin-bottom: 3px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.crown img {
-    width: 35px;
-    height: 35px;
-
-    object-fit: contain;
+    position: relative;
+    z-index: 2;
 }
 
 
@@ -647,11 +781,15 @@ button {
 ========================================================= */
 
 .podium-player h2 {
+
+    position: relative;
+    z-index: 2;
+
     max-width: 90%;
 
     margin-bottom: 5px;
 
-    font-size: 21px;
+    font-size: 20px;
 
     line-height: 1.2;
 
@@ -659,7 +797,7 @@ button {
 }
 
 .first-place h2 {
-    font-size: 24px;
+    font-size: 23px;
 }
 
 
@@ -668,43 +806,48 @@ button {
 ========================================================= */
 
 .player-level {
+
+    position: relative;
+    z-index: 2;
+
     margin-bottom: 17px;
 
     color: var(--text-light);
 
     font-size: 12px;
+
     font-weight: 600;
 }
 
 
 /* =========================================================
-   PONTUAÇÃO
+   PONTOS
 ========================================================= */
 
 .player-points {
+
+    position: relative;
+    z-index: 2;
+
     display: flex;
     flex-direction: column;
 
     align-items: center;
 
-    margin-bottom: 24px;
+    margin-bottom: 22px;
 }
 
 .player-points strong {
-    color: var(--purple);
 
-    font-size: 30px;
+    font-size: 29px;
 
     line-height: 1;
 
     font-weight: 800;
 }
 
-.first-place .player-points strong {
-    font-size: 35px;
-}
-
 .player-points span {
+
     margin-top: 5px;
 
     color: var(--text-light);
@@ -717,13 +860,34 @@ button {
 }
 
 
+/* COR DAS PONTUAÇÕES */
+
+.first-place .player-points strong {
+    color: #b8860b;
+}
+
+.second-place .player-points strong {
+    color: #63758b;
+}
+
+.third-place .player-points strong {
+    color: #975432;
+}
+
+
+.first-place .player-points strong {
+    font-size: 35px;
+}
+
+
 /* =========================================================
    BASE DO PÓDIO
 ========================================================= */
 
 .podium-base {
+
     width: 100%;
-    min-height: 62px;
+    min-height: 66px;
 
     margin-top: auto;
 
@@ -731,74 +895,98 @@ button {
     align-items: center;
     justify-content: center;
 
-    font-size: 34px;
-    font-weight: 800;
-
     color: white;
 
+    font-size: 34px;
+
+    font-weight: 800;
+
     border-radius: 20px 20px 0 0;
+
+    position: relative;
+    z-index: 2;
 }
 
 
-/* 1 */
+/* OURO */
 
 .first-place .podium-base {
+
     background:
         linear-gradient(
             135deg,
-            var(--purple),
-            var(--blue)
+            #d9a514,
+            #f6d45a,
+            #bd8a0e
         );
+
+    color: #fff8d2;
+
+    text-shadow:
+        0 2px 3px rgba(103, 73, 5, 0.35);
 }
 
 
-/* 2 */
+/* PRATA */
 
 .second-place .podium-base {
+
     background:
         linear-gradient(
             135deg,
-            #8994aa,
-            #b6bfce
+            #7f8fa4,
+            #c7d2df,
+            #718195
         );
+
+    color: #f5f8fb;
+
+    text-shadow:
+        0 2px 3px rgba(56, 66, 80, 0.35);
 }
 
 
-/* 3 */
+/* COBRE */
 
 .third-place .podium-base {
+
     background:
         linear-gradient(
             135deg,
-            #ad6d48,
-            #d79b70
+            #9b5835,
+            #d38a5d,
+            #8c4c2d
         );
+
+    color: #fff1e8;
+
+    text-shadow:
+        0 2px 3px rgba(80, 38, 20, 0.35);
 }
 
 
 /* =========================================================
-   USUÁRIO LOGADO
+   JOGADOR LOGADO
 ========================================================= */
 
 .current-player {
-    border-color: var(--purple);
-
     box-shadow:
-        0 0 0 3px rgba(123, 77, 232, 0.10),
+        0 0 0 3px rgba(123, 77, 232, 0.18),
         var(--shadow);
 }
 
 
 /* =========================================================
-   LISTA COMPLETA
+   LISTA DO 4º EM DIANTE
 ========================================================= */
 
 .ranking-list-section {
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
 
 .list-header {
+
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -809,31 +997,37 @@ button {
 }
 
 .list-header h2 {
+
     font-size: 27px;
 
     letter-spacing: -0.7px;
 }
 
 .players-count {
+
     color: var(--text-light);
 
     font-size: 13px;
+
     font-weight: 600;
 }
 
 
 /* =========================================================
-   CADA LINHA
+   LISTA
 ========================================================= */
 
 .ranking-list {
+
     display: flex;
     flex-direction: column;
 
     gap: 10px;
 }
 
+
 .ranking-row {
+
     min-height: 76px;
 
     position: relative;
@@ -866,9 +1060,11 @@ button {
 }
 
 .ranking-row:hover {
+
     transform: translateX(4px);
 
-    border-color: rgba(123, 77, 232, 0.35);
+    border-color:
+        rgba(123, 77, 232, 0.35);
 
     box-shadow:
         0 8px 25px rgba(62, 72, 130, 0.08);
@@ -878,6 +1074,7 @@ button {
 /* USUÁRIO ATUAL */
 
 .ranking-row.current-user {
+
     border: 2px solid var(--purple);
 
     background:
@@ -890,27 +1087,16 @@ button {
 
 
 /* =========================================================
-   POSIÇÃO DA LISTA
+   POSIÇÃO
 ========================================================= */
 
 .row-position {
+
     color: var(--text-light);
 
     font-size: 15px;
 
     font-weight: 800;
-}
-
-.row-position.position-1 {
-    color: var(--purple);
-}
-
-.row-position.position-2 {
-    color: var(--silver);
-}
-
-.row-position.position-3 {
-    color: var(--bronze);
 }
 
 
@@ -919,6 +1105,7 @@ button {
 ========================================================= */
 
 .row-avatar {
+
     width: 45px;
     height: 45px;
 
@@ -940,15 +1127,17 @@ button {
     color: var(--purple);
 
     font-size: 16px;
+
     font-weight: 800;
 }
 
 
 /* =========================================================
-   NOME
+   USUÁRIO
 ========================================================= */
 
 .row-user {
+
     min-width: 0;
 
     display: flex;
@@ -956,6 +1145,7 @@ button {
 }
 
 .row-user strong {
+
     overflow: hidden;
 
     text-overflow: ellipsis;
@@ -966,6 +1156,7 @@ button {
 }
 
 .row-user span {
+
     margin-top: 3px;
 
     color: var(--text-light);
@@ -979,6 +1170,7 @@ button {
 ========================================================= */
 
 .row-xp {
+
     display: flex;
     flex-direction: column;
 
@@ -986,17 +1178,20 @@ button {
 }
 
 .row-xp span {
+
     margin-bottom: 3px;
 
     color: var(--text-light);
 
     font-size: 9px;
+
     font-weight: 700;
 
     letter-spacing: 1px;
 }
 
 .row-xp strong {
+
     color: var(--blue);
 
     font-size: 14px;
@@ -1008,6 +1203,7 @@ button {
 ========================================================= */
 
 .row-score {
+
     display: flex;
     flex-direction: column;
 
@@ -1015,17 +1211,20 @@ button {
 }
 
 .row-score span {
+
     margin-bottom: 3px;
 
     color: var(--text-light);
 
     font-size: 9px;
+
     font-weight: 700;
 
     letter-spacing: 1px;
 }
 
 .row-score strong {
+
     color: var(--purple);
 
     font-size: 17px;
@@ -1037,6 +1236,7 @@ button {
 ========================================================= */
 
 .you-badge {
+
     position: absolute;
 
     top: -8px;
@@ -1063,6 +1263,7 @@ button {
 ========================================================= */
 
 .empty-ranking {
+
     padding: 80px 30px;
 
     text-align: center;
@@ -1077,18 +1278,21 @@ button {
 }
 
 .empty-icon {
+
     margin-bottom: 15px;
 
     font-size: 50px;
 }
 
 .empty-ranking h2 {
+
     margin-bottom: 8px;
 
     font-size: 23px;
 }
 
 .empty-ranking p {
+
     color: var(--text-light);
 
     font-size: 14px;
@@ -1103,10 +1307,10 @@ body.dark,
 body.tema-escuro,
 body[data-theme="dark"] {
 
-    --blue: #6f8cff;
+    --blue: #7190ff;
     --blue-dark: #526fd8;
 
-    --purple: #9b72f0;
+    --purple: #9d76ee;
     --purple-dark: #7449c4;
 
     --background: #0d1020;
@@ -1233,46 +1437,12 @@ body[data-theme="rosa"] .nav-links a.active {
 }
 
 
-body.pink .first-place,
-body.tema-rosa .first-place,
-body[data-theme="pink"] .first-place,
-body[data-theme="rosa"] .first-place {
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(216, 79, 145, 0.15),
-            var(--surface) 46%
-        );
-}
-
-
-body.pink .second-place,
-body.tema-rosa .second-place,
-body[data-theme="pink"] .second-place,
-body[data-theme="rosa"] .second-place {
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(216, 79, 145, 0.08),
-            var(--surface) 48%
-        );
-}
-
-
-body.pink .third-place,
-body.tema-rosa .third-place,
-body[data-theme="pink"] .third-place,
-body[data-theme="rosa"] .third-place {
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(166, 75, 201, 0.08),
-            var(--surface) 48%
-        );
-}
+/*
+   No tema rosa, o pódio continua mantendo
+   a identidade de ouro, prata e cobre.
+   Assim as posições continuam fáceis
+   de identificar visualmente.
+*/
 
 
 /* =========================================================
@@ -1298,17 +1468,18 @@ body[data-theme="rosa"] .third-place {
         padding-right: 15px;
     }
 
-    .podium-icon {
-        width: 125px;
-        height: 125px;
+    .podium-medal {
+        width: 95px;
+        height: 95px;
     }
 
-    .first-place .podium-icon {
-        width: 145px;
-        height: 145px;
+    .first-place .podium-medal {
+        width: 115px;
+        height: 115px;
     }
 
     .ranking-row {
+
         grid-template-columns:
             60px
             45px
@@ -1332,6 +1503,7 @@ body[data-theme="rosa"] .third-place {
     }
 
     .ranking-header {
+
         align-items: flex-start;
 
         flex-direction: column;
@@ -1354,7 +1526,8 @@ body[data-theme="rosa"] .third-place {
 
     .podium-player,
     .first-place {
-        min-height: 470px;
+
+        min-height: 475px;
 
         border-radius: 25px;
 
@@ -1379,6 +1552,7 @@ body[data-theme="rosa"] .third-place {
     }
 
     .ranking-row {
+
         grid-template-columns:
             50px
             45px
@@ -1414,6 +1588,7 @@ body[data-theme="rosa"] .third-place {
     }
 
     .ranking-page {
+
         width: 92%;
 
         padding-top: 40px;
@@ -1437,17 +1612,20 @@ body[data-theme="rosa"] .third-place {
 
     .podium-player,
     .first-place {
-        min-height: 440px;
+
+        min-height: 450px;
     }
 
-    .podium-icon {
+    .podium-medal {
+
+        width: 110px;
+        height: 110px;
+    }
+
+    .first-place .podium-medal {
+
         width: 130px;
         height: 130px;
-    }
-
-    .first-place .podium-icon {
-        width: 150px;
-        height: 150px;
     }
 
     .first-place h2 {
@@ -1463,6 +1641,7 @@ body[data-theme="rosa"] .third-place {
     }
 
     .list-header {
+
         align-items: flex-start;
 
         flex-direction: column;
@@ -1475,6 +1654,7 @@ body[data-theme="rosa"] .third-place {
     }
 
     .ranking-row {
+
         grid-template-columns:
             42px
             42px
@@ -1488,6 +1668,7 @@ body[data-theme="rosa"] .third-place {
     }
 
     .row-avatar {
+
         width: 40px;
         height: 40px;
     }

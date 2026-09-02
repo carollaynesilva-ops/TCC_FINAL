@@ -11,11 +11,10 @@ if (!isset($_SESSION['usuario_id'])) {
 
 $usuarioId = $_SESSION['usuario_id'];
 
-/*
-|--------------------------------------------------------------------------
-| USUÁRIO LOGADO
-|--------------------------------------------------------------------------
-*/
+
+/* =========================================================
+   USUÁRIO LOGADO
+========================================================= */
 
 $sqlUsuario = "SELECT id, nome, nivel, xp, pontuacao_total
                FROM usuarios
@@ -31,40 +30,38 @@ $usuario = $stmtUsuario->fetch();
 
 if (!$usuario) {
     session_destroy();
+
     header("Location: login.php");
+
     exit;
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| RANKING
-|--------------------------------------------------------------------------
-|
-| Ordem:
-| 1º maior pontuação total
-| 2º maior XP em caso de empate
-| 3º nome em ordem alfabética
-|
-*/
+/* =========================================================
+   RANKING DOS ALUNOS
+========================================================= */
 
-$sqlRanking = "SELECT id, nome, nivel, xp, pontuacao_total
+$sqlRanking = "SELECT
+                    id,
+                    nome,
+                    nivel,
+                    xp,
+                    pontuacao_total
                FROM usuarios
                WHERE tipo = 'aluno'
-               ORDER BY pontuacao_total DESC,
-                        xp DESC,
-                        nome ASC";
+               ORDER BY
+                    pontuacao_total DESC,
+                    xp DESC,
+                    nome ASC";
 
 $stmtRanking = $pdo->query($sqlRanking);
 
 $ranking = $stmtRanking->fetchAll();
 
 
-/*
-|--------------------------------------------------------------------------
-| DEFINIR POSIÇÃO
-|--------------------------------------------------------------------------
-*/
+/* =========================================================
+   DEFINIR POSIÇÃO
+========================================================= */
 
 foreach ($ranking as $indice => &$aluno) {
 
@@ -75,11 +72,9 @@ foreach ($ranking as $indice => &$aluno) {
 unset($aluno);
 
 
-/*
-|--------------------------------------------------------------------------
-| ENCONTRAR POSIÇÃO DO USUÁRIO
-|--------------------------------------------------------------------------
-*/
+/* =========================================================
+   POSIÇÃO DO USUÁRIO LOGADO
+========================================================= */
 
 $posicaoUsuario = null;
 
@@ -94,31 +89,25 @@ foreach ($ranking as $aluno) {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| TOP 3
-|--------------------------------------------------------------------------
-*/
+/* =========================================================
+   TOP 3
+========================================================= */
 
 $primeiro = $ranking[0] ?? null;
 $segundo  = $ranking[1] ?? null;
 $terceiro = $ranking[2] ?? null;
 
 
-/*
-|--------------------------------------------------------------------------
-| RESTANTE DO RANKING
-|--------------------------------------------------------------------------
-*/
+/* =========================================================
+   RANKING A PARTIR DO 4º LUGAR
+========================================================= */
 
 $restantes = array_slice($ranking, 3);
 
 
-/*
-|--------------------------------------------------------------------------
-| FUNÇÃO PARA PEGAR INICIAL
-|--------------------------------------------------------------------------
-*/
+/* =========================================================
+   PEGAR INICIAL DO NOME
+========================================================= */
 
 function obterInicial($nome)
 {
@@ -150,13 +139,17 @@ function obterInicial($nome)
     <title>Ranking | MathRun</title>
 
 
-    <!-- Fonte -->
+    <!-- =====================================================
+         FONTE
+    ====================================================== -->
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
-    <link rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossorigin>
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
 
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
@@ -164,7 +157,9 @@ function obterInicial($nome)
     >
 
 
-    <!-- CSS -->
+    <!-- =====================================================
+         CSS
+    ====================================================== -->
 
     <link
         rel="stylesheet"
@@ -184,12 +179,17 @@ function obterInicial($nome)
 <header class="navbar">
 
 
-    <a href="inicio.php" class="logo">
+    <!-- LOGO -->
 
+    <a
+        href="inicio.php"
+        class="logo"
+    >
         Math<span>Run</span>
-
     </a>
 
+
+    <!-- MENU -->
 
     <nav class="nav-links">
 
@@ -197,7 +197,10 @@ function obterInicial($nome)
             Início
         </a>
 
-        <a href="ranking.php" class="active">
+        <a
+            href="ranking.php"
+            class="active"
+        >
             Ranking
         </a>
 
@@ -208,10 +211,12 @@ function obterInicial($nome)
     </nav>
 
 
+    <!-- USUÁRIO -->
+
     <div class="nav-user">
 
 
-        <!-- BOTÃO DE TEMA -->
+        <!-- TEMA -->
 
         <button
             class="theme-toggle"
@@ -223,7 +228,7 @@ function obterInicial($nome)
         </button>
 
 
-        <!-- USUÁRIO -->
+        <!-- PERFIL -->
 
         <a
             href="editar_perfil.php"
@@ -260,6 +265,8 @@ function obterInicial($nome)
         </a>
 
 
+        <!-- SAIR -->
+
         <a
             href="logout.php"
             class="logout"
@@ -286,10 +293,11 @@ function obterInicial($nome)
 
     <section class="ranking-header">
 
+
         <div>
 
             <span class="section-tag">
-                COMPETIÇÃO
+                CLASSIFICAÇÃO
             </span>
 
             <h1>
@@ -302,6 +310,8 @@ function obterInicial($nome)
 
         </div>
 
+
+        <!-- POSIÇÃO DO USUÁRIO -->
 
         <div class="my-position">
 
@@ -343,6 +353,7 @@ function obterInicial($nome)
                     class="
                         podium-player
                         second-place
+
                         <?= (int)$segundo['id'] === (int)$usuarioId
                             ? 'current-player'
                             : ''
@@ -350,33 +361,36 @@ function obterInicial($nome)
                     "
                 >
 
-                    <div class="podium-position">
 
-                        <span>
-                            2º
-                        </span>
+                    <div class="podium-medal">
 
-                        <small>
-                            LUGAR
-                        </small>
+                        <img
+                            src="assets/img/segundo.png"
+                            alt="Medalha de segundo lugar"
+                        >
 
                     </div>
 
 
-                    <div class="podium-icon">
+                    <div class="podium-position">
 
-                        <img
-                            src="assets/img/segundo.png"
-                            alt="Segundo lugar"
-                            onerror="this.style.display='none'; this.parentElement.classList.add('no-image');"
-                        >
+                        <strong>
+                            2º
+                        </strong>
 
-                        <span class="initial-fallback">
+                        <span>
+                            LUGAR
+                        </span>
 
+                    </div>
+
+
+                    <div class="player-icon">
+
+                        <span>
                             <?= htmlspecialchars(
                                 obterInicial($segundo['nome'])
                             ) ?>
-
                         </span>
 
                     </div>
@@ -436,6 +450,7 @@ function obterInicial($nome)
                 class="
                     podium-player
                     first-place
+
                     <?= (int)$primeiro['id'] === (int)$usuarioId
                         ? 'current-player'
                         : ''
@@ -443,12 +458,12 @@ function obterInicial($nome)
                 "
             >
 
-                <div class="crown">
+
+                <div class="podium-medal">
 
                     <img
                         src="assets/img/primeiro.png"
-                        alt="Primeiro lugar"
-                        onerror="this.style.display='none';"
+                        alt="Medalha de primeiro lugar"
                     >
 
                 </div>
@@ -456,31 +471,23 @@ function obterInicial($nome)
 
                 <div class="podium-position">
 
-                    <span>
+                    <strong>
                         1º
-                    </span>
+                    </strong>
 
-                    <small>
+                    <span>
                         LUGAR
-                    </small>
+                    </span>
 
                 </div>
 
 
-                <div class="podium-icon">
+                <div class="player-icon">
 
-                    <img
-                        src="assets/img/primeiro.png"
-                        alt="Primeiro lugar"
-                        onerror="this.style.display='none'; this.parentElement.classList.add('no-image');"
-                    >
-
-                    <span class="initial-fallback">
-
+                    <span>
                         <?= htmlspecialchars(
                             obterInicial($primeiro['nome'])
                         ) ?>
-
                     </span>
 
                 </div>
@@ -540,6 +547,7 @@ function obterInicial($nome)
                     class="
                         podium-player
                         third-place
+
                         <?= (int)$terceiro['id'] === (int)$usuarioId
                             ? 'current-player'
                             : ''
@@ -547,33 +555,36 @@ function obterInicial($nome)
                     "
                 >
 
-                    <div class="podium-position">
 
-                        <span>
-                            3º
-                        </span>
+                    <div class="podium-medal">
 
-                        <small>
-                            LUGAR
-                        </small>
+                        <img
+                            src="assets/img/terceiro.png"
+                            alt="Medalha de terceiro lugar"
+                        >
 
                     </div>
 
 
-                    <div class="podium-icon">
+                    <div class="podium-position">
 
-                        <img
-                            src="assets/img/terceiro.png"
-                            alt="Terceiro lugar"
-                            onerror="this.style.display='none'; this.parentElement.classList.add('no-image');"
-                        >
+                        <strong>
+                            3º
+                        </strong>
 
-                        <span class="initial-fallback">
+                        <span>
+                            LUGAR
+                        </span>
 
+                    </div>
+
+
+                    <div class="player-icon">
+
+                        <span>
                             <?= htmlspecialchars(
                                 obterInicial($terceiro['nome'])
                             ) ?>
-
                         </span>
 
                     </div>
@@ -629,9 +640,9 @@ function obterInicial($nome)
     <?php else: ?>
 
 
-        <!-- =====================================================
+        <!-- =================================================
              RANKING VAZIO
-        ====================================================== -->
+        ================================================== -->
 
         <section class="empty-ranking">
 
@@ -644,7 +655,7 @@ function obterInicial($nome)
             </h2>
 
             <p>
-                Complete uma missão para começar sua pontuação.
+                Complete uma missão para aparecer aqui.
             </p>
 
         </section>
@@ -654,10 +665,10 @@ function obterInicial($nome)
 
 
     <!-- =====================================================
-         LISTA COMPLETA
+         RANKING DO 4º EM DIANTE
     ====================================================== -->
 
-    <?php if (count($ranking) > 0): ?>
+    <?php if (count($restantes) > 0): ?>
 
         <section class="ranking-list-section">
 
@@ -679,9 +690,9 @@ function obterInicial($nome)
 
                 <span class="players-count">
 
-                    <?= count($ranking) ?>
+                    <?= count($restantes) ?>
 
-                    <?= count($ranking) === 1
+                    <?= count($restantes) === 1
                         ? ' jogador'
                         : ' jogadores'
                     ?>
@@ -695,11 +706,12 @@ function obterInicial($nome)
             <div class="ranking-list">
 
 
-                <?php foreach ($ranking as $aluno): ?>
+                <?php foreach ($restantes as $aluno): ?>
 
                     <article
                         class="
                             ranking-row
+
                             <?= (int)$aluno['id'] === (int)$usuarioId
                                 ? 'current-user'
                                 : ''
@@ -710,20 +722,14 @@ function obterInicial($nome)
 
                         <!-- POSIÇÃO -->
 
-                        <div
-                            class="
-                                row-position
-                                position-<?= (int)$aluno['posicao'] ?>
-                            "
-                        >
+                        <div class="row-position">
 
                             #<?= (int)$aluno['posicao'] ?>
 
                         </div>
 
 
-
-                        <!-- ÍCONE / AVATAR -->
+                        <!-- AVATAR -->
 
                         <div class="row-avatar">
 
@@ -734,8 +740,7 @@ function obterInicial($nome)
                         </div>
 
 
-
-                        <!-- NOME -->
+                        <!-- USUÁRIO -->
 
                         <div class="row-user">
 
@@ -754,7 +759,6 @@ function obterInicial($nome)
                             </span>
 
                         </div>
-
 
 
                         <!-- XP -->
@@ -779,7 +783,6 @@ function obterInicial($nome)
                         </div>
 
 
-
                         <!-- PONTOS -->
 
                         <div class="row-score">
@@ -800,7 +803,6 @@ function obterInicial($nome)
                             </strong>
 
                         </div>
-
 
 
                         <!-- VOCÊ -->
@@ -829,12 +831,16 @@ function obterInicial($nome)
     <?php endif; ?>
 
 
-
 </main>
 
 
 
+<!-- =========================================================
+     TEMA
+========================================================= -->
+
 <script src="assets/js/tema.js"></script>
+
 
 </body>
 
