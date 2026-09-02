@@ -182,46 +182,71 @@ button {
     gap: 12px;
 }
 
-
 /* =========================================================
-   BOTÃO DE TEMA
+   SELETOR DE TEMA
 ========================================================= */
 
-.theme-toggle {
-    width: 40px;
-    height: 40px;
+.theme-switcher {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+
+    padding: 4px;
+
+    background: var(--surface-soft);
 
     border: 1px solid var(--border);
+
     border-radius: 12px;
 
-    background: var(--surface);
+    transition:
+        background 0.3s ease,
+        border-color 0.3s ease;
+}
+
+.theme-switcher button {
+    width: 30px;
+    height: 30px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: var(--text-light);
 
     display: flex;
     align-items: center;
     justify-content: center;
 
+    font-size: 15px;
+    line-height: 1;
+
     cursor: pointer;
 
-    color: var(--text);
-
     transition:
-        background 0.25s ease,
-        border-color 0.25s ease,
+        background 0.2s ease,
+        color 0.2s ease,
         transform 0.2s ease;
 }
 
-.theme-toggle:hover {
-    transform: translateY(-2px);
+.theme-switcher button:hover {
+    color: var(--blue);
 
     background: var(--blue-light);
 
-    border-color: rgba(65, 105, 225, 0.25);
+    transform: translateY(-1px);
 }
 
-.theme-icon {
-    font-size: 17px;
-    line-height: 1;
+.theme-switcher button.active {
+    background: var(--surface);
+
+    color: var(--blue);
+
+    box-shadow:
+        0 2px 8px rgba(46, 58, 120, 0.10);
 }
+
 
 
 /* =========================================================

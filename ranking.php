@@ -112,8 +112,7 @@ function inicialNome($nome)
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
     <title>Ranking | MathRun</title>
 
@@ -123,13 +122,11 @@ function inicialNome($nome)
 
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+        rel="stylesheet">
 
     <link
         rel="stylesheet"
-        href="assets/css/ranking.css"
-    >
+        href="assets/css/ranking.css">
 
 </head>
 
@@ -175,55 +172,66 @@ function inicialNome($nome)
 
                 <!-- TEMA -->
 
-                <button
-                    type="button"
-                    class="theme-toggle"
-                    id="themeToggle"
-                    aria-label="Alterar tema"
-                    title="Alterar tema"
-                >
-                    <span class="theme-icon">☀</span>
-                </button>
+                <div class="theme-switcher">
+
+                    <button
+                        type="button"
+                        data-theme-option="light"
+                        title="Tema claro">
+                        ☀
+                    </button>
+
+                    <button
+                        type="button"
+                        data-theme-option="dark"
+                        title="Tema escuro">
+                        ☾
+                    </button>
+
+                    <button
+                        type="button"
+                        data-theme-option="pink"
+                        title="Tema rosa">
+                        ♡
+                    </button>
 
 
-                <!-- USUÁRIO -->
+                    <!-- USUÁRIO -->
 
-                <a
-                    href="editar_perfil.php"
-                    class="user-profile"
-                >
+                    <a
+                        href="editar_perfil.php"
+                        class="user-profile">
 
-                    <div class="user-avatar">
-                        <?= htmlspecialchars(inicialNome($usuario['nome'])) ?>
-                    </div>
+                        <div class="user-avatar">
+                            <?= htmlspecialchars(inicialNome($usuario['nome'])) ?>
+                        </div>
 
-                    <div class="user-info">
+                        <div class="user-info">
 
-                        <strong>
-                            <?= htmlspecialchars($usuario['nome']) ?>
-                        </strong>
+                            <strong>
+                                <?= htmlspecialchars($usuario['nome']) ?>
+                            </strong>
 
-                        <span>
-                            Nível <?= (int)$usuario['nivel'] ?>
-                        </span>
+                            <span>
+                                Nível <?= (int)$usuario['nivel'] ?>
+                            </span>
 
-                    </div>
+                        </div>
 
-                </a>
+                    </a>
 
 
-                <!-- SAIR -->
+                    <!-- SAIR -->
 
-                <a
-                    href="logout.php"
-                    class="logout-btn"
-                >
-                    Sair
-                </a>
+                    <a
+                        href="logout.php"
+                        class="logout-btn">
+                        Sair
+                    </a>
+
+                </div>
 
             </div>
-
-        </div>
 
     </header>
 
@@ -299,8 +307,7 @@ function inicialNome($nome)
 
                                 <img
                                     src="<?= htmlspecialchars($imagemSegundo) ?>"
-                                    alt="Segundo lugar"
-                                >
+                                    alt="Segundo lugar">
 
                             <?php else: ?>
 
@@ -367,8 +374,7 @@ function inicialNome($nome)
 
                                 <img
                                     src="<?= htmlspecialchars($imagemPrimeiro) ?>"
-                                    alt="Primeiro lugar"
-                                >
+                                    alt="Primeiro lugar">
 
                             <?php else: ?>
 
@@ -431,8 +437,7 @@ function inicialNome($nome)
 
                                 <img
                                     src="<?= htmlspecialchars($imagemTerceiro) ?>"
-                                    alt="Terceiro lugar"
-                                >
+                                    alt="Terceiro lugar">
 
                             <?php else: ?>
 
@@ -532,8 +537,7 @@ function inicialNome($nome)
                         ?>
 
                         <div
-                            class="ranking-row <?= $ehUsuario ? 'current-user' : '' ?>"
-                        >
+                            class="ranking-row <?= $ehUsuario ? 'current-user' : '' ?>">
 
                             <!-- POSIÇÃO -->
 
@@ -658,4 +662,4 @@ function inicialNome($nome)
 
 </body>
 
-</html> 
+</html>
