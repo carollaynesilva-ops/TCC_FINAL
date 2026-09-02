@@ -599,13 +599,11 @@ $inicial = strtoupper(
                         </div>
 
                     </div>
-
-                </div>
-
-                <a href="editar_perfil.php" class="edit-profile-button">
+                    <a href="editar_perfil.php" class="edit-profile-button">
                     ✎ Editar perfil
                 </a>
-
+                </div>
+                
             </div>
 
 
