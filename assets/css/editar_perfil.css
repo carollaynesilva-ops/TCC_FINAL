@@ -1,0 +1,819 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+
+
+/* =========================================================
+   TEMA CLARO
+========================================================= */
+
+:root {
+
+    --blue: #4169e1;
+    --purple: #7b4de8;
+    --purple-dark: #6136c7;
+
+    --background: #f7f9ff;
+    --surface: #ffffff;
+
+    --text: #171a2b;
+    --text-soft: #70758a;
+
+    --border: #e8eaf3;
+
+    --success: #31a66a;
+    --error: #d6455d;
+
+    --shadow:
+        0 18px 45px rgba(55, 64, 120, .08);
+}
+
+
+/* =========================================================
+   TEMA ESCURO
+========================================================= */
+
+[data-theme="dark"] {
+
+    --blue: #607df0;
+    --purple: #956cf0;
+    --purple-dark: #7951d4;
+
+    --background: #0d1020;
+    --surface: #171a2d;
+
+    --text: #f5f5fb;
+    --text-soft: #9b9eb5;
+
+    --border: #292d46;
+
+    --success: #4bc582;
+    --error: #ef657b;
+
+    --shadow:
+        0 20px 50px rgba(0, 0, 0, .30);
+}
+
+
+/* =========================================================
+   TEMA ROSA
+========================================================= */
+
+[data-theme="pink"] {
+
+    --blue: #e85d9e;
+    --purple: #c83d82;
+    --purple-dark: #a92d69;
+
+    --background: #fff0f7;
+    --surface: #fff8fc;
+
+    --text: #351522;
+    --text-soft: #946276;
+
+    --border: #f2c9da;
+
+    --success: #38a86e;
+    --error: #d83f69;
+
+    --shadow:
+        0 18px 45px rgba(207, 67, 128, .12);
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+
+    min-height: 100vh;
+
+    font-family: 'Outfit', sans-serif;
+
+    color: var(--text);
+
+    background:
+        radial-gradient(
+            circle at 10% 15%,
+            rgba(65, 105, 225, .07),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 90% 70%,
+            rgba(123, 77, 232, .07),
+            transparent 25%
+        ),
+        var(--background);
+
+    transition:
+        background .3s ease,
+        color .3s ease;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+.navbar {
+
+    height: 72px;
+
+    padding: 0 6%;
+
+    display: flex;
+
+    align-items: center;
+
+    position: relative;
+
+    z-index: 10;
+
+    background: var(--surface);
+
+    border-bottom:
+        1px solid var(--border);
+}
+
+
+/* LOGO */
+
+.brand {
+
+    font-size: 27px;
+
+    font-weight: 800;
+
+    letter-spacing: -1.5px;
+}
+
+.brand span {
+    color: var(--purple);
+}
+
+
+/* MENU */
+
+.nav-links {
+
+    position: absolute;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    display: flex;
+
+    gap: 38px;
+}
+
+.nav-links a {
+
+    color: var(--text-soft);
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    transition: color .2s ease;
+}
+
+.nav-links a:hover {
+    color: var(--purple);
+}
+
+
+/* USUÁRIO */
+
+.nav-user {
+
+    margin-left: auto;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+}
+
+.avatar {
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 13px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--blue),
+            var(--purple)
+        );
+
+    color: white;
+
+    font-weight: 800;
+}
+
+.user-info {
+
+    display: flex;
+
+    flex-direction: column;
+
+    line-height: 1.1;
+}
+
+.user-info strong {
+    font-size: 13px;
+}
+
+.user-info span {
+
+    margin-top: 3px;
+
+    color: var(--text-soft);
+
+    font-size: 10px;
+}
+
+.logout {
+
+    margin-left: 15px;
+
+    color: var(--text-soft);
+
+    font-size: 22px;
+
+    transform: rotate(180deg);
+
+    transition: color .2s ease;
+}
+
+.logout:hover {
+    color: var(--purple);
+}
+
+
+/* =========================================================
+   TEMA
+========================================================= */
+
+.theme-switcher {
+
+    display: flex;
+
+    gap: 3px;
+
+    padding: 4px;
+
+    margin-right: 8px;
+
+    border-radius: 10px;
+
+    background: var(--background);
+
+    border:
+        1px solid var(--border);
+}
+
+.theme-switcher button {
+
+    width: 27px;
+    height: 27px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: transparent;
+
+    color: var(--text-soft);
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    transition: .2s ease;
+}
+
+.theme-switcher button:hover {
+
+    color: var(--purple);
+
+    transform: translateY(-1px);
+}
+
+.theme-switcher button.active {
+
+    color: var(--purple);
+
+    background: var(--surface);
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, .08);
+}
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.edit-container {
+
+    width: min(850px, 88%);
+
+    margin: auto;
+
+    padding: 55px 0 80px;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.edit-header {
+
+    margin-bottom: 30px;
+}
+
+.section-label {
+
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: var(--purple);
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+.edit-header h1 {
+
+    font-size: clamp(38px, 5vw, 52px);
+
+    line-height: 1;
+
+    letter-spacing: -2px;
+}
+
+.edit-header p {
+
+    margin-top: 12px;
+
+    color: var(--text-soft);
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   MENSAGENS
+========================================================= */
+
+.message {
+
+    margin-bottom: 20px;
+
+    padding: 14px 17px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    border-radius: 12px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+.message span {
+
+    width: 22px;
+    height: 22px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    font-weight: 800;
+}
+
+.message.error {
+
+    color: var(--error);
+
+    background: rgba(214, 69, 93, .08);
+
+    border:
+        1px solid rgba(214, 69, 93, .15);
+}
+
+.message.error span {
+    background: var(--error);
+    color: white;
+}
+
+.message.success {
+
+    color: var(--success);
+
+    background: rgba(49, 166, 106, .08);
+
+    border:
+        1px solid rgba(49, 166, 106, .15);
+}
+
+.message.success span {
+    background: var(--success);
+    color: white;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.edit-form {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.edit-card {
+
+    padding: 30px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 22px;
+
+    background: var(--surface);
+
+    box-shadow: var(--shadow);
+}
+
+
+/* =========================================================
+   TÍTULO DO CARD
+========================================================= */
+
+.card-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+
+    margin-bottom: 27px;
+}
+
+.title-icon {
+
+    width: 43px;
+    height: 43px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    background:
+        rgba(123, 77, 232, .10);
+
+    font-size: 19px;
+}
+
+.card-title span {
+
+    display: block;
+
+    color: var(--purple);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+}
+
+.card-title h2 {
+
+    margin-top: 3px;
+
+    font-size: 22px;
+
+    letter-spacing: -.5px;
+}
+
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+.form-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    margin-bottom: 19px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+
+    color: var(--text);
+
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+.form-group input {
+
+    width: 100%;
+
+    height: 48px;
+
+    padding: 0 15px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 11px;
+
+    outline: none;
+
+    background: var(--background);
+
+    color: var(--text);
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    transition:
+        border .2s ease,
+        box-shadow .2s ease;
+}
+
+.form-group input:focus {
+
+    border-color: var(--purple);
+
+    box-shadow:
+        0 0 0 3px rgba(123, 77, 232, .10);
+}
+
+.form-group small {
+
+    color: var(--text-soft);
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   SENHA
+========================================================= */
+
+.password-info {
+
+    margin-top: -12px;
+
+    margin-bottom: 25px;
+
+    color: var(--text-soft);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   AÇÕES
+========================================================= */
+
+.form-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 11px;
+}
+
+.cancel-button,
+.save-button {
+
+    min-height: 45px;
+
+    padding: 0 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 11px;
+
+    font-family: inherit;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+.cancel-button {
+
+    border:
+        1px solid var(--border);
+
+    background: var(--surface);
+
+    color: var(--text-soft);
+}
+
+.cancel-button:hover {
+
+    color: var(--text);
+
+    border-color: var(--text-soft);
+}
+
+
+.save-button {
+
+    gap: 18px;
+
+    border: none;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--blue),
+            var(--purple)
+        );
+
+    color: white;
+
+    box-shadow:
+        0 10px 25px rgba(85, 75, 200, .20);
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+.save-button:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 14px 30px rgba(85, 75, 200, .28);
+}
+
+.save-button span {
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   TEMA ROSA
+========================================================= */
+
+[data-theme="pink"] .title-icon {
+
+    background:
+        rgba(232, 93, 158, .13);
+}
+
+[data-theme="pink"] .form-group input:focus {
+
+    box-shadow:
+        0 0 0 3px rgba(232, 93, 158, .12);
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE
+========================================================= */
+
+@media (max-width: 800px) {
+
+    .nav-links {
+        display: none;
+    }
+
+    .edit-container {
+        width: 90%;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .navbar {
+        padding: 0 20px;
+    }
+
+    .user-info {
+        display: none;
+    }
+
+    .logout {
+        margin-left: 3px;
+    }
+
+    .edit-container {
+
+        padding-top: 35px;
+    }
+
+    .edit-header h1 {
+
+        font-size: 40px;
+    }
+
+    .edit-card {
+
+        padding: 23px;
+    }
+
+    .form-actions {
+
+        flex-direction: column-reverse;
+    }
+
+    .cancel-button,
+    .save-button {
+
+        width: 100%;
+    }
+}
+
+
+@media (max-width: 400px) {
+
+    .brand {
+        font-size: 23px;
+    }
+
+    .theme-switcher button {
+
+        width: 24px;
+        height: 24px;
+    }
+
+    .avatar {
+
+        width: 38px;
+        height: 38px;
+    }
+}
