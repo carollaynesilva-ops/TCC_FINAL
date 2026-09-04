@@ -53,7 +53,6 @@ $stmt = $pdo->prepare("
         m.id,
         m.nome,
         m.descricao,
-        m.imagem,
         m.criterio,
         um.data_conquista
 
@@ -114,6 +113,27 @@ if ($totalMedalhas > 0) {
 $inicial = strtoupper(
     mb_substr($nome, 0, 1, 'UTF-8')
 );
+
+
+// =========================================================
+// IMAGENS DAS CONQUISTAS
+// =========================================================
+
+$imagensMedalhas = [
+
+    'Primeira Receita' => 'primeira_receita.jpg',
+
+    'Chef das Frações' => 'chef_fracoes.jpg',
+
+    'Sem Derramar' => 'sem_derrubar.jpg',
+
+    'Mestre da Cozinha' => 'mestre_cozinha.jpg',
+
+    'Explorador Espacial' => 'explorador.jpg',
+
+    'Mestre da Geometria' => 'mestre_geometria.jpg'
+
+];
 
 ?>
 
@@ -329,8 +349,11 @@ $inicial = strtoupper(
 
 
         <p>
-            <?= $bloqueadas ?> conquista<?= $bloqueadas == 1 ? '' : 's' ?>
+
+            <?= $bloqueadas ?>
+            conquista<?= $bloqueadas == 1 ? '' : 's' ?>
             ainda aguardando você.
+
         </p>
 
     </section>
@@ -338,7 +361,7 @@ $inicial = strtoupper(
 
 
     <!-- ==================================================
-         TÍTULO
+         TÍTULO DA COLEÇÃO
     ================================================== -->
 
     <div class="collection-heading">
@@ -356,7 +379,9 @@ $inicial = strtoupper(
         </div>
 
         <span class="collection-count">
+
             <?= $totalMedalhas ?> medalhas
+
         </span>
 
     </div>
@@ -364,7 +389,7 @@ $inicial = strtoupper(
 
 
     <!-- ==================================================
-         GRID
+         GRID DAS CONQUISTAS
     ================================================== -->
 
     <section class="achievement-grid">
@@ -376,6 +401,9 @@ $inicial = strtoupper(
 
             $desbloqueada =
                 $medalha['data_conquista'] !== null;
+
+            $imagemMedalha =
+                $imagensMedalhas[$medalha['nome']] ?? null;
 
             ?>
 
@@ -391,17 +419,17 @@ $inicial = strtoupper(
             >
 
 
-                <!-- ÍCONE -->
+                <!-- ======================================
+                     ÁREA DA MEDALHA
+                ======================================= -->
 
                 <div class="medal-area">
 
 
-                    <?php if (
-                        !empty($medalha['imagem'])
-                    ): ?>
+                    <?php if ($imagemMedalha): ?>
 
                         <img
-                            src="assets/img/<?= htmlspecialchars($medalha['imagem']) ?>"
+                            src="assets/img/<?= htmlspecialchars($imagemMedalha) ?>"
                             alt="<?= htmlspecialchars($medalha['nome']) ?>"
                             class="medal-image"
                         >
@@ -410,12 +438,17 @@ $inicial = strtoupper(
 
                         <div class="medal-placeholder">
 
-                            <?= $desbloqueada ? '🏆' : '🔒' ?>
+                            <?= $desbloqueada
+                                ? '🏆'
+                                : '🔒'
+                            ?>
 
                         </div>
 
                     <?php endif; ?>
 
+
+                    <!-- STATUS DA MEDALHA -->
 
                     <?php if ($desbloqueada): ?>
 
@@ -431,13 +464,17 @@ $inicial = strtoupper(
 
                     <?php endif; ?>
 
+
                 </div>
 
 
 
-                <!-- CONTEÚDO -->
+                <!-- ======================================
+                     CONTEÚDO DA CONQUISTA
+                ======================================= -->
 
                 <div class="achievement-content">
+
 
                     <span class="achievement-status">
 
@@ -450,14 +487,25 @@ $inicial = strtoupper(
 
 
                     <h3>
-                        <?= htmlspecialchars($medalha['nome']) ?>
+
+                        <?= htmlspecialchars(
+                            $medalha['nome']
+                        ) ?>
+
                     </h3>
 
 
-                    <p>
-                        <?= htmlspecialchars($medalha['descricao']) ?>
+                    <p class="achievement-description">
+
+                        <?= htmlspecialchars(
+                            $medalha['descricao']
+                        ) ?>
+
                     </p>
 
+
+
+                    <!-- CRITÉRIO -->
 
                     <div class="achievement-criterion">
 
@@ -466,17 +514,25 @@ $inicial = strtoupper(
                         </span>
 
                         <p>
-                            <?= htmlspecialchars($medalha['criterio']) ?>
+
+                            <?= htmlspecialchars(
+                                $medalha['criterio']
+                            ) ?>
+
                         </p>
 
                     </div>
 
+
+
+                    <!-- DATA -->
 
                     <?php if ($desbloqueada): ?>
 
                         <div class="achievement-date">
 
                             ✓ Conquistada em
+
                             <?= date(
                                 'd/m/Y',
                                 strtotime(
@@ -488,7 +544,10 @@ $inicial = strtoupper(
 
                     <?php else: ?>
 
-                        <div class="achievement-date locked-text">
+                        <div class="
+                            achievement-date
+                            locked-text
+                        ">
 
                             🔒 Ainda não conquistada
 
@@ -496,7 +555,9 @@ $inicial = strtoupper(
 
                     <?php endif; ?>
 
+
                 </div>
+
 
             </article>
 
