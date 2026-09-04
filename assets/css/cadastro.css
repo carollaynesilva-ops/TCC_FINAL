@@ -402,6 +402,10 @@ a {
 }
 
 
+/* =========================================================
+   INPUTS
+   ========================================================= */
+
 .campo input {
 
     width: 100%;
@@ -442,6 +446,85 @@ a {
 
     box-shadow:
         0 0 0 3px rgba(123, 77, 232, 0.08);
+}
+
+
+/* =========================================================
+   SELECTS
+   ========================================================= */
+
+.campo select {
+
+    width: 100%;
+
+    height: 48px;
+
+    padding: 0 42px 0 14px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    outline: none;
+
+    background-color: #fafbff;
+
+    color: var(--text);
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition: 0.25s ease;
+
+    appearance: none;
+
+    -webkit-appearance: none;
+
+    -moz-appearance: none;
+
+    background-image:
+        linear-gradient(45deg, transparent 50%, #7b4de8 50%),
+        linear-gradient(135deg, #7b4de8 50%, transparent 50%);
+
+    background-position:
+        calc(100% - 18px) 20px,
+        calc(100% - 13px) 20px;
+
+    background-size:
+        5px 5px,
+        5px 5px;
+
+    background-repeat: no-repeat;
+}
+
+
+.campo select:focus {
+
+    border-color: var(--purple);
+
+    background-color: white;
+
+    box-shadow:
+        0 0 0 3px rgba(123, 77, 232, 0.08);
+}
+
+
+.campo select:hover {
+
+    border-color: rgba(123, 77, 232, 0.35);
+}
+
+
+.campo select option {
+
+    font-family: inherit;
+
+    color: var(--text);
+
+    background: white;
 }
 
 
@@ -807,16 +890,4 @@ a {
 
         opacity: 0.035;
     }
-}
-
-.campo select {
-    width: 100%;
-    padding: 14px 16px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: 15px;
-    background: white;
-    color: #171a2b;
-    outline: none;
 }
