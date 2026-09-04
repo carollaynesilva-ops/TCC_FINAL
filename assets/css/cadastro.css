@@ -808,3 +808,15 @@ a {
         opacity: 0.035;
     }
 }
+
+.campo select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+    background: white;
+    color: #171a2b;
+    outline: none;
+}

@@ -11,6 +11,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $nome = trim($_POST["nome"] ?? "");
     $email = trim($_POST["email"] ?? "");
+    $serie = $_POST["serie"] ?? "";
+    $turma = $_POST["turma"] ?? "";
     $senha = $_POST["senha"] ?? "";
     $confirmarSenha = $_POST["confirmar_senha"] ?? "";
 
@@ -19,13 +21,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // VALIDAÇÕES
     // ==========================================
 
-    if ($nome === "" || $email === "" || $senha === "" || $confirmarSenha === "") {
+    if (
+        $nome === "" ||
+        $email === "" ||
+        $serie === "" ||
+        $turma === "" ||
+        $senha === "" ||
+        $confirmarSenha === ""
+    ) {
 
         $erro = "Preencha todos os campos.";
 
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
         $erro = "Digite um e-mail válido.";
+
+    } elseif (!in_array($serie, ["6", "7", "8", "9"])) {
+
+        $erro = "Selecione uma série válida.";
+
+    } elseif (!in_array($turma, ["A", "B"])) {
+
+        $erro = "Selecione uma turma válida.";
 
     } elseif (strlen($senha) < 6) {
 
@@ -79,6 +96,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     email,
                     senha,
                     tipo,
+                    serie,
+                    turma,
                     nivel,
                     xp,
                     pontuacao_total
@@ -89,6 +108,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     :email,
                     :senha,
                     'aluno',
+                    :serie,
+                    :turma,
                     1,
                     0,
                     0
@@ -100,7 +121,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->execute([
                 ":nome" => $nome,
                 ":email" => $email,
-                ":senha" => $senhaHash
+                ":senha" => $senhaHash,
+                ":serie" => $serie,
+                ":turma" => $turma
             ]);
 
 
@@ -311,6 +334,94 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         autocomplete="email"
                         required
                     >
+
+                </div>
+
+
+                <!-- SÉRIE -->
+
+                <div class="campo">
+
+                    <label for="serie">
+                        Sua série
+                    </label>
+
+                    <select
+                        id="serie"
+                        name="serie"
+                        required
+                    >
+
+                        <option value="">
+                            Selecione sua série
+                        </option>
+
+                        <option
+                            value="6"
+                            <?= ($_POST['serie'] ?? '') === '6' ? 'selected' : '' ?>
+                        >
+                            6º ano
+                        </option>
+
+                        <option
+                            value="7"
+                            <?= ($_POST['serie'] ?? '') === '7' ? 'selected' : '' ?>
+                        >
+                            7º ano
+                        </option>
+
+                        <option
+                            value="8"
+                            <?= ($_POST['serie'] ?? '') === '8' ? 'selected' : '' ?>
+                        >
+                            8º ano
+                        </option>
+
+                        <option
+                            value="9"
+                            <?= ($_POST['serie'] ?? '') === '9' ? 'selected' : '' ?>
+                        >
+                            9º ano
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- TURMA -->
+
+                <div class="campo">
+
+                    <label for="turma">
+                        Sua turma
+                    </label>
+
+                    <select
+                        id="turma"
+                        name="turma"
+                        required
+                    >
+
+                        <option value="">
+                            Selecione sua turma
+                        </option>
+
+                        <option
+                            value="A"
+                            <?= ($_POST['turma'] ?? '') === 'A' ? 'selected' : '' ?>
+                        >
+                            Turma A
+                        </option>
+
+                        <option
+                            value="B"
+                            <?= ($_POST['turma'] ?? '') === 'B' ? 'selected' : '' ?>
+                        >
+                            Turma B
+                        </option>
+
+                    </select>
 
                 </div>
 
