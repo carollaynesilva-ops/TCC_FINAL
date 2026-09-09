@@ -27,6 +27,8 @@ $stmt = $pdo->prepare("
         nome,
         email,
         tipo,
+        serie,
+        turma,
         nivel,
         xp,
         pontuacao_total,
@@ -57,6 +59,8 @@ if (!$usuario) {
 
 $nome = $usuario['nome'];
 $email = $usuario['email'];
+$serie = $usuario['serie'];
+$turma = $usuario['turma'];
 
 $nivel = (int) $usuario['nivel'];
 $xp = (int) $usuario['xp'];
@@ -374,7 +378,8 @@ $inicial = strtoupper(
                 <div class="xp-bar">
 
                     <div
-                        style="width: <?= $porcentagemXp ?>%;"></div>
+                        style="width: <?= $porcentagemXp ?>%;">
+                    </div>
 
                 </div>
 
@@ -536,6 +541,8 @@ $inicial = strtoupper(
                 <div class="info-list">
 
 
+                    <!-- NOME -->
+
                     <div class="info-item">
 
                         <div class="info-item-icon">
@@ -557,6 +564,8 @@ $inicial = strtoupper(
                     </div>
 
 
+
+                    <!-- E-MAIL -->
 
                     <div class="info-item">
 
@@ -580,6 +589,56 @@ $inicial = strtoupper(
 
 
 
+                    <!-- SÉRIE -->
+
+                    <div class="info-item">
+
+                        <div class="info-item-icon">
+                            🎓
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Série
+                            </span>
+
+                            <strong>
+                                <?= htmlspecialchars($serie) ?>º ano
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- SALA -->
+
+                    <div class="info-item">
+
+                        <div class="info-item-icon">
+                            🏫
+                        </div>
+
+                        <div>
+
+                            <span>
+                                Sala
+                            </span>
+
+                            <strong>
+                                <?= htmlspecialchars($turma) ?>
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- DATA DE CADASTRO -->
+
                     <div class="info-item">
 
                         <div class="info-item-icon">
@@ -599,9 +658,17 @@ $inicial = strtoupper(
                         </div>
 
                     </div>
-                    <a href="editar_perfil.php" class="edit-profile-button">
+
+
+
+                    <!-- EDITAR PERFIL -->
+
+                    <a
+                        href="editar_perfil.php"
+                        class="edit-profile-button">
                         ✎ Editar perfil
                     </a>
+
                 </div>
 
             </div>
@@ -632,6 +699,8 @@ $inicial = strtoupper(
                 <div class="performance-list">
 
 
+                    <!-- MELHOR PONTUAÇÃO -->
+
                     <div class="performance-item">
 
                         <div>
@@ -654,6 +723,8 @@ $inicial = strtoupper(
 
 
 
+                    <!-- NÍVEL ATUAL -->
+
                     <div class="performance-item">
 
                         <div>
@@ -675,6 +746,8 @@ $inicial = strtoupper(
                     </div>
 
 
+
+                    <!-- PRÓXIMO NÍVEL -->
 
                     <div class="performance-item">
 
@@ -703,7 +776,14 @@ $inicial = strtoupper(
         </section>
 
 
-        <a href="excluir_perfil.php" class="delete-profile-button">
+
+        <!-- ==================================================
+         EXCLUIR PERFIL
+    ================================================== -->
+
+        <a
+            href="excluir_perfil.php"
+            class="delete-profile-button">
             Excluir meu perfil
         </a>
 
