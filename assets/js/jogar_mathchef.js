@@ -1,6 +1,11 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+    /* =====================================================
+       VARIÁVEIS DA PARTIDA
+       ===================================================== */
+
     let questaoAtual = 0;
+
     let pontuacao = 0;
     let acertos = 0;
     let erros = 0;
@@ -8,12 +13,48 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let respostaSelecionada = false;
 
-    const questionText = document.getElementById("questionText");
-    const questionSubject = document.getElementById("questionSubject");
-    const questionPoints = document.getElementById("questionPoints");
+    /*
+     * Guarda cada resposta dada pelo aluno.
+     *
+     * O PHP vai usar esses dados para conferir
+     * novamente as respostas no banco.
+     */
+    const respostasPartida = [];
+
+    /*
+     * Guarda o momento em que a questão foi exibida.
+     * Usado para calcular o tempo de resposta.
+     */
+    let inicioQuestao = Date.now();
+
+    /*
+     * XP disponível durante a partida.
+     *
+     * O valor inicial deve ser enviado pelo PHP.
+     */
+    let xpDisponivel =
+        typeof usuarioXp !== "undefined"
+            ? Number(usuarioXp)
+            : 0;
+
+
+    /* =====================================================
+       ELEMENTOS
+       ===================================================== */
+
+    const questionText =
+        document.getElementById("questionText");
+
+    const questionSubject =
+        document.getElementById("questionSubject");
+
+    const questionPoints =
+        document.getElementById("questionPoints");
 
     const alternativesContainer =
-        document.getElementById("alternativesContainer");
+        document.getElementById(
+            "alternativesContainer"
+        );
 
     const feedback =
         document.getElementById("feedback");
@@ -63,7 +104,9 @@ document.addEventListener("DOMContentLoaded", function () {
        ===================================================== */
 
     const botoesTema =
-        document.querySelectorAll("[data-theme-option]");
+        document.querySelectorAll(
+            "[data-theme-option]"
+        );
 
     const body = document.body;
 
@@ -78,19 +121,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     botoesTema.forEach(function (botao) {
 
-        botao.addEventListener("click", function () {
+        botao.addEventListener(
+            "click",
+            function () {
 
-            const tema =
-                botao.getAttribute("data-theme-option");
+                const tema =
+                    botao.getAttribute(
+                        "data-theme-option"
+                    );
 
-            aplicarTema(tema);
+                aplicarTema(tema);
 
-            localStorage.setItem(
-                "mathrun-tema",
-                tema
-            );
-        });
-
+                localStorage.setItem(
+                    "mathrun-tema",
+                    tema
+                );
+            }
+        );
     });
 
 
@@ -134,7 +181,9 @@ document.addEventListener("DOMContentLoaded", function () {
         botoesTema.forEach(function (botao) {
 
             const temaBotao =
-                botao.getAttribute("data-theme-option");
+                botao.getAttribute(
+                    "data-theme-option"
+                );
 
             botao.classList.toggle(
                 "active",
@@ -153,7 +202,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const questao =
             questoes[questaoAtual];
 
+        if (!questao) {
+            return;
+        }
+
         respostaSelecionada = false;
+
+        inicioQuestao = Date.now();
 
         questionNumber.textContent =
             questaoAtual + 1;
@@ -195,8 +250,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function atualizarProgresso() {
 
+        /*
+         * Mostra o progresso até a questão atual.
+         *
+         * Exemplo:
+         *
+         * questão 1 de 5 → 0%
+         * questão 2 de 5 → 20%
+         * ...
+         */
+
         const porcentagem =
-            ((questaoAtual) / questoes.length) * 100;
+            (questaoAtual / questoes.length) * 100;
 
         progressFill.style.width =
             porcentagem + "%";
@@ -253,7 +318,6 @@ document.addEventListener("DOMContentLoaded", function () {
                             alternativa,
                             button
                         );
-
                     }
                 );
 
@@ -291,15 +355,26 @@ document.addEventListener("DOMContentLoaded", function () {
         botoes.forEach(function (botao) {
 
             botao.disabled = true;
-
         });
 
 
-        if (
+        /*
+         * Calculamos apenas para mostrar o feedback
+         * imediatamente na tela.
+         *
+         * O resultado definitivo será recalculado
+         * pelo PHP usando o banco de dados.
+         */
+
+        const correta =
             Boolean(
-                Number(alternativaSelecionada.correta)
-            )
-        ) {
+                Number(
+                    alternativaSelecionada.correta
+                )
+            );
+
+
+        if (correta) {
 
             botaoSelecionado.classList.add(
                 "correct"
@@ -345,23 +420,31 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-            botoes.forEach(function (botao, index) {
+            /*
+             * Destacar a alternativa correta.
+             */
 
-                const alternativa =
-                    questao.alternativas[index];
+            botoes.forEach(
+                function (botao, index) {
 
-                if (
-                    alternativa &&
-                    Boolean(
-                        Number(alternativa.correta)
-                    )
-                ) {
+                    const alternativa =
+                        questao.alternativas[index];
 
-                    botao.classList.add(
-                        "correct"
-                    );
+                    if (
+                        alternativa &&
+                        Boolean(
+                            Number(
+                                alternativa.correta
+                            )
+                        )
+                    ) {
+
+                        botao.classList.add(
+                            "correct"
+                        );
+                    }
                 }
-            });
+            );
         }
 
 
@@ -375,6 +458,48 @@ document.addEventListener("DOMContentLoaded", function () {
 
         scoreTop.textContent =
             pontuacao;
+
+
+        /*
+         * Tempo gasto nesta questão.
+         */
+
+        const tempoResposta =
+            Math.round(
+                (Date.now() - inicioQuestao) / 1000
+            );
+
+
+        /*
+         * Guardar resposta para enviar ao PHP.
+         *
+         * IMPORTANTE:
+         * Não enviamos "correta" como informação
+         * confiável.
+         *
+         * O PHP vai conferir isso novamente.
+         */
+
+        respostasPartida.push({
+
+            questao_id:
+                Number(questao.id),
+
+            alternativa_id:
+                Number(alternativaSelecionada.id),
+
+            resposta:
+                alternativaSelecionada.texto,
+
+            tempo_resposta:
+                tempoResposta,
+
+            usou_dica:
+                Boolean(
+                    questao.dicaUsada
+                )
+
+        });
 
 
         if (
@@ -392,11 +517,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         nextButton.hidden = false;
-
-        salvarResposta(
-            questao,
-            alternativaSelecionada
-        );
     }
 
 
@@ -406,7 +526,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function criarDicas(questao) {
 
-        if (!questao.dicas || questao.dicas.length === 0) {
+        /*
+         * Marca que nenhuma dica foi usada
+         * nesta questão.
+         */
+
+        questao.dicaUsada = false;
+
+
+        if (
+            !questao.dicas ||
+            questao.dicas.length === 0
+        ) {
 
             const vazio =
                 document.createElement("p");
@@ -423,61 +554,79 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        questao.dicas.forEach(function (dica) {
+        questao.dicas.forEach(
+            function (dica) {
 
-            const button =
-                document.createElement("button");
+                const button =
+                    document.createElement("button");
 
-            button.type = "button";
+                button.type = "button";
 
-            button.className =
-                "hint-button";
+                button.className =
+                    "hint-button";
 
-            const texto =
-                document.createElement("span");
+                const texto =
+                    document.createElement("span");
 
-            texto.textContent =
-                "💡 Dica " + dica.ordem;
+                texto.textContent =
+                    "💡 Dica " +
+                    dica.ordem;
 
-            const custo =
-                document.createElement("span");
-
-            if (Number(dica.custo_xp) > 0) {
-
-                custo.textContent =
-                    "-" + dica.custo_xp + " XP";
-
-            } else {
-
-                custo.textContent =
-                    "Grátis";
-            }
-
-            button.appendChild(texto);
-
-            button.appendChild(custo);
+                const custo =
+                    document.createElement("span");
 
 
-            button.addEventListener(
-                "click",
-                function () {
+                if (
+                    Number(dica.custo_xp) > 0
+                ) {
 
-                    mostrarDica(
-                        dica,
-                        button
-                    );
+                    custo.textContent =
+                        "-" +
+                        dica.custo_xp +
+                        " XP";
 
+                } else {
+
+                    custo.textContent =
+                        "Grátis";
                 }
-            );
 
-            hintsContainer.appendChild(
-                button
-            );
-        });
+
+                button.appendChild(texto);
+
+                button.appendChild(custo);
+
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        mostrarDica(
+                            dica,
+                            button,
+                            questao
+                        );
+                    }
+                );
+
+
+                hintsContainer.appendChild(
+                    button
+                );
+            }
+        );
     }
 
 
-    function mostrarDica(dica, button) {
+    /* =====================================================
+       MOSTRAR DICA
+       ===================================================== */
+
+    function mostrarDica(
+        dica,
+        button,
+        questao
+    ) {
 
         if (button.disabled) {
             return;
@@ -486,27 +635,43 @@ document.addEventListener("DOMContentLoaded", function () {
         const custo =
             Number(dica.custo_xp);
 
-        const xpAtual =
-            Number(usuarioXpAtual());
+
+        /*
+         * Verificação visual/local.
+         *
+         * O PHP também deverá validar o XP
+         * definitivamente.
+         */
 
         if (
             custo > 0 &&
-            xpAtual < custo
+            xpDisponivel < custo
         ) {
 
-            alert(
-                "Você não possui XP suficiente para usar esta dica."
-            );
+            mostrarMensagemXP();
 
             return;
         }
 
+
+        /*
+         * Descontar temporariamente o XP.
+         */
+
         if (custo > 0) {
 
-            descontarXP(custo);
+            xpDisponivel -= custo;
+
+            if (xpDisponivel < 0) {
+                xpDisponivel = 0;
+            }
         }
 
+
         dicasUsadas++;
+
+        questao.dicaUsada = true;
+
 
         const dicaTexto =
             document.createElement("div");
@@ -517,7 +682,9 @@ document.addEventListener("DOMContentLoaded", function () {
         dicaTexto.textContent =
             dica.texto;
 
+
         button.disabled = true;
+
 
         button.parentNode.insertBefore(
             dicaTexto,
@@ -526,40 +693,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    function usuarioXpAtual() {
+    function mostrarMensagemXP() {
 
-        return 999999;
-    }
-
-
-    function descontarXP(custo) {
-
-        /*
-         * O desconto definitivo do XP pode ser
-         * tratado no PHP posteriormente.
-         *
-         * Neste primeiro momento o custo da dica
-         * fica registrado na partida.
-         */
-    }
-
-
-    /* =====================================================
-       SALVAR RESPOSTA
-       ===================================================== */
-
-    function salvarResposta(
-        questao,
-        alternativa
-    ) {
-
-        /*
-         * As respostas são enviadas ao PHP
-         * somente quando a partida é finalizada.
-         *
-         * Elas ficam armazenadas no navegador
-         * durante a partida.
-         */
+        alert(
+            "Você não possui XP suficiente para usar esta dica."
+        );
     }
 
 
@@ -594,68 +732,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
-       FINALIZAR
+       FINALIZAR FASE
        ===================================================== */
 
     function finalizarFase() {
 
-        const porcentagem =
-            Math.round(
-                (acertos / questoes.length) * 100
-            );
-
-        let titulo =
-            "Fase concluída!";
-
-        let icone =
-            "🏆";
-
-        if (porcentagem === 100) {
-
-            titulo =
-                "Perfeito!";
-
-            icone =
-                "👑";
-
-        } else if (porcentagem >= 70) {
-
-            titulo =
-                "Mandou muito bem!";
-
-            icone =
-                "🏆";
-
-        } else if (porcentagem >= 50) {
-
-            titulo =
-                "Bom trabalho!";
-
-            icone =
-                "⭐";
-
-        } else {
-
-            titulo =
-                "Fase concluída!";
-
-            icone =
-                "🍳";
-        }
-
+        /*
+         * Não usamos mais a pontuação enviada
+         * pelo navegador como fonte confiável.
+         *
+         * Enviamos as respostas individuais.
+         */
 
         const dados =
             new FormData();
 
-        dados.append(
-            "usuario_id",
-            usuarioId
-        );
 
         dados.append(
             "fase_id",
             faseId
         );
+
+
+        dados.append(
+            "respostas",
+            JSON.stringify(
+                respostasPartida
+            )
+        );
+
+
+        /*
+         * Estes valores servem apenas para
+         * compatibilidade com o PHP atual.
+         *
+         * O PHP definitivo deve recalcular
+         * todos eles a partir das respostas.
+         */
 
         dados.append(
             "pontuacao",
@@ -678,6 +791,16 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
 
+        /*
+         * Impedir múltiplos envios.
+         */
+
+        nextButton.disabled = true;
+
+        nextButton.textContent =
+            "Salvando resultado...";
+
+
         fetch(
             "finalizar_mathchef.php",
             {
@@ -687,26 +810,81 @@ document.addEventListener("DOMContentLoaded", function () {
         )
         .then(function (response) {
 
+            if (!response.ok) {
+                throw new Error(
+                    "Erro ao finalizar a fase."
+                );
+            }
+
             return response.json();
 
         })
         .then(function (resultado) {
 
+            if (!resultado.sucesso) {
+
+                throw new Error(
+                    resultado.mensagem ||
+                    "Não foi possível salvar a partida."
+                );
+            }
+
+
+            /*
+             * Usamos o resultado calculado pelo PHP.
+             */
+
+            if (
+                typeof resultado.pontuacao !==
+                "undefined"
+            ) {
+
+                pontuacao =
+                    Number(
+                        resultado.pontuacao
+                    );
+            }
+
+            if (
+                typeof resultado.acertos !==
+                "undefined"
+            ) {
+
+                acertos =
+                    Number(
+                        resultado.acertos
+                    );
+            }
+
+            if (
+                typeof resultado.erros !==
+                "undefined"
+            ) {
+
+                erros =
+                    Number(
+                        resultado.erros
+                    );
+            }
+
+
             mostrarResultado(
-                titulo,
-                icone,
                 resultado
             );
 
         })
-        .catch(function () {
+        .catch(function (erro) {
 
-            mostrarResultado(
-                titulo,
-                icone,
-                {
-                    sucesso: false
-                }
+            console.error(erro);
+
+            nextButton.disabled = false;
+
+            nextButton.textContent =
+                "Tentar novamente";
+
+            alert(
+                "Não foi possível salvar sua partida. " +
+                "Verifique sua conexão e tente novamente."
             );
         });
     }
@@ -716,115 +894,303 @@ document.addEventListener("DOMContentLoaded", function () {
        RESULTADO
        ===================================================== */
 
-    function mostrarResultado(
-        titulo,
-        icone,
-        resultado
-    ) {
+    function mostrarResultado(resultado) {
 
-        document.querySelector(
-            ".game-container"
-        ).innerHTML = `
+        const aproveitamento =
+            questoes.length > 0
+                ? Math.round(
+                    (acertos / questoes.length) *
+                    100
+                )
+                : 0;
 
-            <section class="result-card">
 
-                <div class="result-icon">
-                    ${icone}
-                </div>
+        let titulo =
+            "Fase concluída!";
 
-                <h1>
-                    ${titulo}
-                </h1>
+        let icone =
+            "🏆";
 
-                <p>
-                    Você terminou a fase
-                    <strong>${faseNome()}</strong>.
-                </p>
 
-                <div class="result-score">
+        if (aproveitamento === 100) {
 
-                    <span>
-                        Pontuação
-                    </span>
+            titulo =
+                "Perfeito!";
 
-                    <strong>
-                        ${pontuacao}
-                    </strong>
+            icone =
+                "👑";
 
-                </div>
+        } else if (aproveitamento >= 70) {
 
-                <div class="result-stats">
+            titulo =
+                "Mandou muito bem!";
 
-                    <div class="result-stat">
-                        <strong>
-                            ${acertos}
-                        </strong>
+            icone =
+                "🏆";
 
-                        <span>
-                            Acertos
-                        </span>
-                    </div>
+        } else if (aproveitamento >= 50) {
 
-                    <div class="result-stat">
-                        <strong>
-                            ${erros}
-                        </strong>
+            titulo =
+                "Bom trabalho!";
 
-                        <span>
-                            Erros
-                        </span>
-                    </div>
+            icone =
+                "⭐";
 
-                    <div class="result-stat">
-                        <strong>
-                            ${Math.round(
-                                (acertos / questoes.length) * 100
-                            )}%
-                        </strong>
+        } else {
 
-                        <span>
-                            Aproveitamento
-                        </span>
-                    </div>
+            titulo =
+                "Fase concluída!";
 
-                </div>
+            icone =
+                "🍳";
+        }
 
-                <div class="result-buttons">
 
-                    <a
-                        href="mathchef.php"
-                        class="secondary-result-button">
-                        ← Voltar para fases
-                    </a>
+        /*
+         * Criar a tela sem colocar conteúdo
+         * do banco diretamente dentro de HTML.
+         */
 
-                    <a
-                        href="jogar_mathchef.php?fase=${faseId}"
-                        class="primary-result-button">
-                        Jogar novamente
-                    </a>
+        const container =
+            document.querySelector(
+                ".game-container"
+            );
 
-                </div>
+        container.innerHTML = "";
 
-            </section>
-        `;
+
+        const resultCard =
+            document.createElement("section");
+
+        resultCard.className =
+            "result-card";
+
+
+        const resultIcon =
+            document.createElement("div");
+
+        resultIcon.className =
+            "result-icon";
+
+        resultIcon.textContent =
+            icone;
+
+
+        const resultTitle =
+            document.createElement("h1");
+
+        resultTitle.textContent =
+            titulo;
+
+
+        const resultDescription =
+            document.createElement("p");
+
+        resultDescription.textContent =
+            "Você terminou a fase " +
+            (
+                resultado.fase &&
+                resultado.fase.nome
+                    ? resultado.fase.nome
+                    : "selecionada"
+            ) +
+            ".";
+
+
+        /*
+         * Pontuação
+         */
+
+        const resultScore =
+            document.createElement("div");
+
+        resultScore.className =
+            "result-score";
+
+
+        const scoreLabel =
+            document.createElement("span");
+
+        scoreLabel.textContent =
+            "Pontuação";
+
+
+        const scoreValue =
+            document.createElement("strong");
+
+        scoreValue.textContent =
+            pontuacao;
+
+
+        resultScore.appendChild(
+            scoreLabel
+        );
+
+        resultScore.appendChild(
+            scoreValue
+        );
+
+
+        /*
+         * Estatísticas
+         */
+
+        const resultStats =
+            document.createElement("div");
+
+        resultStats.className =
+            "result-stats";
+
+
+        criarEstatistica(
+            resultStats,
+            acertos,
+            "Acertos"
+        );
+
+        criarEstatistica(
+            resultStats,
+            erros,
+            "Erros"
+        );
+
+        criarEstatistica(
+            resultStats,
+            aproveitamento + "%",
+            "Aproveitamento"
+        );
+
+
+        /*
+         * Botões
+         */
+
+        const resultButtons =
+            document.createElement("div");
+
+        resultButtons.className =
+            "result-buttons";
+
+
+        const voltar =
+            document.createElement("a");
+
+        voltar.href =
+            "mathchef.php";
+
+        voltar.className =
+            "secondary-result-button";
+
+        voltar.textContent =
+            "← Voltar para fases";
+
+
+        const novamente =
+            document.createElement("a");
+
+        novamente.href =
+            "jogar_mathchef.php?fase=" +
+            encodeURIComponent(faseId);
+
+        novamente.className =
+            "primary-result-button";
+
+        novamente.textContent =
+            "Jogar novamente";
+
+
+        resultButtons.appendChild(
+            voltar
+        );
+
+        resultButtons.appendChild(
+            novamente
+        );
+
+
+        /*
+         * Montar resultado
+         */
+
+        resultCard.appendChild(
+            resultIcon
+        );
+
+        resultCard.appendChild(
+            resultTitle
+        );
+
+        resultCard.appendChild(
+            resultDescription
+        );
+
+        resultCard.appendChild(
+            resultScore
+        );
+
+        resultCard.appendChild(
+            resultStats
+        );
+
+        resultCard.appendChild(
+            resultButtons
+        );
+
+        container.appendChild(
+            resultCard
+        );
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
     }
 
 
-    function faseNome() {
+    function criarEstatistica(
+        container,
+        valor,
+        legenda
+    ) {
 
-        const titulo =
-            document.querySelector(
-                ".phase-info h1"
-            );
+        const stat =
+            document.createElement("div");
 
-        return titulo
-            ? titulo.textContent.trim()
-            : "esta fase";
+        stat.className =
+            "result-stat";
+
+
+        const valorElemento =
+            document.createElement("strong");
+
+        valorElemento.textContent =
+            valor;
+
+
+        const legendaElemento =
+            document.createElement("span");
+
+        legendaElemento.textContent =
+            legenda;
+
+
+        stat.appendChild(
+            valorElemento
+        );
+
+        stat.appendChild(
+            legendaElemento
+        );
+
+        container.appendChild(
+            stat
+        );
     }
 
 
     /* =====================================================
-       COMEÇAR
+       INICIAR
        ===================================================== */
 
     carregarQuestao();

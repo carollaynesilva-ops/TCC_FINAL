@@ -2,9 +2,10 @@
 
 session_start();
 
-header("Content-Type: application/json; charset=utf-8");
-
 require_once "config/config.php";
+
+header("Content-Type: application/json; charset=UTF-8");
+
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +14,9 @@ require_once "config/config.php";
 */
 
 if (!isset($_SESSION["usuario_id"])) {
+
+    http_response_code(401);
+
     echo json_encode([
         "sucesso" => false,
         "mensagem" => "Usuário não autenticado."
@@ -22,13 +26,14 @@ if (!isset($_SESSION["usuario_id"])) {
 }
 
 
+$usuarioId = (int) $_SESSION["usuario_id"];
+
+
 /*
 |--------------------------------------------------------------------------
-| Dados recebidos
+| Receber dados
 |--------------------------------------------------------------------------
 */
-
-$usuarioId = (int) $_SESSION["usuario_id"];
 
 $faseId = isset($_POST["fase_id"])
     ? (int) $_POST["fase_id"]
@@ -59,6 +64,8 @@ $dicasUsadas = isset($_POST["dicas_usadas"])
 
 if ($faseId <= 0) {
 
+    http_response_code(400);
+
     echo json_encode([
         "sucesso" => false,
         "mensagem" => "Fase inválida."
@@ -66,6 +73,7 @@ if ($faseId <= 0) {
 
     exit;
 }
+
 
 if ($pontuacao < 0) {
     $pontuacao = 0;
@@ -86,44 +94,17 @@ if ($dicasUsadas < 0) {
 
 /*
 |--------------------------------------------------------------------------
-| Buscar fase
+| Buscar usuário
 |--------------------------------------------------------------------------
 */
 
 $stmt = $pdo->prepare("
     SELECT
         id,
-        jogo_id,
+        nome,
         serie,
-        numero
-    FROM fases
-    WHERE id = ?
-      AND jogo_id = 1
-");
-
-$stmt->execute([$faseId]);
-
-$fase = $stmt->fetch();
-
-if (!$fase) {
-
-    echo json_encode([
-        "sucesso" => false,
-        "mensagem" => "Fase não encontrada."
-    ]);
-
-    exit;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Verificar se a fase pertence à série do usuário
-|--------------------------------------------------------------------------
-*/
-
-$stmt = $pdo->prepare("
-    SELECT serie
+        xp,
+        pontuacao_total
     FROM usuarios
     WHERE id = ?
 ");
@@ -132,7 +113,10 @@ $stmt->execute([$usuarioId]);
 
 $usuario = $stmt->fetch();
 
+
 if (!$usuario) {
+
+    http_response_code(404);
 
     echo json_encode([
         "sucesso" => false,
@@ -142,11 +126,50 @@ if (!$usuario) {
     exit;
 }
 
-if ((int) $usuario["serie"] !== (int) $fase["serie"]) {
+
+$serie = (int) $usuario["serie"];
+
+
+/*
+|--------------------------------------------------------------------------
+| Buscar fase
+|--------------------------------------------------------------------------
+|
+| A fase precisa:
+| - existir
+| - ser do MathChef
+| - pertencer à série do aluno
+|
+*/
+
+$stmt = $pdo->prepare("
+    SELECT
+        id,
+        jogo_id,
+        serie,
+        nome,
+        numero
+    FROM fases
+    WHERE id = ?
+      AND jogo_id = 1
+      AND serie = ?
+");
+
+$stmt->execute([
+    $faseId,
+    $serie
+]);
+
+$fase = $stmt->fetch();
+
+
+if (!$fase) {
+
+    http_response_code(403);
 
     echo json_encode([
         "sucesso" => false,
-        "mensagem" => "Você não pode realizar esta fase."
+        "mensagem" => "Você não pode finalizar esta fase."
     ]);
 
     exit;
@@ -155,18 +178,66 @@ if ((int) $usuario["serie"] !== (int) $fase["serie"]) {
 
 /*
 |--------------------------------------------------------------------------
-| Garantir valores coerentes
+| Descobrir quantidade de questões
 |--------------------------------------------------------------------------
 */
 
-if ($acertos + $erros <= 0) {
+$stmt = $pdo->prepare("
+    SELECT
+        COUNT(*) AS total_questoes,
+        COALESCE(SUM(pontuacao), 0) AS pontuacao_maxima
+    FROM questoes
+    WHERE fase_id = ?
+");
+
+$stmt->execute([$faseId]);
+
+$dadosQuestoes = $stmt->fetch();
+
+$totalQuestoes = (int) $dadosQuestoes["total_questoes"];
+
+$pontuacaoMaxima = (int) $dadosQuestoes["pontuacao_maxima"];
+
+
+/*
+|--------------------------------------------------------------------------
+| Validações com base nas questões
+|--------------------------------------------------------------------------
+*/
+
+if ($totalQuestoes <= 0) {
+
+    http_response_code(400);
 
     echo json_encode([
         "sucesso" => false,
-        "mensagem" => "Nenhuma questão foi respondida."
+        "mensagem" => "Esta fase não possui questões."
     ]);
 
     exit;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Limitar valores
+|--------------------------------------------------------------------------
+*/
+
+if ($acertos > $totalQuestoes) {
+    $acertos = $totalQuestoes;
+}
+
+if ($erros > $totalQuestoes) {
+    $erros = $totalQuestoes;
+}
+
+if ($dicasUsadas > $totalQuestoes) {
+    $dicasUsadas = $totalQuestoes;
+}
+
+if ($pontuacao > $pontuacaoMaxima) {
+    $pontuacao = $pontuacaoMaxima;
 }
 
 
@@ -183,7 +254,40 @@ try {
 
     /*
     |--------------------------------------------------------------------------
-    | Buscar melhor pontuação anterior
+    | Registrar partida
+    |--------------------------------------------------------------------------
+    */
+
+    $stmt = $pdo->prepare("
+        INSERT INTO historico_partidas (
+            usuario_id,
+            jogo_id,
+            fase_id,
+            pontuacao,
+            acertos,
+            erros,
+            dicas_usadas
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    $stmt->execute([
+        $usuarioId,
+        1,
+        $faseId,
+        $pontuacao,
+        $acertos,
+        $erros,
+        $dicasUsadas
+    ]);
+
+
+    $partidaId = (int) $pdo->lastInsertId();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Verificar progresso existente
     |--------------------------------------------------------------------------
     */
 
@@ -191,8 +295,9 @@ try {
         SELECT
             id,
             concluida,
-            melhor_pontuacao,
-            tentativas
+            pontuacao,
+            tentativas,
+            melhor_pontuacao
         FROM progresso_usuario
         WHERE usuario_id = ?
           AND fase_id = ?
@@ -207,111 +312,55 @@ try {
     $progresso = $stmt->fetch();
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | Criar histórico da partida
-    |--------------------------------------------------------------------------
-    */
-
-    $stmt = $pdo->prepare("
-        INSERT INTO historico_partidas
-        (
-            usuario_id,
-            jogo_id,
-            fase_id,
-            pontuacao,
-            acertos,
-            erros,
-            dicas_usadas
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ");
-
-    $stmt->execute([
-        $usuarioId,
-        $fase["jogo_id"],
-        $faseId,
-        $pontuacao,
-        $acertos,
-        $erros,
-        $dicasUsadas
-    ]);
-
-    $partidaId = $pdo->lastInsertId();
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Melhor pontuação
-    |--------------------------------------------------------------------------
-    */
-
     if ($progresso) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Fase já possui progresso
+        |--------------------------------------------------------------------------
+        */
 
         $melhorPontuacaoAnterior =
             (int) $progresso["melhor_pontuacao"];
 
-    } else {
+        $melhorPontuacao =
+            max(
+                $melhorPontuacaoAnterior,
+                $pontuacao
+            );
 
-        $melhorPontuacaoAnterior = 0;
-    }
+        $tentativas =
+            (int) $progresso["tentativas"] + 1;
 
-
-    $melhorPontuacao =
-        max(
-            $melhorPontuacaoAnterior,
-            $pontuacao
-        );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Fase concluída
-    |--------------------------------------------------------------------------
-    |
-    | Consideramos concluída quando o aluno termina
-    | todas as questões.
-    |
-    */
-
-    $concluida = true;
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Salvar / atualizar progresso
-    |--------------------------------------------------------------------------
-    */
-
-    if ($progresso) {
 
         $stmt = $pdo->prepare("
             UPDATE progresso_usuario
-
             SET
-                concluida = ?,
+                concluida = TRUE,
                 pontuacao = ?,
-                tentativas = tentativas + 1,
+                tentativas = ?,
                 melhor_pontuacao = ?,
                 data_conclusao = NOW()
-
-            WHERE usuario_id = ?
-              AND fase_id = ?
+            WHERE id = ?
         ");
 
         $stmt->execute([
-            $concluida ? 1 : 0,
             $pontuacao,
+            $tentativas,
             $melhorPontuacao,
-            $usuarioId,
-            $faseId
+            $progresso["id"]
         ]);
 
     } else {
 
+        /*
+        |--------------------------------------------------------------------------
+        | Primeiro registro da fase
+        |--------------------------------------------------------------------------
+        */
+
         $stmt = $pdo->prepare("
-            INSERT INTO progresso_usuario
-            (
+            INSERT INTO progresso_usuario (
                 usuario_id,
                 fase_id,
                 concluida,
@@ -320,64 +369,47 @@ try {
                 melhor_pontuacao,
                 data_conclusao
             )
-            VALUES (?, ?, ?, ?, ?, ?, NOW())
+            VALUES (?, ?, TRUE, ?, 1, ?, NOW())
         ");
 
         $stmt->execute([
             $usuarioId,
             $faseId,
-            1,
             $pontuacao,
-            1,
-            $melhorPontuacao
+            $pontuacao
         ]);
+
+        $melhorPontuacao = $pontuacao;
+        $tentativas = 1;
     }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Atualizar pontuação total
-    |--------------------------------------------------------------------------
-    |
-    | Só adicionamos à pontuação total a diferença entre
-    | a nova pontuação e a melhor pontuação anterior.
-    |
-    | Isso evita que o aluno jogue a mesma fase 500 vezes
-    | e fique milionário em XP por acidente.
-    |
-    */
-
-    $pontosNovos =
-        max(
-            0,
-            $pontuacao - $melhorPontuacaoAnterior
-        );
 
 
     /*
     |--------------------------------------------------------------------------
     | Atualizar XP e pontuação total
     |--------------------------------------------------------------------------
+    |
+    | Neste momento:
+    |
+    | 1 ponto = 1 XP
+    |
     */
 
-    if ($pontosNovos > 0) {
+    $xpGanho = $pontuacao;
 
-        $stmt = $pdo->prepare("
-            UPDATE usuarios
+    $stmt = $pdo->prepare("
+        UPDATE usuarios
+        SET
+            xp = xp + ?,
+            pontuacao_total = pontuacao_total + ?
+        WHERE id = ?
+    ");
 
-            SET
-                xp = xp + ?,
-                pontuacao_total = pontuacao_total + ?
-
-            WHERE id = ?
-        ");
-
-        $stmt->execute([
-            $pontosNovos,
-            $pontosNovos,
-            $usuarioId
-        ]);
-    }
+    $stmt->execute([
+        $xpGanho,
+        $pontuacao,
+        $usuarioId
+    ]);
 
 
     /*
@@ -386,15 +418,16 @@ try {
     |--------------------------------------------------------------------------
     */
 
-    $numeroAtual =
-        (int) $fase["numero"];
+    $numeroAtual = (int) $fase["numero"];
 
-    $proximoNumero =
-        $numeroAtual + 1;
+    $proximoNumero = $numeroAtual + 1;
 
 
     $stmt = $pdo->prepare("
-        SELECT id
+        SELECT
+            id,
+            nome,
+            numero
         FROM fases
         WHERE jogo_id = 1
           AND serie = ?
@@ -403,7 +436,7 @@ try {
     ");
 
     $stmt->execute([
-        $fase["serie"],
+        $serie,
         $proximoNumero
     ]);
 
@@ -412,7 +445,7 @@ try {
 
     /*
     |--------------------------------------------------------------------------
-    | Commit
+    | Finalizar transação
     |--------------------------------------------------------------------------
     */
 
@@ -427,23 +460,44 @@ try {
 
     echo json_encode([
         "sucesso" => true,
-        "mensagem" => "Fase finalizada com sucesso.",
-        "partida_id" => (int) $partidaId,
+        "mensagem" => "Fase finalizada com sucesso!",
+
+        "partida_id" => $partidaId,
+
+        "fase" => [
+            "id" => $faseId,
+            "nome" => $fase["nome"],
+            "numero" => $numeroAtual
+        ],
+
         "pontuacao" => $pontuacao,
+
         "acertos" => $acertos,
+
         "erros" => $erros,
+
+        "dicas_usadas" => $dicasUsadas,
+
+        "xp_ganho" => $xpGanho,
+
         "melhor_pontuacao" => $melhorPontuacao,
-        "pontos_novos" => $pontosNovos,
+
+        "tentativas" => $tentativas,
+
         "proxima_fase" => $proximaFase
-            ? (int) $proximaFase["id"]
+            ? [
+                "id" => (int) $proximaFase["id"],
+                "nome" => $proximaFase["nome"],
+                "numero" => (int) $proximaFase["numero"]
+            ]
             : null
     ]);
 
-} catch (Exception $e) {
+} catch (PDOException $e) {
 
     /*
     |--------------------------------------------------------------------------
-    | Desfazer alterações caso aconteça algum erro
+    | Desfazer alterações se algo der errado
     |--------------------------------------------------------------------------
     */
 
@@ -451,9 +505,11 @@ try {
         $pdo->rollBack();
     }
 
+
+    http_response_code(500);
+
     echo json_encode([
         "sucesso" => false,
-        "mensagem" => "Não foi possível salvar a partida."
+        "mensagem" => "Não foi possível salvar o resultado da fase."
     ]);
-
 }
