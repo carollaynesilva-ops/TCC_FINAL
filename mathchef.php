@@ -13,7 +13,7 @@ $usuarioId = $_SESSION["usuario_id"];
 
 /*
 |--------------------------------------------------------------------------
-| BUSCAR DADOS DO USUÁRIO
+| BUSCAR USUÁRIO
 |--------------------------------------------------------------------------
 */
 
@@ -43,12 +43,8 @@ $serieUsuario = (int) $usuario["serie"];
 
 /*
 |--------------------------------------------------------------------------
-| BUSCAR AS FASES DO MATHCHEF
+| BUSCAR FASES DO MATHCHEF
 |--------------------------------------------------------------------------
-|
-| jogo_id = 1 → MathChef
-| A série vem do cadastro do usuário.
-|
 */
 
 $sqlFases = "
@@ -73,6 +69,7 @@ $sqlFases = "
 ";
 
 $stmtFases = $pdo->prepare($sqlFases);
+
 $stmtFases->execute([
     $usuarioId,
     $serieUsuario
@@ -84,10 +81,6 @@ $fases = $stmtFases->fetchAll();
 |--------------------------------------------------------------------------
 | DEFINIR FASES DESBLOQUEADAS
 |--------------------------------------------------------------------------
-|
-| A primeira fase sempre começa desbloqueada.
-| As próximas são liberadas quando a anterior é concluída.
-|
 */
 
 $proximaDesbloqueada = true;
@@ -113,7 +106,7 @@ unset($fase);
 
 /*
 |--------------------------------------------------------------------------
-| TRADUZIR DIFICULDADE
+| FUNÇÕES DE DIFICULDADE
 |--------------------------------------------------------------------------
 */
 
@@ -153,6 +146,27 @@ function classeDificuldade($dificuldade)
     }
 }
 
+/*
+|--------------------------------------------------------------------------
+| PROGRESSO
+|--------------------------------------------------------------------------
+*/
+
+$totalFases = count($fases);
+
+$fasesConcluidas = 0;
+
+foreach ($fases as $fase) {
+
+    if ($fase["concluida"]) {
+        $fasesConcluidas++;
+    }
+}
+
+$porcentagemProgresso = $totalFases > 0
+    ? ($fasesConcluidas / $totalFases) * 100
+    : 0;
+
 ?>
 
 <!DOCTYPE html>
@@ -177,6 +191,30 @@ function classeDificuldade($dificuldade)
 </head>
 
 <body>
+
+    <!-- ==========================================
+         ELEMENTOS DECORATIVOS DA COZINHA
+    =========================================== -->
+
+    <div class="kitchen-background" aria-hidden="true">
+
+        <span class="food-icon food-1">🍳</span>
+        <span class="food-icon food-2">🥕</span>
+        <span class="food-icon food-3">🍅</span>
+        <span class="food-icon food-4">🥄</span>
+        <span class="food-icon food-5">🧀</span>
+        <span class="food-icon food-6">🥣</span>
+        <span class="food-icon food-7">🍞</span>
+        <span class="food-icon food-8">🥛</span>
+        <span class="food-icon food-9">🍓</span>
+        <span class="food-icon food-10">🍋</span>
+        <span class="food-icon food-11">🥄</span>
+        <span class="food-icon food-12">🧁</span>
+        <span class="food-icon food-13">🍕</span>
+        <span class="food-icon food-14">🥚</span>
+
+    </div>
+
 
     <!-- ==========================================
          NAVBAR
@@ -209,6 +247,7 @@ function classeDificuldade($dificuldade)
                 </a>
 
             </nav>
+
 
             <div class="theme-switcher">
 
@@ -244,36 +283,73 @@ function classeDificuldade($dificuldade)
 
 
     <!-- ==========================================
-         CONTEÚDO
+         CONTEÚDO PRINCIPAL
     =========================================== -->
 
     <main class="mathchef-container">
 
-        <!-- Cabeçalho -->
+
+        <!-- ======================================
+             HERO
+        ======================================= -->
 
         <section class="game-header">
 
-            <div class="game-header-text">
+            <div class="game-header-content">
 
-                <span class="game-label">
-                    JOGO DE MATEMÁTICA
-                </span>
+                <div class="game-kicker">
+
+                    <span class="kicker-line"></span>
+
+                    <span>
+                        DESAFIO CULINÁRIO
+                    </span>
+
+                </div>
+
 
                 <h1>
-                    MathChef
+                    Math<span>Chef</span>
                 </h1>
 
+
                 <p>
-                    Prepare receitas, resolva desafios
-                    e domine a matemática na cozinha.
+                    Entre na cozinha, prepare suas receitas
+                    e resolva desafios matemáticos para
+                    avançar de fase.
                 </p>
+
+
+                <div class="hero-details">
+
+                    <div class="hero-detail">
+                        <span class="detail-icon">👨‍🍳</span>
+                        <span>Modo aventura</span>
+                    </div>
+
+                    <div class="hero-detail">
+                        <span class="detail-icon">🧮</span>
+                        <span>Matemática</span>
+                    </div>
+
+                    <div class="hero-detail">
+                        <span class="detail-icon">🏆</span>
+                        <span>Ganhe pontos</span>
+                    </div>
+
+                </div>
 
             </div>
 
-            <div class="series-badge">
+
+            <div class="chef-badge">
+
+                <div class="chef-badge-icon">
+                    👨‍🍳
+                </div>
 
                 <span>
-                    Sua série
+                    SUA SÉRIE
                 </span>
 
                 <strong>
@@ -285,48 +361,42 @@ function classeDificuldade($dificuldade)
         </section>
 
 
-        <!-- Progresso geral -->
-
-        <?php
-
-        $totalFases = count($fases);
-        $fasesConcluidas = 0;
-
-        foreach ($fases as $fase) {
-
-            if ($fase["concluida"]) {
-                $fasesConcluidas++;
-            }
-
-        }
-
-        $porcentagemProgresso = $totalFases > 0
-            ? ($fasesConcluidas / $totalFases) * 100
-            : 0;
-
-        ?>
+        <!-- ======================================
+             PROGRESSO
+        ======================================= -->
 
         <section class="progress-section">
 
-            <div class="progress-info">
+            <div class="progress-top">
 
-                <div>
+                <div class="progress-title">
 
-                    <span>
-                        Progresso
+                    <span class="progress-icon">
+                        🍽️
                     </span>
 
-                    <strong>
-                        <?= $fasesConcluidas ?> de <?= $totalFases ?> fases
-                    </strong>
+                    <div>
+
+                        <span>
+                            Jornada culinária
+                        </span>
+
+                        <strong>
+                            <?= $fasesConcluidas ?> de <?= $totalFases ?>
+                            fases concluídas
+                        </strong>
+
+                    </div>
 
                 </div>
 
-                <span>
+
+                <strong class="progress-percentage">
                     <?= round($porcentagemProgresso) ?>%
-                </span>
+                </strong>
 
             </div>
+
 
             <div class="progress-bar">
 
@@ -340,21 +410,29 @@ function classeDificuldade($dificuldade)
         </section>
 
 
-        <!-- ==========================================
+        <!-- ======================================
              FASES
-        =========================================== -->
+        ======================================= -->
 
         <section class="phases-section">
 
-            <div class="section-title">
+            <div class="section-heading">
 
-                <span>
-                    SUA JORNADA
-                </span>
+                <div>
 
-                <h2>
-                    Fases do MathChef
-                </h2>
+                    <span>
+                        MENU DE FASES
+                    </span>
+
+                    <h2>
+                        Sua cozinha
+                    </h2>
+
+                </div>
+
+                <div class="cutlery-decoration">
+                    ✦ ✦ ✦
+                </div>
 
             </div>
 
@@ -365,48 +443,63 @@ function classeDificuldade($dificuldade)
 
                     <div class="empty-state">
 
+                        <div class="empty-icon">
+                            🍳
+                        </div>
+
                         <h3>
-                            Nenhuma fase encontrada
+                            A cozinha está vazia
                         </h3>
 
                         <p>
-                            Não existem fases cadastradas para esta série.
+                            Nenhuma fase foi encontrada para sua série.
                         </p>
 
                     </div>
 
                 <?php else: ?>
 
+
                     <?php foreach ($fases as $fase): ?>
 
                         <?php
+
                         $desbloqueada = $fase["desbloqueada"];
                         $concluida = $fase["concluida"];
 
-                        $classeCard = "";
-
                         if (!$desbloqueada) {
+
                             $classeCard = "locked";
+
                         } elseif ($concluida) {
+
                             $classeCard = "completed";
+
                         } else {
+
                             $classeCard = "available";
+
                         }
+
                         ?>
 
+
                         <article class="phase-card <?= $classeCard ?>">
+
+
+                            <!-- Número -->
 
                             <div class="phase-number">
 
                                 <?php if (!$desbloqueada): ?>
 
-                                    <span class="lock-icon">
+                                    <span>
                                         🔒
                                     </span>
 
                                 <?php elseif ($concluida): ?>
 
-                                    <span class="check-icon">
+                                    <span>
                                         ✓
                                     </span>
 
@@ -421,18 +514,27 @@ function classeDificuldade($dificuldade)
                             </div>
 
 
+                            <!-- Conteúdo -->
+
                             <div class="phase-content">
+
 
                                 <div class="phase-top">
 
                                     <span class="phase-tag">
-                                        FASE <?= $fase["numero"] ?>
+
+                                        FASE
+                                        <?= $fase["numero"] ?>
+
                                     </span>
+
 
                                     <span
                                         class="difficulty <?= classeDificuldade($fase["nivel_dificuldade"]) ?>"
                                     >
+
                                         <?= nomeDificuldade($fase["nivel_dificuldade"]) ?>
+
                                     </span>
 
                                 </div>
@@ -453,13 +555,15 @@ function classeDificuldade($dificuldade)
                                     <div class="phase-status completed-status">
 
                                         <span>
-                                            ✓ Fase concluída
+                                            ✓ Receita concluída
                                         </span>
+
 
                                         <?php if ($fase["melhor_pontuacao"] > 0): ?>
 
                                             <strong>
-                                                <?= (int) $fase["melhor_pontuacao"] ?> pts
+                                                <?= (int) $fase["melhor_pontuacao"] ?>
+                                                pts
                                             </strong>
 
                                         <?php endif; ?>
@@ -472,15 +576,21 @@ function classeDificuldade($dificuldade)
                                     <div class="phase-status">
 
                                         <span>
-                                            Fase disponível
+                                            🍴 Bancada liberada
                                         </span>
+
 
                                         <a
                                             href="jogar_mathchef.php?fase=<?= (int) $fase["id"] ?>"
                                             class="play-button"
                                         >
-                                            Jogar
-                                            <span>→</span>
+
+                                            Preparar
+
+                                            <span>
+                                                →
+                                            </span>
+
                                         </a>
 
                                     </div>
@@ -498,6 +608,7 @@ function classeDificuldade($dificuldade)
 
                                 <?php endif; ?>
 
+
                             </div>
 
                         </article>
@@ -511,22 +622,24 @@ function classeDificuldade($dificuldade)
         </section>
 
 
-        <!-- Voltar -->
+        <!-- ======================================
+             VOLTAR
+        ======================================= -->
 
         <div class="back-area">
 
-            <a href="inicio.php" class="back-link">
+            <a
+                href="inicio.php"
+                class="back-link"
+            >
                 ← Voltar para o início
             </a>
 
         </div>
 
+
     </main>
 
-
-    <!-- ==========================================
-         TEMA
-    =========================================== -->
 
     <script src="assets/js/tema.js"></script>
 
