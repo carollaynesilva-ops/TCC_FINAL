@@ -600,10 +600,10 @@ $inicial = strtoupper(
 
                     </div>
                     <a href="editar_perfil.php" class="edit-profile-button">
-                    ✎ Editar perfil
-                </a>
+                        ✎ Editar perfil
+                    </a>
                 </div>
-                
+
             </div>
 
 
@@ -701,6 +701,11 @@ $inicial = strtoupper(
             </div>
 
         </section>
+
+
+        <a href="excluir_perfil.php" class="delete-profile-button">
+            Excluir meu perfil
+        </a>
 
 
 
