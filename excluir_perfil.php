@@ -165,7 +165,7 @@ $inicial = strtoupper(
 
     <link
         rel="stylesheet"
-        href="assets/css/perfil.css">
+        href="assets/css/excluir_perfil.css">
 
 </head>
 
