@@ -1419,3 +1419,12 @@ a:focus-visible {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* =========================================================
+   ELEMENTOS OCULTOS
+   ========================================================= */
+
+.feedback[hidden],
+.next-button[hidden] {
+    display: none !important;
+}
