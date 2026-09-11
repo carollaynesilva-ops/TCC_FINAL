@@ -383,6 +383,7 @@ foreach ($respostas as $resposta) {
         $tempoResposta = 0;
     }
 
+
     /*
      * Evita valores absurdos enviados manualmente.
      * 1 hora para responder uma questão já é uma
@@ -525,6 +526,53 @@ try {
 
 
     // =====================================================
+    // VERIFICAR SE A FASE JÁ FOI CONCLUÍDA ANTES
+    // =====================================================
+    //
+    // Essa informação precisa ser obtida antes de atualizar
+    // o progresso.
+    //
+    // Se já estiver concluída:
+    // - não ganha XP novamente
+    // - não ganha conquista novamente
+    // - ainda pode jogar
+    // - ainda registra tentativa
+    // - ainda pode melhorar a pontuação
+    //
+
+    $stmt = $pdo->prepare("
+        SELECT
+            id,
+            concluida,
+            pontuacao,
+            tentativas,
+            melhor_pontuacao
+        FROM progresso_usuario
+        WHERE usuario_id = ?
+          AND fase_id = ?
+        FOR UPDATE
+    ");
+
+    $stmt->execute([
+        $usuarioId,
+        $faseId
+    ]);
+
+    $progresso =
+        $stmt->fetch();
+
+
+    // =====================================================
+    // DEFINIR SE É PRIMEIRA CONCLUSÃO
+    // =====================================================
+
+    $primeiraConclusao = (
+        !$progresso ||
+        !(bool) $progresso["concluida"]
+    );
+
+
+    // =====================================================
     // REGISTRAR PARTIDA
     // =====================================================
 
@@ -599,41 +647,13 @@ try {
 
 
     // =====================================================
-    // VERIFICAR PROGRESSO DA FASE
-    // =====================================================
-
-    $stmt = $pdo->prepare("
-        SELECT
-            id,
-            concluida,
-            pontuacao,
-            tentativas,
-            melhor_pontuacao
-        FROM progresso_usuario
-        WHERE usuario_id = ?
-          AND fase_id = ?
-        FOR UPDATE
-    ");
-
-    $stmt->execute([
-        $usuarioId,
-        $faseId
-    ]);
-
-    $progresso =
-        $stmt->fetch();
-
-
-    // =====================================================
     // ATUALIZAR PROGRESSO EXISTENTE
     // =====================================================
 
     if ($progresso) {
 
         $melhorPontuacaoAnterior =
-            (int) $progresso[
-                "melhor_pontuacao"
-            ];
+            (int) $progresso["melhor_pontuacao"];
 
 
         $melhorPontuacao =
@@ -711,13 +731,37 @@ try {
     // ATUALIZAR XP E PONTUAÇÃO
     // =====================================================
     //
-    // Por enquanto:
+    // REGRA:
     //
-    // 1 ponto = 1 XP
+    // Primeira conclusão:
+    //     XP ganho = pontuação
+    //
+    // Replay:
+    //     XP ganho = 0
+    //
+    // A pontuação total também só aumenta na primeira
+    // conclusão da fase.
+    //
+    // O desconto de 50 XP da dica já acontece no
+    // usar_dica_mathchef.php e NÃO deve ser repetido aqui.
     //
 
-    $xpGanho =
-        $pontuacao;
+    if ($primeiraConclusao) {
+
+        $xpGanho =
+            $pontuacao;
+
+        $pontuacaoGanha =
+            $pontuacao;
+
+    } else {
+
+        $xpGanho =
+            0;
+
+        $pontuacaoGanha =
+            0;
+    }
 
 
     $stmt = $pdo->prepare("
@@ -732,7 +776,7 @@ try {
 
         $xpGanho,
 
-        $pontuacao,
+        $pontuacaoGanha,
 
         $usuarioId
     ]);
@@ -817,6 +861,9 @@ try {
 
         "dicas_usadas" =>
             $dicasUsadas,
+
+        "primeira_conclusao" =>
+            $primeiraConclusao,
 
         "xp_ganho" =>
             $xpGanho,
