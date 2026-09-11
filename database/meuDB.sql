@@ -938,3 +938,186 @@ LEFT JOIN questoes q ON q.fase_id = f.id
 WHERE f.jogo_id = 1
 GROUP BY f.id, f.serie, f.numero, f.nome
 ORDER BY f.serie, f.numero;
+
+
+USE b17_42774059_tcc;
+
+SET NAMES utf8mb4;
+
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp) VALUES
+
+-- ==========================================
+-- MATHCHEF - 6º ANO
+-- ==========================================
+
+(1, 1, 'Pense em quantidades que estão sendo juntadas. Qual operação usamos quando queremos descobrir o total?', 50),
+
+(2, 1, 'Se alguns ovos foram usados, pense em retirar essa quantidade do total que havia no início.', 50),
+
+(3, 1, 'A palavra "metade" representa uma divisão do inteiro em duas partes iguais. Pense em quantas dessas partes você precisa.', 50),
+
+(4, 1, 'Observe o número de partes que foram usadas e o total de partes da pizza. Depois tente simplificar a fração.', 50),
+
+(5, 1, 'Para descobrir 10%, pense em dividir o valor total em 10 partes iguais.', 50),
+
+(6, 1, 'Transforme o número decimal em uma fração com denominador 10 e depois simplifique, se possível.', 50),
+
+(7, 1, 'Antes de fazer a subtração, transforme quilogramas em gramas para deixar as duas quantidades na mesma unidade.', 50),
+
+(8, 1, 'Transforme 1/2 em uma fração com o mesmo denominador de 3/4. Depois veja quanto falta para chegar ao total.', 50),
+
+(9, 1, 'Lembre-se de que 1 litro corresponde a 1.000 mililitros. Use essa relação para fazer a conversão.', 50),
+
+(10, 1, 'Na parte decimal, observe os números que aparecem depois da vírgula.', 50),
+
+(11, 1, 'Compare a quantidade de pessoas. Se o número de pessoas dobrou, o que acontece com a quantidade de farinha?', 50),
+
+(12, 1, 'Se cada bolo precisa da mesma quantidade de ovos, multiplique a quantidade usada em um bolo pelo número de bolos.', 50),
+
+(13, 1, 'A quantidade de leite é igual para cada porção. Multiplique a quantidade de uma porção pelo número de porções.', 50),
+
+(14, 1, 'Se cada uma das 6 porções usa a mesma quantidade, você pode repetir essa quantidade 6 vezes ou fazer uma multiplicação.', 50),
+
+(15, 1, 'Se a receita será feita em quantidade dobrada, o custo também deve ser multiplicado por 2.', 50),
+
+(16, 1, 'Converta tudo para gramas antes de subtrair. Depois transforme o resultado de volta para quilogramas, se necessário.', 50),
+
+(17, 1, 'Como as duas frações possuem o mesmo denominador, observe apenas a diferença entre os numeradores.', 50),
+
+(18, 1, '25% representa uma parte de um total dividido em quatro partes iguais. Pense em dividir a quantidade por 4.', 50),
+
+(19, 1, 'Primeiro descubra quantas partes foram usadas ao todo. Depois compare esse número com as 12 partes originais.', 50),
+
+(20, 1, 'Converta os 2 litros para mililitros. Depois descubra quanto foi usado nos 6 copos.', 50),
+
+-- ==========================================
+-- MATHCHEF - 7º ANO
+-- ==========================================
+
+(21, 1, 'Comece pela temperatura inicial e pense no aumento como uma adição. Cuidado com o sinal negativo.', 50),
+
+(22, 1, 'Quando uma temperatura negativa aumenta, você está caminhando em direção ao zero e depois aos números positivos.', 50),
+
+(23, 1, 'As duas frações possuem o mesmo denominador. Some os numeradores e observe quantas partes do inteiro foram obtidas.', 50),
+
+(24, 1, 'Use a relação entre litros e mililitros. Um litro corresponde a 1.000 mililitros.', 50),
+
+(25, 1, 'Transforme 15% em uma fração ou número decimal e multiplique pela quantidade total.', 50),
+
+(26, 1, 'Compare 6 bolos com 2 bolos. Descubra por quantas vezes a quantidade de bolos aumentou e faça o mesmo com os ovos.', 50),
+
+(27, 1, 'Para calcular 20%, transforme a porcentagem em decimal e multiplique pelo preço original.', 50),
+
+(28, 1, 'A quantidade de porções passou de 8 para 16. Descubra a relação entre esses dois números e aplique-a às xícaras.', 50),
+
+(29, 1, 'Um aumento de 10% significa acrescentar ao preço original uma décima parte desse valor.', 50),
+
+(30, 1, 'Calcule primeiro quanto representa 25% do preço. Depois retire esse valor do preço original.', 50),
+
+(31, 1, 'Se cada bolo usa x ovos, pense em somar x três vezes: x + x + x.', 50),
+
+(32, 1, 'Você precisa descobrir qual número somado a 7 resulta em 15. Faça a operação inversa da adição.', 50),
+
+(33, 1, 'Se o dobro de um número é 18, pense na operação inversa da multiplicação por 2.', 50),
+
+(34, 1, 'Descubra primeiro quantos ovos são usados em cada bolo. Depois multiplique essa quantidade por 8.', 50),
+
+(35, 1, 'Se cada unidade custa 12 reais e existem x unidades, pense em uma multiplicação entre o preço de uma unidade e a quantidade de unidades.', 50),
+
+(36, 1, 'Calcule 5% de 100. Uma porcentagem pode ser transformada em decimal antes da multiplicação.', 50),
+
+(37, 1, 'Você sabe o total e já conhece uma parte dele. Use a subtração para descobrir a quantidade que falta.', 50),
+
+(38, 1, 'Primeiro elimine o -5 fazendo a operação inversa. Depois descubra o valor de x dividindo pelo número que o acompanha.', 50),
+
+(39, 1, 'Multiplicar uma fração por 3 significa multiplicar seu numerador por 3. Observe o que acontece com o denominador.', 50),
+
+(40, 1, 'Transforme 40% em decimal e multiplique pela quantidade total de gramas.', 50),
+
+-- ==========================================
+-- MATHCHEF - 8º ANO
+-- ==========================================
+
+(41, 1, 'Use a fórmula do quadrado da soma: o primeiro termo ao quadrado, mais duas vezes o produto dos termos, mais o segundo termo ao quadrado.', 50),
+
+(42, 1, 'Procure um fator que apareça nos dois termos da expressão. Coloque esse fator em evidência.', 50),
+
+(43, 1, 'Lembre-se de que 10 elevado ao quadrado significa 10 multiplicado por ele mesmo.', 50),
+
+(44, 1, 'Um número irracional não pode ser escrito como uma fração exata de dois números inteiros. Pense nas raízes quadradas que não resultam em números inteiros.', 50),
+
+(45, 1, 'Some as duas equações para eliminar uma das incógnitas. Depois substitua o valor encontrado em uma das equações.', 50),
+
+(46, 1, 'A área de um círculo é calculada multiplicando pi pelo quadrado do raio. Primeiro descubra o quadrado do raio.', 50),
+
+(47, 1, 'Para calcular o volume de um cilindro, use pi vezes o raio ao quadrado vezes a altura.', 50),
+
+(48, 1, 'Calcule primeiro quanto representa 15% de 80. Depois retire esse valor do preço original.', 50),
+
+(49, 1, 'Compare as duas equações. Subtrair uma da outra pode eliminar uma das incógnitas e facilitar o cálculo.', 50),
+
+(50, 1, 'Para encontrar 30% de uma quantidade, transforme 30% em 0,30 e multiplique pelo total.', 50),
+
+(51, 1, 'Observe a razão 2:3. Se 2 partes correspondem a 8 cm, descubra primeiro quanto vale 1 parte.', 50),
+
+(52, 1, 'O comprimento da circunferência é calculado por 2 vezes pi vezes o raio.', 50),
+
+(53, 1, 'Quando multiplicamos potências de mesma base, podemos somar os expoentes antes de calcular o resultado.', 50),
+
+(54, 1, 'Na notação científica, o primeiro número deve ficar entre 1 e 10. Conte quantas casas a vírgula precisa se mover.', 50),
+
+(55, 1, 'O volume de um prisma é calculado multiplicando a área da base pela altura.', 50),
+
+(56, 1, 'Procure dois números que multiplicados resultem em 6 e somados resultem em 5. Eles ajudam a fatorar a equação.', 50),
+
+(57, 1, 'Use novamente a fórmula da área do círculo: pi vezes o raio ao quadrado.', 50),
+
+(58, 1, 'Primeiro isole o termo que contém x ao quadrado. Depois pense em quais números possuem quadrado igual ao valor encontrado.', 50),
+
+(59, 1, 'Para calcular a média, some todos os valores e divida pela quantidade de valores existentes.', 50),
+
+(60, 1, 'Probabilidade é a quantidade de resultados favoráveis dividida pela quantidade total de possibilidades.', 50),
+
+-- ==========================================
+-- MATHCHEF - 9º ANO
+-- ==========================================
+
+(61, 1, 'Procure dois números que multiplicados resultem em 6 e somados resultem em 5. Eles permitem fatorar a equação.', 50),
+
+(62, 1, 'Substitua o valor de x na expressão. Primeiro faça a multiplicação e depois a adição.', 50),
+
+(63, 1, 'Pense em qual número multiplicado por ele mesmo resulta em 144.', 50),
+
+(64, 1, 'Descubra quantos litros correspondem a cada porção. Depois multiplique essa quantidade pelo número de porções desejado.', 50),
+
+(65, 1, 'A fórmula do volume da esfera é quatro terços vezes pi vezes o raio ao cubo. Primeiro calcule o cubo do raio.', 50),
+
+(66, 1, 'Descubra quantos quilômetros a nave percorre com cada litro. Depois use essa mesma proporção para 700 km.', 50),
+
+(67, 1, 'Isole x ao quadrado dividindo os dois lados por 2. Depois lembre que tanto um número positivo quanto seu oposto podem ter o mesmo quadrado.', 50),
+
+(68, 1, 'Substitua 5 no lugar de x na função e siga a ordem das operações.', 50),
+
+(69, 1, 'O volume de uma pirâmide é a área da base multiplicada pela altura e dividida por 3.', 50),
+
+(70, 1, 'Coloque os valores em ordem. Como existe uma quantidade ímpar de números, a mediana será o valor que fica exatamente no centro.', 50),
+
+(71, 1, 'Procure dois números que multiplicados resultem em 12 e somados resultem em 7. Eles ajudam a fatorar a equação.', 50),
+
+(72, 1, 'Substitua x por 2 na função e resolva primeiro a potência, depois a multiplicação e por fim as demais operações.', 50),
+
+(73, 1, 'Separe 50 em um produto que contenha um quadrado perfeito. Depois retire a raiz desse quadrado perfeito.', 50),
+
+(74, 1, 'Use o Teorema de Pitágoras. Ele relaciona os dois catetos com a hipotenusa por meio dos quadrados dessas medidas.', 50),
+
+(75, 1, 'Use a fórmula do volume da esfera e lembre que o raio precisa ser elevado ao cubo.', 50),
+
+(76, 1, 'Procure dois números que multiplicados resultem em 8 e somados resultem em 6. Eles podem ajudar na fatoração.', 50),
+
+(77, 1, 'Use o Teorema de Pitágoras: some os quadrados dos dois catetos e depois encontre a raiz quadrada do resultado.', 50),
+
+(78, 1, 'Substitua 4 no lugar de x. Resolva primeiro o quadrado de 4 e depois continue com as outras operações.', 50),
+
+(79, 1, 'Para encontrar o volume da esfera, use quatro terços vezes pi vezes o raio ao cubo.', 50),
+
+(80, 1, 'Para encontrar a mediana, coloque os valores em ordem e observe o valor central. Para encontrar a moda, procure o número que mais se repete.', 50);

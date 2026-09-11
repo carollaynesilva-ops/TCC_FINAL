@@ -572,13 +572,14 @@ $dificuldade = $dificuldades[$fase["nivel_dificuldade"]] ?? "Fácil";
 
         <script>
             const questoes = <?= json_encode(
-                $questoesCompletas,
-                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-            ) ?>;
+                                    $questoesCompletas,
+                                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                                ) ?>;
 
             const usuarioId = <?= $usuarioId ?>;
             const faseId = <?= $faseId ?>;
             const serie = <?= $serie ?>;
+            const usuarioXp = <?= (int) $usuario["xp"] ?>;
         </script>
 
     <?php endif; ?>

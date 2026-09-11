@@ -5,12 +5,10 @@ document.addEventListener("DOMContentLoaded", function () {
        ===================================================== */
 
     let questaoAtual = 0;
-
     let pontuacao = 0;
     let acertos = 0;
     let erros = 0;
     let dicasUsadas = 0;
-
     let respostaSelecionada = false;
 
     /*
@@ -31,6 +29,12 @@ document.addEventListener("DOMContentLoaded", function () {
      * XP disponível durante a partida.
      *
      * O valor inicial deve ser enviado pelo PHP.
+     *
+     * IMPORTANTE:
+     * O JavaScript usa esse valor apenas para atualizar
+     * a interface.
+     *
+     * O desconto REAL do XP é feito pelo PHP.
      */
     let xpDisponivel =
         typeof usuarioXp !== "undefined"
@@ -52,9 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("questionPoints");
 
     const alternativesContainer =
-        document.getElementById(
-            "alternativesContainer"
-        );
+        document.getElementById("alternativesContainer");
 
     const feedback =
         document.getElementById("feedback");
@@ -100,6 +102,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
+       XP NA INTERFACE
+       ===================================================== */
+
+    /*
+     * Procura elementos que possam mostrar o XP atual.
+     *
+     * Caso sua página tenha algum desses IDs, eles serão
+     * atualizados automaticamente.
+     */
+    const xpElements = [
+        document.getElementById("xp"),
+        document.getElementById("xpValue"),
+        document.getElementById("userXp"),
+        document.getElementById("xpTop")
+    ].filter(Boolean);
+
+
+    function atualizarXPInterface() {
+
+        xpElements.forEach(function (elemento) {
+            elemento.textContent = xpDisponivel;
+        });
+
+    }
+
+
+    /* =====================================================
        TEMA
        ===================================================== */
 
@@ -136,8 +165,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     "mathrun-tema",
                     tema
                 );
+
             }
         );
+
     });
 
 
@@ -151,6 +182,7 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
         body.removeAttribute("data-theme");
+
 
         if (tema === "dark") {
 
@@ -176,7 +208,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 "data-theme",
                 "light"
             );
+
         }
+
 
         botoesTema.forEach(function (botao) {
 
@@ -189,7 +223,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 "active",
                 temaBotao === tema
             );
+
         });
+
     }
 
 
@@ -206,15 +242,18 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+
         respostaSelecionada = false;
 
         inicioQuestao = Date.now();
+
 
         questionNumber.textContent =
             questaoAtual + 1;
 
         totalQuestions.textContent =
             questoes.length;
+
 
         questionText.textContent =
             questao.pergunta;
@@ -225,6 +264,11 @@ document.addEventListener("DOMContentLoaded", function () {
         questionPoints.textContent =
             questao.pontuacao;
 
+
+        /*
+         * Esconde o feedback e o botão de próxima questão
+         * ao carregar uma nova questão.
+         */
         feedback.hidden = true;
 
         feedback.className =
@@ -232,15 +276,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
         nextButton.hidden = true;
 
+
         alternativesContainer.innerHTML = "";
 
         hintsContainer.innerHTML = "";
+
 
         atualizarProgresso();
 
         criarAlternativas(questao);
 
         criarDicas(questao);
+
     }
 
 
@@ -257,17 +304,17 @@ document.addEventListener("DOMContentLoaded", function () {
          *
          * questão 1 de 5 → 0%
          * questão 2 de 5 → 20%
-         * ...
          */
-
         const porcentagem =
             (questaoAtual / questoes.length) * 100;
+
 
         progressFill.style.width =
             porcentagem + "%";
 
         progressPercent.textContent =
             Math.round(porcentagem) + "%";
+
     }
 
 
@@ -280,6 +327,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const letras =
             ["A", "B", "C", "D"];
 
+
         questao.alternativas.forEach(
             function (alternativa, index) {
 
@@ -291,6 +339,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 button.className =
                     "alternative-button";
 
+
                 const letra =
                     document.createElement("span");
 
@@ -300,15 +349,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 letra.textContent =
                     letras[index] || "?";
 
+
                 const texto =
                     document.createElement("span");
 
                 texto.textContent =
                     alternativa.texto;
 
+
                 button.appendChild(letra);
 
                 button.appendChild(texto);
+
 
                 button.addEventListener(
                     "click",
@@ -318,14 +370,18 @@ document.addEventListener("DOMContentLoaded", function () {
                             alternativa,
                             button
                         );
+
                     }
                 );
+
 
                 alternativesContainer.appendChild(
                     button
                 );
+
             }
         );
+
     }
 
 
@@ -342,18 +398,25 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+
         respostaSelecionada = true;
+
 
         const questao =
             questoes[questaoAtual];
+
 
         const botoes =
             document.querySelectorAll(
                 ".alternative-button"
             );
 
-        botoes.forEach(function (botao) {
 
+        /*
+         * Depois que uma alternativa é escolhida,
+         * todas ficam desabilitadas.
+         */
+        botoes.forEach(function (botao) {
             botao.disabled = true;
         });
 
@@ -363,9 +426,8 @@ document.addEventListener("DOMContentLoaded", function () {
          * imediatamente na tela.
          *
          * O resultado definitivo será recalculado
-         * pelo PHP usando o banco de dados.
+         * pelo PHP usando o banco.
          */
-
         const correta =
             Boolean(
                 Number(
@@ -380,24 +442,32 @@ document.addEventListener("DOMContentLoaded", function () {
                 "correct"
             );
 
+
             acertos++;
+
 
             pontuacao +=
                 Number(questao.pontuacao);
 
-            feedbackIcon.textContent = "✓";
+
+            feedbackIcon.textContent =
+                "✓";
+
 
             feedbackTitle.textContent =
                 "Resposta correta!";
+
 
             feedbackText.textContent =
                 "Você acertou e ganhou " +
                 questao.pontuacao +
                 " pontos.";
 
+
             feedback.classList.add(
                 "correct-feedback"
             );
+
 
         } else {
 
@@ -405,15 +475,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 "wrong"
             );
 
+
             erros++;
 
-            feedbackIcon.textContent = "✕";
+
+            feedbackIcon.textContent =
+                "✕";
+
 
             feedbackTitle.textContent =
                 "Não foi dessa vez!";
 
+
             feedbackText.textContent =
                 "A resposta correta está destacada.";
+
 
             feedback.classList.add(
                 "wrong-feedback"
@@ -423,12 +499,12 @@ document.addEventListener("DOMContentLoaded", function () {
             /*
              * Destacar a alternativa correta.
              */
-
             botoes.forEach(
                 function (botao, index) {
 
                     const alternativa =
                         questao.alternativas[index];
+
 
                     if (
                         alternativa &&
@@ -442,19 +518,25 @@ document.addEventListener("DOMContentLoaded", function () {
                         botao.classList.add(
                             "correct"
                         );
+
                     }
+
                 }
             );
+
         }
 
 
         explanation.textContent =
             questao.explicacao;
 
+
         feedback.hidden = false;
+
 
         score.textContent =
             pontuacao;
+
 
         scoreTop.textContent =
             pontuacao;
@@ -463,7 +545,6 @@ document.addEventListener("DOMContentLoaded", function () {
         /*
          * Tempo gasto nesta questão.
          */
-
         const tempoResposta =
             Math.round(
                 (Date.now() - inicioQuestao) / 1000
@@ -474,12 +555,10 @@ document.addEventListener("DOMContentLoaded", function () {
          * Guardar resposta para enviar ao PHP.
          *
          * IMPORTANTE:
-         * Não enviamos "correta" como informação
-         * confiável.
+         * Não enviamos "correta" como informação confiável.
          *
          * O PHP vai conferir isso novamente.
          */
-
         respostasPartida.push({
 
             questao_id:
@@ -514,9 +593,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             nextButtonText.textContent =
                 "Finalizar fase";
+
         }
 
+
         nextButton.hidden = false;
+
     }
 
 
@@ -527,10 +609,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function criarDicas(questao) {
 
         /*
-         * Marca que nenhuma dica foi usada
-         * nesta questão.
+         * Cada questão começa sem dica usada.
          */
-
         questao.dicaUsada = false;
 
 
@@ -548,9 +628,13 @@ document.addEventListener("DOMContentLoaded", function () {
             vazio.textContent =
                 "Nenhuma dica disponível para esta questão.";
 
-            hintsContainer.appendChild(vazio);
+
+            hintsContainer.appendChild(
+                vazio
+            );
 
             return;
+
         }
 
 
@@ -565,6 +649,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 button.className =
                     "hint-button";
 
+
                 const texto =
                     document.createElement("span");
 
@@ -572,10 +657,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     "💡 Dica " +
                     dica.ordem;
 
+
                 const custo =
                     document.createElement("span");
 
 
+                /*
+                 * Como todas as nossas dicas custam 50 XP,
+                 * mostramos o valor vindo do banco.
+                 */
                 if (
                     Number(dica.custo_xp) > 0
                 ) {
@@ -589,6 +679,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     custo.textContent =
                         "Grátis";
+
                 }
 
 
@@ -606,6 +697,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             button,
                             questao
                         );
+
                     }
                 );
 
@@ -613,8 +705,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 hintsContainer.appendChild(
                     button
                 );
+
             }
         );
+
     }
 
 
@@ -628,9 +722,21 @@ document.addEventListener("DOMContentLoaded", function () {
         questao
     ) {
 
+        /*
+         * Impede clicar novamente no mesmo botão.
+         */
         if (button.disabled) {
             return;
         }
+
+
+        /*
+         * Impede usar mais de uma dica na mesma questão.
+         */
+        if (questao.dicaUsada) {
+            return;
+        }
+
 
         const custo =
             Number(dica.custo_xp);
@@ -639,10 +745,8 @@ document.addEventListener("DOMContentLoaded", function () {
         /*
          * Verificação visual/local.
          *
-         * O PHP também deverá validar o XP
-         * definitivamente.
+         * O PHP também vai validar definitivamente.
          */
-
         if (
             custo > 0 &&
             xpDisponivel < custo
@@ -651,53 +755,245 @@ document.addEventListener("DOMContentLoaded", function () {
             mostrarMensagemXP();
 
             return;
+
         }
 
 
         /*
-         * Descontar temporariamente o XP.
+         * Desabilita o botão imediatamente enquanto
+         * esperamos a resposta do servidor.
+         *
+         * Isso evita dois cliques rápidos.
          */
-
-        if (custo > 0) {
-
-            xpDisponivel -= custo;
-
-            if (xpDisponivel < 0) {
-                xpDisponivel = 0;
-            }
-        }
-
-
-        dicasUsadas++;
-
-        questao.dicaUsada = true;
-
-
-        const dicaTexto =
-            document.createElement("div");
-
-        dicaTexto.className =
-            "hint-text";
-
-        dicaTexto.textContent =
-            dica.texto;
-
-
         button.disabled = true;
 
+        button.classList.add("loading");
 
-        button.parentNode.insertBefore(
-            dicaTexto,
-            button.nextSibling
+        button.setAttribute(
+            "aria-busy",
+            "true"
         );
+
+
+        const dados =
+            new FormData();
+
+
+        dados.append(
+            "questao_id",
+            questao.id
+        );
+
+
+        dados.append(
+            "fase_id",
+            faseId
+        );
+
+
+        /*
+         * Envia a solicitação para o PHP.
+         *
+         * O PHP é quem realmente:
+         * - verifica o usuário;
+         * - verifica a fase;
+         * - verifica a questão;
+         * - verifica o XP;
+         * - desconta 50 XP;
+         * - devolve a dica.
+         */
+        fetch(
+            "usar_dica_mathchef.php",
+            {
+                method: "POST",
+                body: dados
+            }
+        )
+
+            .then(function (response) {
+
+                return response.json()
+                    .then(function (resultado) {
+
+                        if (!response.ok) {
+
+                            throw new Error(
+                                resultado.mensagem ||
+                                "Não foi possível usar a dica."
+                            );
+
+                        }
+
+                        return resultado;
+
+                    });
+
+            })
+
+            .then(function (resultado) {
+
+                if (!resultado.sucesso) {
+
+                    throw new Error(
+                        resultado.mensagem ||
+                        "Não foi possível liberar a dica."
+                    );
+
+                }
+
+
+                /*
+                 * O servidor devolveu o XP verdadeiro
+                 * depois do desconto.
+                 */
+                if (
+                    typeof resultado.xp_atual !==
+                    "undefined"
+                ) {
+
+                    xpDisponivel =
+                        Number(
+                            resultado.xp_atual
+                        );
+
+                } else {
+
+                    /*
+                     * Fallback caso o PHP não envie
+                     * o novo XP.
+                     */
+                    xpDisponivel -= custo;
+
+                }
+
+
+                if (xpDisponivel < 0) {
+                    xpDisponivel = 0;
+                }
+
+
+                /*
+                 * Atualiza o XP mostrado na página.
+                 */
+                atualizarXPInterface();
+
+
+                /*
+                 * Marca a dica como usada.
+                 */
+                dicasUsadas++;
+
+                questao.dicaUsada = true;
+
+
+                /*
+                 * Criar elemento visual da dica.
+                 *
+                 * Usamos o texto retornado pelo servidor,
+                 * e não confiamos no texto enviado pelo cliente.
+                 */
+                const dicaTexto =
+                    document.createElement("div");
+
+                dicaTexto.className =
+                    "hint-text";
+
+
+                dicaTexto.textContent =
+                    resultado.dica &&
+                        resultado.dica.texto
+                        ? resultado.dica.texto
+                        : dica.texto;
+
+
+                button.classList.remove(
+                    "loading"
+                );
+
+                button.removeAttribute(
+                    "aria-busy"
+                );
+
+
+                /*
+                 * Mostra a dica abaixo do botão.
+                 */
+                button.parentNode.insertBefore(
+                    dicaTexto,
+                    button.nextSibling
+                );
+
+
+                /*
+                 * Mantém o botão desabilitado.
+                 */
+                button.disabled = true;
+
+
+                /*
+                 * Se existirem outros botões de dica,
+                 * eles também ficam desabilitados porque
+                 * a regra é uma dica por questão.
+                 */
+                const outrosBotoes =
+                    hintsContainer.querySelectorAll(
+                        ".hint-button"
+                    );
+
+
+                outrosBotoes.forEach(
+                    function (outroBotao) {
+
+                        outroBotao.disabled = true;
+
+                    }
+                );
+
+            })
+
+            .catch(function (erro) {
+
+                console.error(
+                    "Erro ao usar dica:",
+                    erro
+                );
+
+
+                /*
+                 * Se o servidor recusou a solicitação,
+                 * permitimos tentar novamente.
+                 */
+                button.disabled = false;
+
+                button.classList.remove(
+                    "loading"
+                );
+
+                button.removeAttribute(
+                    "aria-busy"
+                );
+
+
+                alert(
+                    erro.message ||
+                    "Não foi possível usar a dica."
+                );
+
+            });
+
     }
 
+
+    /* =====================================================
+       MENSAGEM DE XP INSUFICIENTE
+       ===================================================== */
 
     function mostrarMensagemXP() {
 
         alert(
             "Você não possui XP suficiente para usar esta dica."
         );
+
     }
 
 
@@ -718,6 +1014,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 carregarQuestao();
 
+
                 window.scrollTo({
                     top: 0,
                     behavior: "smooth"
@@ -726,7 +1023,9 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
 
                 finalizarFase();
+
             }
+
         }
     );
 
@@ -738,22 +1037,27 @@ document.addEventListener("DOMContentLoaded", function () {
     function finalizarFase() {
 
         /*
-         * Não usamos mais a pontuação enviada
-         * pelo navegador como fonte confiável.
+         * O navegador envia somente as respostas dadas.
          *
-         * Enviamos as respostas individuais.
+         * A pontuação, acertos e erros oficiais serão
+         * calculados novamente pelo PHP usando o banco.
          */
-
         const dados =
             new FormData();
 
 
+        /*
+         * ID da fase.
+         */
         dados.append(
             "fase_id",
             faseId
         );
 
 
+        /*
+         * Respostas individuais.
+         */
         dados.append(
             "respostas",
             JSON.stringify(
@@ -763,44 +1067,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
-         * Estes valores servem apenas para
-         * compatibilidade com o PHP atual.
-         *
-         * O PHP definitivo deve recalcular
-         * todos eles a partir das respostas.
+         * Impedir múltiplos cliques enquanto
+         * o resultado está sendo salvo.
          */
-
-        dados.append(
-            "pontuacao",
-            pontuacao
-        );
-
-        dados.append(
-            "acertos",
-            acertos
-        );
-
-        dados.append(
-            "erros",
-            erros
-        );
-
-        dados.append(
-            "dicas_usadas",
-            dicasUsadas
-        );
-
-
-        /*
-         * Impedir múltiplos envios.
-         */
-
         nextButton.disabled = true;
 
         nextButton.textContent =
             "Salvando resultado...";
 
 
+        /*
+         * Enviar para o PHP.
+         */
         fetch(
             "finalizar_mathchef.php",
             {
@@ -808,85 +1086,142 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: dados
             }
         )
-        .then(function (response) {
 
-            if (!response.ok) {
-                throw new Error(
-                    "Erro ao finalizar a fase."
-                );
-            }
+            .then(function (response) {
 
-            return response.json();
+                if (!response.ok) {
 
-        })
-        .then(function (resultado) {
+                    throw new Error(
+                        "Erro ao finalizar a fase."
+                    );
 
-            if (!resultado.sucesso) {
+                }
 
-                throw new Error(
-                    resultado.mensagem ||
-                    "Não foi possível salvar a partida."
-                );
-            }
+                return response.json();
+
+            })
+
+            .then(function (resultado) {
+
+                /*
+                 * Verificar se o PHP conseguiu
+                 * finalizar a partida.
+                 */
+                if (!resultado.sucesso) {
+
+                    throw new Error(
+                        resultado.mensagem ||
+                        "Não foi possível salvar a partida."
+                    );
+
+                }
 
 
-            /*
-             * Usamos o resultado calculado pelo PHP.
-             */
-
-            if (
-                typeof resultado.pontuacao !==
-                "undefined"
-            ) {
-
+                /*
+                 * Agora usamos os valores calculados
+                 * pelo PHP.
+                 */
                 pontuacao =
                     Number(
-                        resultado.pontuacao
+                        resultado.pontuacao || 0
                     );
-            }
 
-            if (
-                typeof resultado.acertos !==
-                "undefined"
-            ) {
 
                 acertos =
                     Number(
-                        resultado.acertos
+                        resultado.acertos || 0
                     );
-            }
 
-            if (
-                typeof resultado.erros !==
-                "undefined"
-            ) {
 
                 erros =
                     Number(
-                        resultado.erros
+                        resultado.erros || 0
                     );
-            }
 
 
-            mostrarResultado(
-                resultado
-            );
+                dicasUsadas =
+                    Number(
+                        resultado.dicas_usadas || 0
+                    );
 
-        })
-        .catch(function (erro) {
 
-            console.error(erro);
+                /*
+                 * Caso o PHP envie o XP atualizado,
+                 * podemos atualizar a interface.
+                 *
+                 * IMPORTANTE:
+                 * O PHP de finalização deve apenas SOMAR
+                 * a pontuação ao XP.
+                 *
+                 * Ele não deve descontar as dicas novamente.
+                 */
+                if (
+                    typeof resultado.xp_atual !==
+                    "undefined"
+                ) {
 
-            nextButton.disabled = false;
+                    xpDisponivel =
+                        Number(
+                            resultado.xp_atual
+                        );
 
-            nextButton.textContent =
-                "Tentar novamente";
+                    atualizarXPInterface();
 
-            alert(
-                "Não foi possível salvar sua partida. " +
-                "Verifique sua conexão e tente novamente."
-            );
-        });
+                }
+
+
+                /*
+                 * Atualizar pontuação mostrada.
+                 */
+                if (score) {
+
+                    score.textContent =
+                        pontuacao;
+
+                }
+
+
+                if (scoreTop) {
+
+                    scoreTop.textContent =
+                        pontuacao;
+
+                }
+
+
+                /*
+                 * Mostrar tela final.
+                 */
+                mostrarResultado(
+                    resultado
+                );
+
+            })
+
+            .catch(function (erro) {
+
+                console.error(
+                    "Erro ao finalizar MathChef:",
+                    erro
+                );
+
+
+                /*
+                 * Permitir tentar novamente.
+                 */
+                nextButton.disabled = false;
+
+                nextButton.textContent =
+                    "Tentar novamente";
+
+
+                alert(
+                    erro.message ||
+                    "Não foi possível salvar sua partida."
+                );
+
+            });
+
     }
 
 
@@ -943,6 +1278,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             icone =
                 "🍳";
+
         }
 
 
@@ -950,11 +1286,11 @@ document.addEventListener("DOMContentLoaded", function () {
          * Criar a tela sem colocar conteúdo
          * do banco diretamente dentro de HTML.
          */
-
         const container =
             document.querySelector(
                 ".game-container"
             );
+
 
         container.innerHTML = "";
 
@@ -990,7 +1326,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "Você terminou a fase " +
             (
                 resultado.fase &&
-                resultado.fase.nome
+                    resultado.fase.nome
                     ? resultado.fase.nome
                     : "selecionada"
             ) +
@@ -998,9 +1334,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
-         * Pontuação
+         * Pontuação.
          */
-
         const resultScore =
             document.createElement("div");
 
@@ -1032,9 +1367,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
-         * Estatísticas
+         * Estatísticas.
          */
-
         const resultStats =
             document.createElement("div");
 
@@ -1048,11 +1382,13 @@ document.addEventListener("DOMContentLoaded", function () {
             "Acertos"
         );
 
+
         criarEstatistica(
             resultStats,
             erros,
             "Erros"
         );
+
 
         criarEstatistica(
             resultStats,
@@ -1062,9 +1398,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
-         * Botões
+         * Mostrar dicas usadas.
          */
+        criarEstatistica(
+            resultStats,
+            dicasUsadas,
+            "Dicas usadas"
+        );
 
+
+        /*
+         * Mostrar XP atual, se disponível.
+         */
+        if (
+            typeof xpDisponivel !==
+            "undefined"
+        ) {
+
+            criarEstatistica(
+                resultStats,
+                xpDisponivel + " XP",
+                "XP atual"
+            );
+
+        }
+
+
+        /*
+         * Botões.
+         */
         const resultButtons =
             document.createElement("div");
 
@@ -1109,9 +1471,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
-         * Montar resultado
+         * Montar resultado.
          */
-
         resultCard.appendChild(
             resultIcon
         );
@@ -1136,6 +1497,7 @@ document.addEventListener("DOMContentLoaded", function () {
             resultButtons
         );
 
+
         container.appendChild(
             resultCard
         );
@@ -1145,8 +1507,13 @@ document.addEventListener("DOMContentLoaded", function () {
             top: 0,
             behavior: "smooth"
         });
+
     }
 
+
+    /* =====================================================
+       CRIAR ESTATÍSTICA
+       ===================================================== */
 
     function criarEstatistica(
         container,
@@ -1183,15 +1550,19 @@ document.addEventListener("DOMContentLoaded", function () {
             legendaElemento
         );
 
+
         container.appendChild(
             stat
         );
+
     }
 
 
     /* =====================================================
        INICIAR
        ===================================================== */
+
+    atualizarXPInterface();
 
     carregarQuestao();
 
