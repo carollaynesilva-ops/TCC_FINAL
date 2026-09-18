@@ -8,6 +8,22 @@ header("Content-Type: application/json; charset=UTF-8");
 
 
 // =========================================================
+// CONFIGURAÇÕES DO MATHCHEF
+// =========================================================
+
+/*
+ * Cada questão vale 20 XP.
+ */
+$XP_POR_QUESTAO = 20;
+
+/*
+ * São necessários 60 XP conquistados na fase
+ * para liberar a próxima fase.
+ */
+$XP_NECESSARIO_FASE = 60;
+
+
+// =========================================================
 // VERIFICAR LOGIN
 // =========================================================
 
@@ -22,7 +38,6 @@ if (!isset($_SESSION["usuario_id"])) {
 
     exit;
 }
-
 
 $usuarioId = (int) $_SESSION["usuario_id"];
 
@@ -64,7 +79,6 @@ $respostas = json_decode(
     true
 );
 
-
 if (
     !is_array($respostas) ||
     empty($respostas)
@@ -103,7 +117,6 @@ $stmt->execute([
 
 $usuario = $stmt->fetch();
 
-
 if (!$usuario) {
 
     http_response_code(404);
@@ -116,19 +129,12 @@ if (!$usuario) {
     exit;
 }
 
-
 $serie = (int) $usuario["serie"];
 
 
 // =========================================================
 // BUSCAR FASE
 // =========================================================
-//
-// A fase precisa:
-// - existir
-// - ser MathChef
-// - pertencer à série do aluno
-//
 
 $stmt = $pdo->prepare("
     SELECT
@@ -151,7 +157,6 @@ $stmt->execute([
 
 $fase = $stmt->fetch();
 
-
 if (!$fase) {
 
     http_response_code(403);
@@ -166,7 +171,7 @@ if (!$fase) {
 
 
 // =========================================================
-// BUSCAR QUESTÕES DA FASE
+// BUSCAR TODAS AS QUESTÕES DA FASE
 // =========================================================
 
 $stmt = $pdo->prepare("
@@ -184,10 +189,7 @@ $stmt->execute([
 
 $questoesBanco = $stmt->fetchAll();
 
-
-$totalQuestoes =
-    count($questoesBanco);
-
+$totalQuestoes = count($questoesBanco);
 
 if ($totalQuestoes === 0) {
 
@@ -210,37 +212,57 @@ $questoesValidas = [];
 
 foreach ($questoesBanco as $questao) {
 
-    $questoesValidas[
-        (int) $questao["id"]
-    ] = [
-        "pontuacao" =>
-            (int) $questao["pontuacao"]
+    $questoesValidas[(int) $questao["id"]] = [
+        "pontuacao" => (int) $questao["pontuacao"]
     ];
 }
 
 
 // =========================================================
-// VALIDAR QUANTIDADE DE RESPOSTAS
+// BUSCAR QUESTÕES QUE O ALUNO JÁ ACERTOU
 // =========================================================
 //
-// O aluno precisa responder todas as questões
-// antes de finalizar a fase.
+// Essa consulta é a parte importante da nova lógica.
+//
+// Se o aluno já acertou determinada questão em qualquer
+// tentativa anterior dessa fase, ela NÃO poderá gerar XP
+// novamente.
+//
+// Portanto:
+//
+// primeira vez + acerto = XP
+// primeira vez + erro   = 0 XP
+// replay + acerto de questão anteriormente errada = XP
+// replay + acerto de questão já acertada = 0 XP
 //
 
-if (
-    count($respostas) !==
-    $totalQuestoes
-) {
+$stmt = $pdo->prepare("
+    SELECT DISTINCT ru.questao_id
+    FROM respostas_usuario ru
+    INNER JOIN questoes q
+        ON q.id = ru.questao_id
+    INNER JOIN historico_partidas hp
+        ON hp.id = ru.partida_id
+    WHERE ru.usuario_id = ?
+      AND q.fase_id = ?
+      AND ru.correta = 1
+      AND hp.fase_id = ?
+");
 
-    http_response_code(400);
+$stmt->execute([
+    $usuarioId,
+    $faseId,
+    $faseId
+]);
 
-    echo json_encode([
-        "sucesso" => false,
-        "mensagem" =>
-            "É necessário responder todas as questões antes de finalizar a fase."
-    ]);
+$questoesJaAcertadas = [];
 
-    exit;
+while ($linha = $stmt->fetch()) {
+
+    $questaoAcertadaId =
+        (int) $linha["questao_id"];
+
+    $questoesJaAcertadas[$questaoAcertadaId] = true;
 }
 
 
@@ -262,7 +284,7 @@ $stmtAlternativa = $pdo->prepare("
 
 
 // =========================================================
-// VARIÁVEIS DO RESULTADO
+// VARIÁVEIS DA PARTIDA
 // =========================================================
 
 $pontuacao = 0;
@@ -273,14 +295,29 @@ $erros = 0;
 
 $dicasUsadas = 0;
 
+$xpGanho = 0;
 
-// Guarda quais questões já foram respondidas.
-// Isso impede enviar a mesma questão duas vezes.
+$xpQuestoesNovas = 0;
+
+
+// =========================================================
+// CONTROLE DAS QUESTÕES RESPONDIDAS
+// =========================================================
+
 $questoesRespondidas = [];
 
 
-// Guarda os dados que serão inseridos
-// em respostas_usuario.
+// =========================================================
+// QUESTÕES QUE AINDA PRECISAM SER RECUPERADAS
+// =========================================================
+
+$questoesPendentes = [];
+
+
+// =========================================================
+// RESPOSTAS VALIDADAS
+// =========================================================
+
 $respostasValidadas = [];
 
 
@@ -296,8 +333,8 @@ foreach ($respostas as $resposta) {
 
     $questaoId =
         isset($resposta["questao_id"])
-            ? (int) $resposta["questao_id"]
-            : 0;
+        ? (int) $resposta["questao_id"]
+        : 0;
 
 
     // -----------------------------------------------------
@@ -306,8 +343,8 @@ foreach ($respostas as $resposta) {
 
     $alternativaId =
         isset($resposta["alternativa_id"])
-            ? (int) $resposta["alternativa_id"]
-            : 0;
+        ? (int) $resposta["alternativa_id"]
+        : 0;
 
 
     // -----------------------------------------------------
@@ -316,8 +353,8 @@ foreach ($respostas as $resposta) {
 
     $tempoResposta =
         isset($resposta["tempo_resposta"])
-            ? (int) $resposta["tempo_resposta"]
-            : 0;
+        ? (int) $resposta["tempo_resposta"]
+        : 0;
 
 
     // -----------------------------------------------------
@@ -329,21 +366,16 @@ foreach ($respostas as $resposta) {
 
 
     // -----------------------------------------------------
-    // VALIDAR ID DA QUESTÃO
+    // VALIDAR QUESTÃO
     // -----------------------------------------------------
 
-    if (
-        !isset(
-            $questoesValidas[$questaoId]
-        )
-    ) {
+    if (!isset($questoesValidas[$questaoId])) {
 
         http_response_code(400);
 
         echo json_encode([
             "sucesso" => false,
-            "mensagem" =>
-                "Foi enviada uma questão inválida."
+            "mensagem" => "Foi enviada uma questão inválida."
         ]);
 
         exit;
@@ -354,23 +386,18 @@ foreach ($respostas as $resposta) {
     // IMPEDIR QUESTÃO DUPLICADA
     // -----------------------------------------------------
 
-    if (
-        isset(
-            $questoesRespondidas[$questaoId]
-        )
-    ) {
+    if (isset($questoesRespondidas[$questaoId])) {
 
         http_response_code(400);
 
         echo json_encode([
             "sucesso" => false,
             "mensagem" =>
-                "Uma questão foi enviada mais de uma vez."
+            "Uma questão foi enviada mais de uma vez."
         ]);
 
         exit;
     }
-
 
     $questoesRespondidas[$questaoId] = true;
 
@@ -380,23 +407,18 @@ foreach ($respostas as $resposta) {
     // -----------------------------------------------------
 
     if ($tempoResposta < 0) {
+
         $tempoResposta = 0;
     }
 
-
-    /*
-     * Evita valores absurdos enviados manualmente.
-     * 1 hora para responder uma questão já é uma
-     * relação bastante generosa com a matemática.
-     */
-
     if ($tempoResposta > 3600) {
+
         $tempoResposta = 3600;
     }
 
 
     // -----------------------------------------------------
-    // BUSCAR ALTERNATIVA NO BANCO
+    // VALIDAR ALTERNATIVA
     // -----------------------------------------------------
 
     if ($alternativaId <= 0) {
@@ -405,13 +427,16 @@ foreach ($respostas as $resposta) {
 
         echo json_encode([
             "sucesso" => false,
-            "mensagem" =>
-                "Alternativa inválida."
+            "mensagem" => "Alternativa inválida."
         ]);
 
         exit;
     }
 
+
+    // -----------------------------------------------------
+    // BUSCAR ALTERNATIVA NO BANCO
+    // -----------------------------------------------------
 
     $stmtAlternativa->execute([
         $alternativaId,
@@ -422,11 +447,6 @@ foreach ($respostas as $resposta) {
         $stmtAlternativa->fetch();
 
 
-    /*
-     * Se a alternativa não pertence à questão,
-     * rejeitamos a resposta.
-     */
-
     if (!$alternativa) {
 
         http_response_code(400);
@@ -434,7 +454,7 @@ foreach ($respostas as $resposta) {
         echo json_encode([
             "sucesso" => false,
             "mensagem" =>
-                "A alternativa enviada não pertence à questão."
+            "A alternativa enviada não pertence à questão."
         ]);
 
         exit;
@@ -442,12 +462,16 @@ foreach ($respostas as $resposta) {
 
 
     // -----------------------------------------------------
-    // VERIFICAR RESPOSTA CORRETA
+    // VERIFICAR SE ESTÁ CORRETA
     // -----------------------------------------------------
 
     $correta =
         (bool) $alternativa["correta"];
 
+
+    // -----------------------------------------------------
+    // PONTUAÇÃO
+    // -----------------------------------------------------
 
     if ($correta) {
 
@@ -455,64 +479,99 @@ foreach ($respostas as $resposta) {
 
         $pontuacao +=
             $questoesValidas[$questaoId]["pontuacao"];
-
     } else {
 
         $erros++;
+
+        /*
+         * Se errou agora, essa questão continua pendente.
+         */
+        $questoesPendentes[] = $questaoId;
     }
 
 
     // -----------------------------------------------------
-    // CONTAR DICAS
+    // XP
+    // -----------------------------------------------------
+    //
+    // O XP depende de a questão já ter sido acertada
+    // anteriormente.
+    //
+
+    if (
+        $correta &&
+        !isset($questoesJaAcertadas[$questaoId])
+    ) {
+
+        /*
+         * Primeira vez que o aluno acerta esta questão.
+         */
+        $xpGanho += $XP_POR_QUESTAO;
+
+        $xpQuestoesNovas++;
+
+        /*
+         * Marcamos localmente como acertada para impedir
+         * qualquer duplicação dentro da mesma requisição.
+         */
+        $questoesJaAcertadas[$questaoId] = true;
+    }
+
+
+    // -----------------------------------------------------
+    // DICAS
     // -----------------------------------------------------
 
     if ($usouDica) {
+
         $dicasUsadas++;
     }
 
 
     // -----------------------------------------------------
-    // GUARDAR RESPOSTA VALIDADA
+    // GUARDAR RESPOSTA
     // -----------------------------------------------------
 
     $respostasValidadas[] = [
 
         "questao_id" =>
-            $questaoId,
+        $questaoId,
 
         "resposta" =>
-            $alternativa["texto"],
+        $alternativa["texto"],
 
         "correta" =>
-            $correta,
+        $correta,
 
         "tempo_resposta" =>
-            $tempoResposta,
+        $tempoResposta,
 
         "usou_dica" =>
-            $usouDica
+        $usouDica
     ];
 }
 
 
 // =========================================================
-// GARANTIR QUE TODAS AS QUESTÕES FORAM RESPONDIDAS
+// BUSCAR QUESTÕES QUE AINDA ESTÃO PENDENTES
 // =========================================================
+//
+// Depois de analisar a tentativa atual, precisamos descobrir
+// todas as questões da fase que ainda NÃO foram acertadas.
+//
+// Isso será utilizado pelo jogar_mathchef.js para montar
+// o próximo replay.
+//
 
-if (
-    count($questoesRespondidas) !==
-    $totalQuestoes
-) {
+$questoesPendentes = [];
 
-    http_response_code(400);
+foreach ($questoesValidas as $questaoId => $dadosQuestao) {
 
-    echo json_encode([
-        "sucesso" => false,
-        "mensagem" =>
-            "Nem todas as questões foram respondidas."
-    ]);
+    if (!isset($questoesJaAcertadas[$questaoId])) {
 
-    exit;
+        $questoesPendentes[] =
+            (int) $questaoId;
+    }
 }
 
 
@@ -526,19 +585,8 @@ try {
 
 
     // =====================================================
-    // VERIFICAR SE A FASE JÁ FOI CONCLUÍDA ANTES
+    // BUSCAR PROGRESSO ATUAL
     // =====================================================
-    //
-    // Essa informação precisa ser obtida antes de atualizar
-    // o progresso.
-    //
-    // Se já estiver concluída:
-    // - não ganha XP novamente
-    // - não ganha conquista novamente
-    // - ainda pode jogar
-    // - ainda registra tentativa
-    // - ainda pode melhorar a pontuação
-    //
 
     $stmt = $pdo->prepare("
         SELECT
@@ -563,13 +611,43 @@ try {
 
 
     // =====================================================
-    // DEFINIR SE É PRIMEIRA CONCLUSÃO
+    // VERIFICAR XP JÁ GANHO NESTA FASE
     // =====================================================
+    //
+    // O XP global do usuário não permite descobrir quanto
+    // foi conquistado especificamente nesta fase.
+    //
+    // Por isso usamos as respostas corretas já registradas
+    // para calcular a quantidade de questões que já deram XP.
+    //
+    // Como cada questão vale 20 XP:
+    //
+    // questões acertadas × 20 = XP conquistado na fase
+    //
 
-    $primeiraConclusao = (
-        !$progresso ||
-        !(bool) $progresso["concluida"]
-    );
+    $quantidadeQuestoesAcertadas =
+        count($questoesJaAcertadas);
+
+
+    $xpDaFase =
+        $quantidadeQuestoesAcertadas *
+        $XP_POR_QUESTAO;
+
+
+    // =====================================================
+    // VERIFICAR SE A FASE ESTÁ CONCLUÍDA
+    // =====================================================
+    //
+    // A fase passa a ser considerada concluída quando
+    // todas as questões tiverem sido acertadas pelo menos
+    // uma vez.
+    //
+
+    $faseConcluida =
+        (
+            $quantidadeQuestoesAcertadas >=
+            $totalQuestoes
+        );
 
 
     // =====================================================
@@ -598,7 +676,6 @@ try {
         $erros,
         $dicasUsadas
     ]);
-
 
     $partidaId =
         (int) $pdo->lastInsertId();
@@ -637,48 +714,59 @@ try {
 
             $respostaValida["resposta"],
 
-            $respostaValida["correta"] ? 1 : 0,
+            $respostaValida["correta"]
+                ? 1
+                : 0,
 
             $respostaValida["tempo_resposta"],
 
-            $respostaValida["usou_dica"] ? 1 : 0
+            $respostaValida["usou_dica"]
+                ? 1
+                : 0
         ]);
     }
 
 
     // =====================================================
-    // ATUALIZAR PROGRESSO EXISTENTE
+    // ATUALIZAR PROGRESSO
     // =====================================================
 
+    $melhorPontuacaoAnterior =
+        $progresso
+        ? (int) $progresso["melhor_pontuacao"]
+        : 0;
+
+
+    $melhorPontuacao =
+        max(
+            $melhorPontuacaoAnterior,
+            $pontuacao
+        );
+
+
+    $tentativas =
+        $progresso
+        ? (int) $progresso["tentativas"] + 1
+        : 1;
+
+
     if ($progresso) {
-
-        $melhorPontuacaoAnterior =
-            (int) $progresso["melhor_pontuacao"];
-
-
-        $melhorPontuacao =
-            max(
-                $melhorPontuacaoAnterior,
-                $pontuacao
-            );
-
-
-        $tentativas =
-            (int) $progresso["tentativas"] + 1;
-
 
         $stmt = $pdo->prepare("
             UPDATE progresso_usuario
             SET
-                concluida = TRUE,
+                concluida = ?,
                 pontuacao = ?,
                 tentativas = ?,
                 melhor_pontuacao = ?,
-                data_conclusao = NOW()
+                data_conclusao = ?
             WHERE id = ?
         ");
 
+
         $stmt->execute([
+
+            $faseConcluida ? 1 : 0,
 
             $pontuacao,
 
@@ -686,20 +774,13 @@ try {
 
             $melhorPontuacao,
 
+            $faseConcluida
+                ? date("Y-m-d H:i:s")
+                : null,
+
             $progresso["id"]
         ]);
-
     } else {
-
-        // =================================================
-        // PRIMEIRO REGISTRO DA FASE
-        // =================================================
-
-        $melhorPontuacao =
-            $pontuacao;
-
-        $tentativas = 1;
-
 
         $stmt = $pdo->prepare("
             INSERT INTO progresso_usuario (
@@ -711,8 +792,9 @@ try {
                 melhor_pontuacao,
                 data_conclusao
             )
-            VALUES (?, ?, TRUE, ?, 1, ?, NOW())
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
+
 
         $stmt->execute([
 
@@ -720,70 +802,86 @@ try {
 
             $faseId,
 
+            $faseConcluida ? 1 : 0,
+
             $pontuacao,
 
-            $melhorPontuacao
+            1,
+
+            $melhorPontuacao,
+
+            $faseConcluida
+                ? date("Y-m-d H:i:s")
+                : null
         ]);
     }
 
 
     // =====================================================
-    // ATUALIZAR XP E PONTUAÇÃO
+    // ATUALIZAR XP DO USUÁRIO
     // =====================================================
     //
-    // REGRA:
+    // SOMENTE o XP novo desta tentativa é acrescentado.
     //
-    // Primeira conclusão:
-    //     XP ganho = pontuação
+    // Exemplo:
+    //
+    // Primeira tentativa:
+    // acertou 2 → +40 XP
     //
     // Replay:
-    //     XP ganho = 0
+    // acertou 1 das erradas → +20 XP
     //
-    // A pontuação total também só aumenta na primeira
-    // conclusão da fase.
-    //
-    // O desconto de 50 XP da dica já acontece no
-    // usar_dica_mathchef.php e NÃO deve ser repetido aqui.
+    // Replay novamente:
+    // acertou uma já acertada → +0 XP
     //
 
-    if ($primeiraConclusao) {
+    if ($xpGanho > 0) {
 
-        $xpGanho =
-            $pontuacao;
+        $stmt = $pdo->prepare("
+            UPDATE usuarios
+            SET
+                xp = xp + ?,
+                pontuacao_total = pontuacao_total + ?
+            WHERE id = ?
+        ");
 
-        $pontuacaoGanha =
-            $pontuacao;
+        /*
+         * A pontuação total também recebe somente
+         * a pontuação correspondente às questões que
+         * geraram XP nesta tentativa.
+         *
+         * Como cada questão vale 20 XP, usamos o
+         * número de novas questões acertadas.
+         */
+        $pontuacaoNova =
+            $xpQuestoesNovas *
+            $XP_POR_QUESTAO;
 
-    } else {
 
-        $xpGanho =
-            0;
+        $stmt->execute([
 
-        $pontuacaoGanha =
-            0;
+            $xpGanho,
+
+            $pontuacaoNova,
+
+            $usuarioId
+        ]);
     }
 
 
-    $stmt = $pdo->prepare("
-        UPDATE usuarios
-        SET
-            xp = xp + ?,
-            pontuacao_total = pontuacao_total + ?
-        WHERE id = ?
-    ");
+    // =====================================================
+    // VERIFICAR SE A PRÓXIMA FASE ESTÁ LIBERADA
+    // =====================================================
 
-    $stmt->execute([
-
-        $xpGanho,
-
-        $pontuacaoGanha,
-
-        $usuarioId
-    ]);
+    $faseLiberada =
+        (
+            $xpDaFase >=
+            $XP_NECESSARIO_FASE
+        );
 
 
     // =====================================================
-    // VERIFICAR PRÓXIMA FASE
+    // BUSCAR PRÓXIMA FASE
     // =====================================================
 
     $numeroAtual =
@@ -833,68 +931,109 @@ try {
         "sucesso" => true,
 
         "mensagem" =>
-            "Fase finalizada com sucesso!",
+        "Fase finalizada com sucesso!",
 
         "partida_id" =>
-            $partidaId,
+        $partidaId,
 
         "fase" => [
 
             "id" =>
-                $faseId,
+            $faseId,
 
             "nome" =>
-                $fase["nome"],
+            $fase["nome"],
 
             "numero" =>
-                $numeroAtual
+            $numeroAtual
         ],
 
+        // -------------------------------------------------
+        // RESULTADO DA TENTATIVA
+        // -------------------------------------------------
+
         "pontuacao" =>
-            $pontuacao,
+        $pontuacao,
 
         "acertos" =>
-            $acertos,
+        $acertos,
 
         "erros" =>
-            $erros,
+        $erros,
 
         "dicas_usadas" =>
-            $dicasUsadas,
+        $dicasUsadas,
 
-        "primeira_conclusao" =>
-            $primeiraConclusao,
+        // -------------------------------------------------
+        // XP
+        // -------------------------------------------------
 
         "xp_ganho" =>
-            $xpGanho,
+        $xpGanho,
+
+        "xp_da_fase" =>
+        $xpDaFase,
+
+        "xp_necessario" =>
+        $XP_NECESSARIO_FASE,
+
+        "xp_questoes_novas" =>
+        $xpQuestoesNovas,
+
+        // -------------------------------------------------
+        // PROGRESSO
+        // -------------------------------------------------
+
+        "fase_concluida" =>
+        $faseConcluida,
+
+        "fase_liberada" =>
+        $faseLiberada,
+
+        "questoes_acertadas" =>
+        $quantidadeQuestoesAcertadas,
+
+        "total_questoes" =>
+        $totalQuestoes,
+
+        "questoes_pendentes" =>
+        $questoesPendentes,
+
+        // -------------------------------------------------
+        // DADOS DA TENTATIVA
+        // -------------------------------------------------
 
         "melhor_pontuacao" =>
-            $melhorPontuacao,
+        $melhorPontuacao,
 
         "tentativas" =>
-            $tentativas,
+        $tentativas,
+
+        // -------------------------------------------------
+        // PRÓXIMA FASE
+        // -------------------------------------------------
 
         "proxima_fase" =>
-            $proximaFase
-                ? [
+        $proximaFase
+            ? [
 
-                    "id" =>
-                        (int) $proximaFase["id"],
+                "id" =>
+                (int) $proximaFase["id"],
 
-                    "nome" =>
-                        $proximaFase["nome"],
+                "nome" =>
+                $proximaFase["nome"],
 
-                    "numero" =>
-                        (int) $proximaFase["numero"]
+                "numero" =>
+                (int) $proximaFase["numero"]
 
-                ]
-                : null
+            ]
+            : null
     ]);
 
 
-// =========================================================
-// ERRO
-// =========================================================
+    // =========================================================
+    // ERRO
+    // =========================================================
 
 } catch (PDOException $e) {
 
@@ -911,6 +1050,6 @@ try {
         "sucesso" => false,
 
         "mensagem" =>
-            "Não foi possível salvar o resultado da fase."
+        "Não foi possível salvar o resultado da fase."
     ]);
 }

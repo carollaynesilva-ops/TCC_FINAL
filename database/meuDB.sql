@@ -1121,3 +1121,102 @@ INSERT INTO dicas (questao_id, ordem, texto, custo_xp) VALUES
 (79, 1, 'Para encontrar o volume da esfera, use quatro terços vezes pi vezes o raio ao cubo.', 50),
 
 (80, 1, 'Para encontrar a mediana, coloque os valores em ordem e observe o valor central. Para encontrar a moda, procure o número que mais se repete.', 50);
+
+
+USE b17_42774059_tcc;
+
+-- =========================================================
+-- MATHCHEF
+-- CONFIGURAÇÃO DE XP POR FASE
+-- =========================================================
+
+/*
+Cada questão vale 20 XP.
+
+São necessários 60 XP para desbloquear a próxima fase.
+
+O XP conquistado fica salvo individualmente no progresso
+do usuário em cada fase.
+*/
+
+
+-- =========================================================
+-- 1. ADICIONAR XP CONQUISTADO POR FASE
+-- =========================================================
+
+ALTER TABLE progresso_usuario
+ADD COLUMN xp_conquistado INT NOT NULL DEFAULT 0
+AFTER melhor_pontuacao;
+
+
+-- =========================================================
+-- 2. GARANTIR QUE O XP EXISTENTE NÃO FIQUE NULL
+-- =========================================================
+
+UPDATE progresso_usuario
+SET xp_conquistado = 0
+WHERE xp_conquistado IS NULL;
+
+
+-- =========================================================
+-- 3. CRIAR CONFIGURAÇÃO DE XP DO MATHCHEF
+-- =========================================================
+
+/*
+Esta tabela centraliza as regras do jogo.
+
+Assim não precisamos espalhar os valores
+20 e 60 pelo código inteiro.
+*/
+
+CREATE TABLE IF NOT EXISTS configuracao_mathchef (
+
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    xp_por_questao INT NOT NULL DEFAULT 20,
+
+    xp_para_proxima_fase INT NOT NULL DEFAULT 60
+
+);
+
+
+-- =========================================================
+-- 4. INSERIR CONFIGURAÇÃO PADRÃO
+-- =========================================================
+
+INSERT INTO configuracao_mathchef (
+    xp_por_questao,
+    xp_para_proxima_fase
+)
+
+SELECT
+    20,
+    60
+
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM configuracao_mathchef
+);
+
+
+-- =========================================================
+-- 5. VERIFICAÇÃO
+-- =========================================================
+
+SELECT
+    id,
+    xp_por_questao,
+    xp_para_proxima_fase
+FROM configuracao_mathchef;
+
+
+SELECT
+    id,
+    usuario_id,
+    fase_id,
+    concluida,
+    xp_conquistado,
+    melhor_pontuacao,
+    tentativas
+FROM progresso_usuario
+ORDER BY usuario_id, fase_id;
