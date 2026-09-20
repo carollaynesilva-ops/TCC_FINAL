@@ -5,152 +5,140 @@ session_start();
 require_once "config/config.php";
 
 if (!isset($_SESSION["usuario_id"])) {
-
     header("Location: login.php");
-
     exit;
 }
 
 $usuarioId = $_SESSION["usuario_id"];
-
 
 // =========================================================
 // BUSCAR USUÁRIO
 // =========================================================
 
 $sqlUsuario = "
-
     SELECT
-
         id,
-
         nome,
-
         serie
-
     FROM usuarios
-
     WHERE id = ?
-
 ";
 
 $stmtUsuario = $pdo->prepare($sqlUsuario);
-
 $stmtUsuario->execute([$usuarioId]);
 
 $usuario = $stmtUsuario->fetch();
 
 if (!$usuario) {
-
     session_destroy();
-
     header("Location: login.php");
-
     exit;
 }
 
 $nomeUsuario = $usuario["nome"];
-
 $serieUsuario = (int) $usuario["serie"];
-
 
 // =========================================================
 // BUSCAR FASES DO MATHCHEF
 // =========================================================
 
 $sqlFases = "
-
     SELECT
-
         f.id,
-
         f.nome,
-
         f.descricao,
-
         f.nivel_dificuldade,
-
         f.numero,
 
         COALESCE(p.concluida, 0) AS concluida,
-
-        COALESCE(p.melhor_pontuacao, 0) AS melhor_pontuacao
+        COALESCE(p.melhor_pontuacao, 0) AS melhor_pontuacao,
+        COALESCE(p.xp_conquistado, 0) AS xp_conquistado
 
     FROM fases f
 
     LEFT JOIN progresso_usuario p
-
         ON p.fase_id = f.id
-
         AND p.usuario_id = ?
 
     WHERE f.jogo_id = 1
-
       AND f.serie = ?
 
     ORDER BY f.numero ASC
-
 ";
 
 $stmtFases = $pdo->prepare($sqlFases);
 
 $stmtFases->execute([
-
     $usuarioId,
-
     $serieUsuario
-
 ]);
 
 $fases = $stmtFases->fetchAll();
 
+// =========================================================
+// CONFIGURAÇÃO DE XP
+// =========================================================
+//
+// A próxima fase será liberada quando a fase anterior
+// possuir pelo menos 60 XP conquistados.
+//
+// O valor vem da tabela configuracao_mathchef.
+// Caso a tabela não tenha registro, usamos 60 como
+// valor de segurança.
+//
+
+$sqlConfiguracao = "
+    SELECT xp_para_proxima_fase
+    FROM configuracao_mathchef
+    LIMIT 1
+";
+
+$stmtConfiguracao = $pdo->query($sqlConfiguracao);
+
+$configuracao = $stmtConfiguracao->fetch();
+
+$xpParaProximaFase = $configuracao
+    ? (int) $configuracao["xp_para_proxima_fase"]
+    : 60;
 
 // =========================================================
 // DEFINIR FASES DESBLOQUEADAS
 // =========================================================
 //
-// REGRA:
+// REGRAS:
 //
-// - A primeira fase sempre está desbloqueada.
-// - Se uma fase foi concluída, ela continua desbloqueada.
-// - Ao concluir uma fase, a próxima é desbloqueada.
-// - Fases posteriores continuam bloqueadas até a anterior
-//   ser concluída.
+// 1. A primeira fase sempre está desbloqueada.
 //
-// IMPORTANTE:
-// Uma fase concluída NÃO fica bloqueada.
-// Ela pode ser jogada novamente.
+// 2. Uma fase concluída continua desbloqueada.
 //
+// 3. Uma fase ainda não concluída só será desbloqueada
+//    quando a fase anterior tiver atingido o XP mínimo.
+//
+// 4. A pessoa pode jogar novamente uma fase concluída.
+//
+// =========================================================
 
 $proximaDesbloqueada = true;
 
 foreach ($fases as &$fase) {
 
-    $fase["concluida"] =
-        (bool) $fase["concluida"];
+    $fase["concluida"] = (bool) $fase["concluida"];
 
+    $fase["xp_conquistado"] = (int) $fase["xp_conquistado"];
 
-    // A fase atual está liberada?
-    $fase["desbloqueada"] =
-        $proximaDesbloqueada;
+    // A fase atual recebe o estado calculado anteriormente.
+    $fase["desbloqueada"] = $proximaDesbloqueada;
 
-
-    // Se esta fase foi concluída,
-    // a próxima também será liberada.
-    if ($fase["concluida"]) {
-
+    // Se a fase já possui o XP necessário,
+    // a próxima fase será liberada.
+    if ($fase["xp_conquistado"] >= $xpParaProximaFase) {
         $proximaDesbloqueada = true;
-
     } else {
-
-        // Se ainda não foi concluída,
-        // a próxima permanece bloqueada.
         $proximaDesbloqueada = false;
     }
 }
 
 unset($fase);
-
 
 // =========================================================
 // FUNÇÕES DE DIFICULDADE
@@ -158,51 +146,39 @@ unset($fase);
 
 function nomeDificuldade($dificuldade)
 {
-
     switch ($dificuldade) {
 
         case "facil":
-
             return "Fácil";
 
         case "medio":
-
             return "Médio";
 
         case "dificil":
-
             return "Difícil";
 
         default:
-
             return "Nível";
     }
 }
 
-
 function classeDificuldade($dificuldade)
 {
-
     switch ($dificuldade) {
 
         case "facil":
-
             return "difficulty-easy";
 
         case "medio":
-
             return "difficulty-medium";
 
         case "dificil":
-
             return "difficulty-hard";
 
         default:
-
             return "";
     }
 }
-
 
 // =========================================================
 // PROGRESSO
@@ -215,15 +191,12 @@ $fasesConcluidas = 0;
 foreach ($fases as $fase) {
 
     if ($fase["concluida"]) {
-
         $fasesConcluidas++;
     }
 }
 
 $porcentagemProgresso = $totalFases > 0
-
     ? ($fasesConcluidas / $totalFases) * 100
-
     : 0;
 
 ?>
@@ -234,29 +207,28 @@ $porcentagemProgresso = $totalFases > 0
 
 <head>
 
+    
     <meta charset="UTF-8">
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
     <title>MathChef | MathRun</title>
 
     <link
         rel="stylesheet"
-        href="assets/css/mathchef.css"
-    >
+        href="assets/css/mathchef.css">
+    
 
 </head>
 
-
 <body>
 
-
+    
     <!-- ==========================================
-         ELEMENTOS DECORATIVOS DA COZINHA
-    =========================================== -->
+     ELEMENTOS DECORATIVOS DA COZINHA
+=========================================== -->
 
     <div class="kitchen-background" aria-hidden="true">
 
@@ -277,10 +249,9 @@ $porcentagemProgresso = $totalFases > 0
 
     </div>
 
-
     <!-- ==========================================
-         NAVBAR
-    =========================================== -->
+     NAVBAR
+=========================================== -->
 
     <header class="topbar">
 
@@ -289,7 +260,6 @@ $porcentagemProgresso = $totalFases > 0
             <a href="inicio.php" class="brand">
                 MathRun
             </a>
-
 
             <nav class="main-nav">
 
@@ -311,30 +281,26 @@ $porcentagemProgresso = $totalFases > 0
 
             </nav>
 
-
             <div class="theme-switcher">
 
                 <button
                     type="button"
                     data-theme-option="light"
-                    title="Tema claro"
-                >
+                    title="Tema claro">
                     ☀
                 </button>
 
                 <button
                     type="button"
                     data-theme-option="dark"
-                    title="Tema escuro"
-                >
+                    title="Tema escuro">
                     ☾
                 </button>
 
                 <button
                     type="button"
                     data-theme-option="pink"
-                    title="Tema rosa"
-                >
+                    title="Tema rosa">
                     ♡
                 </button>
 
@@ -344,17 +310,15 @@ $porcentagemProgresso = $totalFases > 0
 
     </header>
 
-
     <!-- ==========================================
-         CONTEÚDO PRINCIPAL
-    =========================================== -->
+     CONTEÚDO PRINCIPAL
+=========================================== -->
 
     <main class="mathchef-container">
 
-
         <!-- ======================================
-             HERO
-        ======================================= -->
+         HERO
+    ======================================= -->
 
         <section class="game-header">
 
@@ -370,53 +334,57 @@ $porcentagemProgresso = $totalFases > 0
 
                 </div>
 
-
                 <h1>
                     Math<span>Chef</span>
                 </h1>
 
-
                 <p>
-
                     Entre na cozinha, prepare suas receitas
                     e resolva desafios matemáticos para
                     avançar de fase.
-
                 </p>
-
 
                 <div class="hero-details">
 
                     <div class="hero-detail">
 
-                        <span class="detail-icon">👨‍🍳</span>
+                        <span class="detail-icon">
+                            👨‍🍳
+                        </span>
 
-                        <span>Modo aventura</span>
-
-                    </div>
-
-
-                    <div class="hero-detail">
-
-                        <span class="detail-icon">🧮</span>
-
-                        <span>Matemática</span>
+                        <span>
+                            Modo aventura
+                        </span>
 
                     </div>
 
+                    <div class="hero-detail">
+
+                        <span class="detail-icon">
+                            🧮
+                        </span>
+
+                        <span>
+                            Matemática
+                        </span>
+
+                    </div>
 
                     <div class="hero-detail">
 
-                        <span class="detail-icon">🏆</span>
+                        <span class="detail-icon">
+                            🏆
+                        </span>
 
-                        <span>Ganhe pontos</span>
+                        <span>
+                            Ganhe pontos
+                        </span>
 
                     </div>
 
                 </div>
 
             </div>
-
 
             <div class="chef-badge">
 
@@ -436,10 +404,9 @@ $porcentagemProgresso = $totalFases > 0
 
         </section>
 
-
         <!-- ======================================
-             PROGRESSO
-        ======================================= -->
+         PROGRESSO
+    ======================================= -->
 
         <section class="progress-section">
 
@@ -458,7 +425,9 @@ $porcentagemProgresso = $totalFases > 0
                         </span>
 
                         <strong>
-                            <?= $fasesConcluidas ?> de <?= $totalFases ?>
+                            <?= $fasesConcluidas ?>
+                            de
+                            <?= $totalFases ?>
                             fases concluídas
                         </strong>
 
@@ -466,34 +435,27 @@ $porcentagemProgresso = $totalFases > 0
 
                 </div>
 
-
                 <strong class="progress-percentage">
-
                     <?= round($porcentagemProgresso) ?>%
-
                 </strong>
 
             </div>
-
 
             <div class="progress-bar">
 
                 <div
                     class="progress-fill"
-                    style="width: <?= $porcentagemProgresso ?>%;"
-                ></div>
+                    style="width: <?= $porcentagemProgresso ?>%;"></div>
 
             </div>
 
         </section>
 
-
         <!-- ======================================
-             FASES
-        ======================================= -->
+         FASES
+    ======================================= -->
 
         <section class="phases-section">
-
 
             <div class="section-heading">
 
@@ -509,19 +471,15 @@ $porcentagemProgresso = $totalFases > 0
 
                 </div>
 
-
                 <div class="cutlery-decoration">
                     ✦ ✦ ✦
                 </div>
 
             </div>
 
-
             <div class="phases-list">
 
-
                 <?php if (empty($fases)): ?>
-
 
                     <div class="empty-state">
 
@@ -539,12 +497,9 @@ $porcentagemProgresso = $totalFases > 0
 
                     </div>
 
-
                 <?php else: ?>
 
-
                     <?php foreach ($fases as $fase): ?>
-
 
                         <?php
 
@@ -554,15 +509,15 @@ $porcentagemProgresso = $totalFases > 0
                         $concluida =
                             $fase["concluida"];
 
+                        $xpConquistado =
+                            (int) $fase["xp_conquistado"];
 
                         if (!$desbloqueada) {
 
                             $classeCard = "locked";
-
                         } elseif ($concluida) {
 
                             $classeCard = "completed";
-
                         } else {
 
                             $classeCard = "available";
@@ -570,9 +525,8 @@ $porcentagemProgresso = $totalFases > 0
 
                         ?>
 
-
-                        <article class="phase-card <?= $classeCard ?>">
-
+                        <article
+                            class="phase-card <?= $classeCard ?>">
 
                             <!-- Número -->
 
@@ -600,11 +554,9 @@ $porcentagemProgresso = $totalFases > 0
 
                             </div>
 
-
                             <!-- Conteúdo -->
 
                             <div class="phase-content">
-
 
                                 <div class="phase-top">
 
@@ -615,10 +567,8 @@ $porcentagemProgresso = $totalFases > 0
 
                                     </span>
 
-
                                     <span
-                                        class="difficulty <?= classeDificuldade($fase["nivel_dificuldade"]) ?>"
-                                    >
+                                        class="difficulty <?= classeDificuldade($fase["nivel_dificuldade"]) ?>">
 
                                         <?= nomeDificuldade($fase["nivel_dificuldade"]) ?>
 
@@ -626,54 +576,60 @@ $porcentagemProgresso = $totalFases > 0
 
                                 </div>
 
-
                                 <h3>
-
                                     <?= htmlspecialchars($fase["nome"]) ?>
-
                                 </h3>
 
-
                                 <p>
-
                                     <?= htmlspecialchars($fase["descricao"]) ?>
-
                                 </p>
 
+                                <!-- =================================
+                                 XP DA FASE
+                            ================================== -->
+
+                                <?php if ($desbloqueada): ?>
+
+                                    <div class="phase-xp">
+
+                                        <span>
+                                            ⭐ XP da fase
+                                        </span>
+
+                                        <strong>
+                                            <?= $xpConquistado ?>
+                                            /
+                                            <?= $xpParaProximaFase ?>
+                                        </strong>
+
+                                    </div>
+
+                                <?php endif; ?>
 
                                 <?php if ($concluida): ?>
 
-
                                     <!-- =================================
-                                         FASE CONCLUÍDA
-                                    ================================== -->
+                                     FASE CONCLUÍDA
+                                ================================== -->
 
                                     <div class="phase-status completed-status">
 
                                         <span>
-
                                             ✓ Receita concluída
-
                                         </span>
-
 
                                         <?php if ($fase["melhor_pontuacao"] > 0): ?>
 
                                             <strong>
-
                                                 <?= (int) $fase["melhor_pontuacao"] ?>
-
                                                 pts
-
                                             </strong>
 
                                         <?php endif; ?>
 
-
                                         <a
                                             href="jogar_mathchef.php?fase=<?= (int) $fase["id"] ?>"
-                                            class="play-button"
-                                        >
+                                            class="play-button">
 
                                             Jogar novamente
 
@@ -685,27 +641,21 @@ $porcentagemProgresso = $totalFases > 0
 
                                     </div>
 
-
                                 <?php elseif ($desbloqueada): ?>
 
-
                                     <!-- =================================
-                                         FASE DISPONÍVEL
-                                    ================================== -->
+                                     FASE DISPONÍVEL
+                                ================================== -->
 
                                     <div class="phase-status">
 
                                         <span>
-
                                             🍴 Bancada liberada
-
                                         </span>
-
 
                                         <a
                                             href="jogar_mathchef.php?fase=<?= (int) $fase["id"] ?>"
-                                            class="play-button"
-                                        >
+                                            class="play-button">
 
                                             Preparar
 
@@ -717,66 +667,54 @@ $porcentagemProgresso = $totalFases > 0
 
                                     </div>
 
-
                                 <?php else: ?>
 
-
                                     <!-- =================================
-                                         FASE BLOQUEADA
-                                    ================================== -->
+                                     FASE BLOQUEADA
+                                ================================== -->
 
                                     <div class="phase-status locked-status">
 
                                         <span>
-
-                                            🔒 Complete a fase anterior
-
+                                            🔒 Alcance
+                                            <?= $xpParaProximaFase ?>
+                                            XP na fase anterior
                                         </span>
 
                                     </div>
 
-
                                 <?php endif; ?>
-
 
                             </div>
 
                         </article>
 
-
                     <?php endforeach; ?>
 
-
                 <?php endif; ?>
-
 
             </div>
 
         </section>
 
-
         <!-- ======================================
-             VOLTAR
-        ======================================= -->
+         VOLTAR
+    ======================================= -->
 
         <div class="back-area">
 
             <a
                 href="inicio.php"
-                class="back-link"
-            >
-
+                class="back-link">
                 ← Voltar para o início
-
             </a>
 
         </div>
 
-
     </main>
 
-
     <script src="assets/js/tema.js"></script>
+    
 
 </body>
 
