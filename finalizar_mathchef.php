@@ -493,34 +493,55 @@ foreach ($respostas as $resposta) {
         (bool) $alternativa["correta"];
 
     // -----------------------------------------------------
-    // PONTUAÇÃO DA TENTATIVA
+    // VERIFICAR SE A QUESTÃO JÁ FOI ACERTADA ANTES
+    // -----------------------------------------------------
+
+    $questaoJaAcertadaAntes =
+        isset($questoesJaAcertadas[$questaoId]);
+
+    // -----------------------------------------------------
+    // ACERTOS E ERROS DA TENTATIVA
     // -----------------------------------------------------
 
     if ($correta) {
 
         $acertos++;
-
-        $pontuacao +=
-            $questoesValidas[$questaoId]["pontuacao"];
     } else {
 
         $erros++;
     }
 
     // -----------------------------------------------------
-    // XP DA QUESTÃO
+    // XP E PONTUAÇÃO
     // -----------------------------------------------------
+    //
+    // A recompensa só acontece uma vez por questão.
+    //
+    // Se a questão já foi acertada anteriormente:
+    //     XP = 0
+    //     Pontuação = 0
+    //
+    // Se for a primeira vez que o usuário acerta:
+    //     XP = XP da questão
+    //     Pontuação = pontuação da questão
+    //
 
     if (
         $correta &&
-        !isset($questoesJaAcertadas[$questaoId])
+        !$questaoJaAcertadaAntes
     ) {
 
+        // XP
         $xpGanho +=
             $XP_POR_QUESTAO;
 
         $xpQuestoesNovas++;
 
+        // PONTUAÇÃO
+        $pontuacao +=
+            $questoesValidas[$questaoId]["pontuacao"];
+
+        // Marcar como acertada
         $questoesJaAcertadas[$questaoId] = true;
     }
 
@@ -610,7 +631,7 @@ $quantidadeQuestoesAcertadas =
 //
 // Cada questão vale XP somente uma vez.
 // Portanto, esse valor representa o XP acumulado
-// daquela fase, e não o XP ganho nesta tentativa.
+// daquela fase.
 //
 
 $xpDaFase =
@@ -834,18 +855,21 @@ try {
     }
 
     // =====================================================
-    // ATUALIZAR XP GLOBAL DO USUÁRIO
+    // ATUALIZAR XP E PONTUAÇÃO GLOBAL DO USUÁRIO
     // =====================================================
     //
-    // IMPORTANTE:
-    // O XP das dicas já foi descontado por
-    // usar_dica_mathchef.php.
+    // XP recebe somente XP novo.
     //
-    // Aqui somente adicionamos o XP novo
-    // conquistado pelas questões.
+    // pontuacao_total recebe somente pontuação nova.
+    //
+    // Dica não entra aqui porque o XP da dica já foi
+    // descontado em usar_dica_mathchef.php.
     //
 
-    if ($xpGanho > 0) {
+    if (
+        $xpGanho > 0 ||
+        $pontuacao > 0
+    ) {
 
         $stmt = $pdo->prepare("
             UPDATE usuarios
@@ -859,7 +883,7 @@ try {
 
         $stmt->execute([
             $xpGanho,
-            $xpGanho,
+            $pontuacao,
             $usuarioId
         ]);
     }
@@ -913,6 +937,14 @@ try {
         $xpGanho;
 
     // =====================================================
+    // PONTUAÇÃO GLOBAL ATUALIZADA
+    // =====================================================
+
+    $pontuacaoAtualizada =
+        (int) $usuario["pontuacao_total"] +
+        $pontuacao;
+
+    // =====================================================
     // FINALIZAR TRANSAÇÃO
     // =====================================================
 
@@ -926,10 +958,12 @@ try {
 
         "sucesso" => true,
 
-        "mensagem" =>
-        $xpGanho > 0
+        "mensagem" => (
+            $xpGanho > 0 ||
+            $pontuacao > 0
+        )
             ? "Fase finalizada com sucesso!"
-            : "Fase finalizada. Nenhum XP novo foi conquistado nesta tentativa.",
+            : "Fase finalizada. Nenhum XP ou pontuação nova foi conquistado nesta tentativa.",
 
         // -------------------------------------------------
         // PARTIDA
@@ -990,6 +1024,16 @@ try {
         $xpQuestoesNovas,
 
         // -------------------------------------------------
+        // PONTUAÇÃO GLOBAL
+        // -------------------------------------------------
+
+        "pontuacao_ganha" =>
+        $pontuacao,
+
+        "pontuacao_total" =>
+        $pontuacaoAtualizada,
+
+        // -------------------------------------------------
         // PROGRESSO DA FASE
         // -------------------------------------------------
 
@@ -1034,6 +1078,7 @@ try {
 
                 "numero" =>
                 (int) $proximaFase["numero"]
+
             ]
 
             : null
