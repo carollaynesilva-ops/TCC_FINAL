@@ -167,34 +167,84 @@ if ((int) $fase["numero"] > 1) {
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Buscar questões
-|--------------------------------------------------------------------------
-*/
+// =========================================================
+// BUSCAR QUESTÕES
+// =========================================================
+//
+// PRIMEIRA VEZ:
+// Todas as questões são exibidas.
+//
+// REFAZENDO A FASE:
+// Somente as questões que o usuário ainda não acertou
+// serão exibidas.
+//
 
 $stmt = $pdo->prepare("
     SELECT
-        id,
-        materia,
-        pergunta,
-        resposta_correta,
-        explicacao,
-        pontuacao
-    FROM questoes
-    WHERE fase_id = ?
-    ORDER BY id
+        q.id,
+        q.materia,
+        q.pergunta,
+        q.resposta_correta,
+        q.explicacao,
+        q.pontuacao
+
+    FROM questoes q
+
+    WHERE q.fase_id = ?
+
+      AND (
+            
+            NOT EXISTS (
+                SELECT 1
+                FROM respostas_usuario ru
+                WHERE ru.usuario_id = ?
+                  AND ru.questao_id = q.id
+            )
+
+            OR
+
+            
+            EXISTS (
+                SELECT 1
+                FROM respostas_usuario ru
+                WHERE ru.usuario_id = ?
+                  AND ru.questao_id = q.id
+                  AND ru.correta = 0
+            )
+          )
+
+      AND NOT EXISTS (
+            
+            SELECT 1
+            FROM respostas_usuario ru
+            WHERE ru.usuario_id = ?
+              AND ru.questao_id = q.id
+              AND ru.correta = 1
+      )
+
+    ORDER BY q.id
 ");
 
-$stmt->execute([$faseId]);
+$stmt->execute([
+    $faseId,
+    $usuarioId,
+    $usuarioId,
+    $usuarioId
+]);
 
 $questoes = $stmt->fetchAll();
 
 if (!$questoes) {
+
     $semQuestoes = true;
+
 } else {
+
     $semQuestoes = false;
+
 }
+
+
 
 /*
 |--------------------------------------------------------------------------
