@@ -92,14 +92,33 @@ $progresso = $stmt->fetch();
 
 /*
 |--------------------------------------------------------------------------
-| Fases anteriores
+| Verificar se a fase está liberada
 |--------------------------------------------------------------------------
+|
+| A próxima fase é liberada quando a fase anterior
+| possui pelo menos o XP necessário.
+|
 */
 
 if ((int) $fase["numero"] > 1) {
 
     $numeroAnterior = (int) $fase["numero"] - 1;
 
+    // Buscar configuração de XP
+    $stmt = $pdo->query("
+        SELECT xp_para_proxima_fase
+        FROM configuracao_mathchef
+        ORDER BY id ASC
+        LIMIT 1
+    ");
+
+    $configuracao = $stmt->fetch();
+
+    $xpParaProximaFase = $configuracao
+        ? (int) $configuracao["xp_para_proxima_fase"]
+        : 60;
+
+    // Buscar fase anterior
     $stmt = $pdo->prepare("
         SELECT id
         FROM fases
@@ -109,17 +128,23 @@ if ((int) $fase["numero"] > 1) {
         LIMIT 1
     ");
 
-    $stmt->execute([$serie, $numeroAnterior]);
+    $stmt->execute([
+        $serie,
+        $numeroAnterior
+    ]);
 
     $faseAnterior = $stmt->fetch();
 
+    // Se existir fase anterior, verificar XP
     if ($faseAnterior) {
 
         $stmt = $pdo->prepare("
-            SELECT concluida
+            SELECT
+                COALESCE(xp_conquistado, 0) AS xp_conquistado
             FROM progresso_usuario
             WHERE usuario_id = ?
               AND fase_id = ?
+            LIMIT 1
         ");
 
         $stmt->execute([
@@ -129,7 +154,13 @@ if ((int) $fase["numero"] > 1) {
 
         $progressoAnterior = $stmt->fetch();
 
-        if (!$progressoAnterior || !$progressoAnterior["concluida"]) {
+        $xpFaseAnterior = $progressoAnterior
+            ? (int) $progressoAnterior["xp_conquistado"]
+            : 0;
+
+        // Ainda não possui XP suficiente
+        if ($xpFaseAnterior < $xpParaProximaFase) {
+
             header("Location: mathchef.php");
             exit;
         }
