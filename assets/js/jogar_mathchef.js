@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    ```
+    
 /* =====================================================
    VARIÁVEIS DA PARTIDA
    ===================================================== */
@@ -1846,6 +1846,5 @@ atualizarXPInterface();
 atualizarPontuacaoInterface();
 
 carregarQuestao();
-```
 
 });
