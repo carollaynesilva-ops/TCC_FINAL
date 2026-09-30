@@ -213,13 +213,13 @@ if ($hora < 12) {
             </div>
 
             <div class="avatar">
-                <a href="perfil.php">
+                <a href="/perfil/perfil.php">
                     <?= strtoupper(substr($usuario['nome'], 0, 1)) ?>
                 </a>
             </div>
 
             <div class="user-info">
-                <a href="perfil.php">
+                <a href="/perfil/perfil.php">
                     <strong><?= htmlspecialchars($usuario['nome']) ?></strong>
                     <span>LEVEL <?= $nivel ?></span>
                 </a>

@@ -2,7 +2,7 @@
 
 session_start();
 
-require_once "config/config.php";
+require_once "../config/config.php";
 
 if (!isset($_SESSION["usuario_id"])) {
     header("Location: login.php");
@@ -218,7 +218,7 @@ $porcentagemProgresso = $totalFases > 0
 
     <link
         rel="stylesheet"
-        href="assets/css/mathchef.css">
+        href="../assets/css/mathchef.css">
     
 
 </head>
@@ -257,25 +257,25 @@ $porcentagemProgresso = $totalFases > 0
 
         <div class="topbar-content">
 
-            <a href="inicio.php" class="brand">
+            <a href="../inicio.php" class="brand">
                 MathRun
             </a>
 
             <nav class="main-nav">
 
-                <a href="inicio.php">
+                <a href="../inicio.php">
                     Início
                 </a>
 
-                <a href="conquistas.php">
+                <a href="../conquistas.php">
                     Conquistas
                 </a>
 
-                <a href="ranking.php">
+                <a href="../ranking.php">
                     Ranking
                 </a>
 
-                <a href="perfil.php">
+                <a href="../perfil.php">
                     Perfil
                 </a>
 
@@ -704,7 +704,7 @@ $porcentagemProgresso = $totalFases > 0
         <div class="back-area">
 
             <a
-                href="inicio.php"
+                href="../inicio.php"
                 class="back-link">
                 ← Voltar para o início
             </a>
@@ -713,7 +713,7 @@ $porcentagemProgresso = $totalFases > 0
 
     </main>
 
-    <script src="assets/js/tema.js"></script>
+    <script src="../assets/js/tema.js"></script>
     
 
 </body>

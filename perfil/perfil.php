@@ -2,7 +2,7 @@
 
 session_start();
 
-require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '../config/config.php';
 
 
 // =========================================================
@@ -166,7 +166,7 @@ $inicial = strtoupper(
 
     <link
         rel="stylesheet"
-        href="assets/css/perfil.css">
+        href="../assets/css/perfil.css">
 
 </head>
 
@@ -180,22 +180,22 @@ $inicial = strtoupper(
 
     <header class="navbar">
 
-        <a href="inicio.php" class="brand">
+        <a href="../inicio.php" class="brand">
             Math<span>Run</span>
         </a>
 
 
         <nav class="nav-links">
 
-            <a href="inicio.php">
+            <a href="../inicio.php">
                 Início
             </a>
 
-            <a href="ranking.php">
+            <a href="../ranking.php">
                 Ranking
             </a>
 
-            <a href="conquistas.php">
+            <a href="../conquistas.php">
                 Conquistas
             </a>
 
@@ -258,7 +258,7 @@ $inicial = strtoupper(
             <!-- LOGOUT -->
 
             <a
-                href="logout.php"
+                href="../logout.php"
                 class="logout"
                 title="Sair">
                 ↪
@@ -299,7 +299,7 @@ $inicial = strtoupper(
 
 
             <a
-                href="inicio.php"
+                href="../inicio.php"
                 class="back-button">
                 ← Voltar para início
             </a>
@@ -827,7 +827,7 @@ $inicial = strtoupper(
 
 
             <a
-                href="conquistas.php"
+                href="../conquistas.php"
                 class="achievement-button">
                 Ver conquistas
                 <span>→</span>
@@ -843,7 +843,7 @@ $inicial = strtoupper(
      TEMA
 ====================================================== -->
 
-    <script src="assets/js/tema.js"></script>
+    <script src="../assets/js/tema.js"></script>
 
 </body>
 

@@ -277,7 +277,7 @@ function inicialNome($nome)
             ============================================== -->
 
             <a
-                href="editar_perfil.php"
+                href="/perfil/editar_perfil.php"
                 class="user-profile"
             >
 
