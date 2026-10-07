@@ -263,7 +263,7 @@ $inicial = strtoupper(
 
     <link
         rel="stylesheet"
-        href="assets/css/editar_perfil.css"
+        href="../assets/css/editar_perfil.css"
     >
 
 </head>
