@@ -387,7 +387,7 @@ $inicial = strtoupper(
          TEMA
     ====================================================== -->
 
-    <script src="assets/js/tema.js"></script>
+    <script src="../assets/js/tema.js"></script>
 
 </body>
 

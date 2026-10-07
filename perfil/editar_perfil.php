@@ -616,7 +616,7 @@ $inicial = strtoupper(
 </main>
 
 
-<script src="assets/js/tema.js"></script>
+<script src="../assets/js/tema.js"></script>
 
 </body>
 
