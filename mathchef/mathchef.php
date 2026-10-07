@@ -2,10 +2,10 @@
 
 session_start();
 
-require_once "/../config/config.php";
+require_once __DIR__ . "/../config/config.php";
 
 if (!isset($_SESSION["usuario_id"])) {
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit;
 }
 
@@ -207,7 +207,7 @@ $porcentagemProgresso = $totalFases > 0
 
 <head>
 
-    
+
     <meta charset="UTF-8">
 
     <meta
@@ -219,13 +219,13 @@ $porcentagemProgresso = $totalFases > 0
     <link
         rel="stylesheet"
         href="../assets/css/mathchef.css">
-    
+
 
 </head>
 
 <body>
 
-    
+
     <!-- ==========================================
      ELEMENTOS DECORATIVOS DA COZINHA
 =========================================== -->
@@ -257,54 +257,54 @@ $porcentagemProgresso = $totalFases > 0
 
         <div class="topbar-content">
 
-            <a href="../inicio.php" class="brand">
+            <<a href="../inicio.php" class="brand">
                 MathRun
-            </a>
-
-            <nav class="main-nav">
-
-                <a href="../inicio.php">
-                    Início
                 </a>
 
-                <a href="../conquistas.php">
-                    Conquistas
-                </a>
+                <nav class="main-nav">
 
-                <a href="../ranking.php">
-                    Ranking
-                </a>
+                    <a href="../inicio.php">
+                        Início
+                    </a>
 
-                <a href="../perfil.php">
-                    Perfil
-                </a>
+                    <a href="../conquistas.php">
+                        Conquistas
+                    </a>
 
-            </nav>
+                    <a href="../ranking.php">
+                        Ranking
+                    </a>
 
-            <div class="theme-switcher">
+                    <a href="../perfil/perfil.php">
+                        Perfil
+                    </a>
 
-                <button
-                    type="button"
-                    data-theme-option="light"
-                    title="Tema claro">
-                    ☀
-                </button>
+                </nav>
 
-                <button
-                    type="button"
-                    data-theme-option="dark"
-                    title="Tema escuro">
-                    ☾
-                </button>
+                <div class="theme-switcher">
 
-                <button
-                    type="button"
-                    data-theme-option="pink"
-                    title="Tema rosa">
-                    ♡
-                </button>
+                    <button
+                        type="button"
+                        data-theme-option="light"
+                        title="Tema claro">
+                        ☀
+                    </button>
 
-            </div>
+                    <button
+                        type="button"
+                        data-theme-option="dark"
+                        title="Tema escuro">
+                        ☾
+                    </button>
+
+                    <button
+                        type="button"
+                        data-theme-option="pink"
+                        title="Tema rosa">
+                        ♡
+                    </button>
+
+                </div>
 
         </div>
 
@@ -714,7 +714,7 @@ $porcentagemProgresso = $totalFases > 0
     </main>
 
     <script src="../assets/js/tema.js"></script>
-    
+
 
 </body>
 
