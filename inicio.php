@@ -19,6 +19,7 @@ $stmt = $pdo->prepare("
     FROM usuarios
     WHERE id = ?
 ");
+
 $stmt->execute([$usuarioId]);
 
 $usuario = $stmt->fetch();
@@ -107,6 +108,19 @@ $stmt->execute([$usuarioId]);
 $proximaFase = $stmt->fetch();
 
 /* =========================
+   LINK DA PRÓXIMA FASE
+========================= */
+
+if ($proximaFase) {
+
+    if ($proximaFase["jogo_nome"] === "MathChef") {
+        $linkProximaFase = "mathchef/jogar_mathchef.php";
+    } else {
+        $linkProximaFase = "mathspace/jogar_mathspace.php";
+    }
+}
+
+/* =========================
    MEDALHAS
 ========================= */
 
@@ -153,10 +167,12 @@ if ($hora < 12) {
 ?>
 
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 
 <head>
 
+    ```
     <meta charset="UTF-8">
 
     <meta
@@ -168,11 +184,13 @@ if ($hora < 12) {
     <link rel="stylesheet" href="assets/css/inicio.css">
 
     <script src="assets/js/tema.js" defer></script>
+    ```
 
 </head>
 
 <body>
 
+    ```
     <header class="navbar">
 
         <a href="inicio.php" class="brand">
@@ -327,7 +345,7 @@ if ($hora < 12) {
 
 
                     <a
-                        href="jogar.php?fase=<?= $proximaFase["id"] ?>"
+                        href="<?= $linkProximaFase ?>?fase=<?= $proximaFase["id"] ?>"
                         class="mission-button">
                         CONTINUAR MISSÃO
                         <span>→</span>
@@ -429,7 +447,7 @@ if ($hora < 12) {
                     ?>
 
                     <a
-                        href="jogos.php?id=<?= $jogo["id"] ?>"
+                        href="<?= $isChef ? 'mathchef/mathchef.php' : 'mathspace/mathspace.php' ?>"
                         class="world-card <?= $isChef ? 'chef' : 'space' ?>">
 
                         <div class="world-background">
@@ -495,7 +513,8 @@ if ($hora < 12) {
 
                                 <div
                                     class="progress-fill"
-                                    style="width: <?= $progresso ?>%"></div>
+                                    style="width: <?= $progresso ?>%">
+                                </div>
 
                             </div>
 
@@ -553,7 +572,8 @@ if ($hora < 12) {
                     <div class="xp-track">
 
                         <div
-                            style="width: <?= $porcentagemXP ?>%"></div>
+                            style="width: <?= $porcentagemXP ?>%">
+                        </div>
 
                     </div>
 
@@ -594,6 +614,7 @@ if ($hora < 12) {
         </section>
 
     </main>
+
 
 </body>
 
