@@ -6,7 +6,7 @@ ini_set('display_startup_errors', 1);
 
 session_start();
 
-require_once "/../config/config.php";
+require_once __DIR__ ."/../config/config.php";
 
 if (!isset($_SESSION["usuario_id"])) {
     header("Location: ../login.php");
