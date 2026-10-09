@@ -363,7 +363,7 @@ $respostasValidadas = [];
 // Contamos as questões que ainda não foram acertadas 
 // antes de começar a processar as respostas desta partida.
 
-$totalQuestoesDaPartida = 
+$totalQuestoesDaPartida =
     $totalQuestoes - count($questoesJaAcertadas);
 
 // =========================================================
@@ -769,6 +769,178 @@ try {
                 ? 1
                 : 0
         ]);
+    }
+
+    // =========================================================
+    // SISTEMA DE DESBLOQUEIO DE MEDALHAS
+    // =========================================================
+
+    // Concede uma medalha somente se ela estiver cadastrada.
+    // INSERT IGNORE evita duplicar a mesma medalha para o usuário.
+
+    $concederMedalha = function ($nomeMedalha) use ($pdo, $usuarioId) {
+
+        $stmt = $pdo->prepare("
+        INSERT IGNORE INTO usuario_medalhas (
+            usuario_id,
+            medalha_id
+        )
+        SELECT ?, id
+        FROM medalhas
+        WHERE nome = ?
+        LIMIT 1
+    ");
+
+        $stmt->execute([
+            $usuarioId,
+            $nomeMedalha
+        ]);
+    };
+
+
+    // =========================================================
+    // 1. PRIMEIRA RECEITA
+    // Concluir a primeira fase do MathChef.
+    // =========================================================
+
+    if (
+        $faseConcluida &&
+        $numeroAtual === 1
+    ) {
+        $concederMedalha("Primeira Receita");
+    }
+
+
+    // =========================================================
+    // 2. MESTRE DA COZINHA
+    // Concluir uma fase sem utilizar dicas.
+    // =========================================================
+
+    if ($faseConcluida) {
+
+        $stmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM respostas_usuario ru
+
+        INNER JOIN questoes q
+            ON q.id = ru.questao_id
+
+        WHERE ru.usuario_id = ?
+          AND q.fase_id = ?
+          AND ru.usou_dica = 1
+    ");
+
+        $stmt->execute([
+            $usuarioId,
+            $faseId
+        ]);
+
+        $dicasUtilizadasNaFase = (int) $stmt->fetchColumn();
+
+        if ($dicasUtilizadasNaFase === 0) {
+            $concederMedalha("Mestre da Cozinha");
+        }
+    }
+
+
+    // =========================================================
+    // 3. CHEF DAS FRAÇÕES
+    // Concluir todas as fases do MathChef da própria série.
+    // =========================================================
+
+    $stmt = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM fases
+    WHERE jogo_id = 1
+      AND serie = ?
+");
+
+    $stmt->execute([$serie]);
+
+    $totalFasesMathChef = (int) $stmt->fetchColumn();
+
+
+    $stmt = $pdo->prepare("
+    SELECT COUNT(*)
+
+    FROM fases f
+
+    LEFT JOIN progresso_usuario pu
+        ON pu.fase_id = f.id
+        AND pu.usuario_id = ?
+
+    WHERE f.jogo_id = 1
+      AND f.serie = ?
+      AND (
+          pu.id IS NULL
+          OR pu.concluida = 0
+      )
+");
+
+    $stmt->execute([
+        $usuarioId,
+        $serie
+    ]);
+
+    $fasesPendentes = (int) $stmt->fetchColumn();
+
+    if (
+        $totalFasesMathChef > 0 &&
+        $fasesPendentes === 0
+    ) {
+        $concederMedalha("Chef das Frações");
+    }
+
+
+    // =========================================================
+    // 4. SEM DERRAMAR
+    // Acertar cinco questões consecutivas.
+    // =========================================================
+
+    $stmt = $pdo->prepare("
+    SELECT ru.correta
+
+    FROM respostas_usuario ru
+
+    INNER JOIN questoes q
+        ON q.id = ru.questao_id
+
+    INNER JOIN fases f
+        ON f.id = q.fase_id
+
+    WHERE ru.usuario_id = ?
+      AND f.jogo_id = 1
+      AND f.serie = ?
+
+    ORDER BY ru.id ASC
+");
+
+    $stmt->execute([
+        $usuarioId,
+        $serie
+    ]);
+
+    $sequenciaAcertos = 0;
+    $cincoConsecutivas = false;
+
+    while ($resposta = $stmt->fetch()) {
+
+        if ((int) $resposta["correta"] === 1) {
+
+            $sequenciaAcertos++;
+
+            if ($sequenciaAcertos >= 5) {
+                $cincoConsecutivas = true;
+                break;
+            }
+        } else {
+
+            $sequenciaAcertos = 0;
+        }
+    }
+
+    if ($cincoConsecutivas) {
+        $concederMedalha("Sem Derramar");
     }
 
     // =====================================================
