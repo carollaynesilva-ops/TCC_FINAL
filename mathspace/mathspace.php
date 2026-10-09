@@ -31,7 +31,7 @@ if (!$aluno) {
 $serie = (int) $aluno['serie'];
 
 if (!in_array($serie, [6, 7, 8, 9], true)) {
-    die('Série escolar inválida.');
+    exit('Série escolar inválida.');
 }
 
 $stmt = $pdo->prepare(
@@ -55,23 +55,81 @@ $stmt = $pdo->prepare(
 $stmt->execute([$usuarioId, $serie]);
 $fases = $stmt->fetchAll();
 
+function escapar($valor): string
+{
+    return htmlspecialchars(
+        (string) $valor,
+        ENT_QUOTES,
+        'UTF-8'
+    );
+}
+
+function nomeDificuldade($valor): string
+{
+    return match (strtolower(trim((string) $valor))) {
+        'facil', 'fácil' => 'Fácil',
+        'medio', 'médio' => 'Médio',
+        'dificil', 'difícil' => 'Difícil',
+        default => ucfirst((string) $valor)
+    };
+}
+
+/*
+ * Coordenadas dos destinos no mapa.
+ * Os valores são porcentagens da área de navegação.
+ */
+$destinos = [
+    [
+        'icone' => '☾',
+        'classe' => 'lua',
+        'x' => 14,
+        'y' => 67,
+        'tipo' => 'SATÉLITE NATURAL',
+        'cor' => '#a9d8ff'
+    ],
+    [
+        'icone' => '♂',
+        'classe' => 'marte',
+        'x' => 37,
+        'y' => 35,
+        'tipo' => 'PLANETA ROCHOSO',
+        'cor' => '#ff967c'
+    ],
+    [
+        'icone' => '✦',
+        'classe' => 'asteroides',
+        'x' => 62,
+        'y' => 65,
+        'tipo' => 'CAMPO DE ASTEROIDES',
+        'cor' => '#85e8ed'
+    ],
+    [
+        'icone' => '◉',
+        'classe' => 'estacao',
+        'x' => 84,
+        'y' => 29,
+        'tipo' => 'BASE ORBITAL',
+        'cor' => '#c2a6ff'
+    ]
+];
+
 $totalFases = count($fases);
 $fasesConcluidas = 0;
 $pontuacaoTotal = 0;
-$proximaDesbloqueada = true;
+$liberarProxima = true;
 
 foreach ($fases as &$fase) {
     $fase['concluida'] = (int) $fase['concluida'];
     $fase['melhor_pontuacao'] = (int) $fase['melhor_pontuacao'];
 
-    $fase['desbloqueada'] = $proximaDesbloqueada;
+    $fase['desbloqueada'] = $liberarProxima;
 
     if ($fase['concluida'] === 1) {
         $fasesConcluidas++;
         $pontuacaoTotal += $fase['melhor_pontuacao'];
     }
 
-    $proximaDesbloqueada = $fase['concluida'] === 1;
+    $liberarProxima = $fase['concluida'] === 1;
 }
 unset($fase);
 
@@ -79,48 +137,17 @@ $percentual = $totalFases > 0
     ? (int) round(($fasesConcluidas / $totalFases) * 100)
     : 0;
 
-$planetas = [
-    [
-        'icone' => '🌙',
-        'classe' => 'lua',
-        'subtitulo' => 'O começo da jornada',
-        'coordenada' => '01'
-    ],
-    [
-        'icone' => '🔴',
-        'classe' => 'marte',
-        'subtitulo' => 'Prepare-se para o desafio',
-        'coordenada' => '02'
-    ],
-    [
-        'icone' => '🪐',
-        'classe' => 'asteroides',
-        'subtitulo' => 'Desvie dos obstáculos',
-        'coordenada' => '03'
-    ],
-    [
-        'icone' => '🌌',
-        'classe' => 'estacao',
-        'subtitulo' => 'O desafio final',
-        'coordenada' => '04'
-    ]
-];
+$primeiraDisponivel = null;
 
-function escapar($valor)
-{
-    return htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8');
+foreach ($fases as $i => $fase) {
+    if ($fase['desbloqueada']) {
+        $primeiraDisponivel = $i;
+        break;
+    }
 }
 
-function dificuldadeTexto($dificuldade)
-{
-    $dificuldade = strtolower(trim((string) $dificuldade));
-
-    return match ($dificuldade) {
-        'facil', 'fácil' => 'Fácil',
-        'medio', 'médio' => 'Médio',
-        'dificil', 'difícil' => 'Difícil',
-        default => ucfirst($dificuldade ?: 'Exploração')
-    };
+if ($primeiraDisponivel === null && $totalFases > 0) {
+    $primeiraDisponivel = 0;
 }
 ?>
 <!DOCTYPE html>
@@ -129,6 +156,8 @@ function dificuldadeTexto($dificuldade)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#080b1b">
 
     <title>MathSpace | MathRun</title>
 
@@ -145,276 +174,407 @@ function dificuldadeTexto($dificuldade)
         <div class="shooting-star"></div>
     </div>
 
-    <header class="game-header">
-        <a href="../inicio.php" class="game-logo">
-            <span class="logo-icon">✦</span>
-            <span>Math<span class="logo-highlight">Run</span></span>
+    <header class="top-hud">
+        <a href="../inicio.php" class="brand">
+            <span class="brand-symbol">✦</span>
+            <span>Math<span>Run</span></span>
         </a>
 
-        <nav class="game-nav" aria-label="Navegação principal">
-            <a href="../inicio.php">Início</a>
-            <a href="../perfil.php">Meu perfil</a>
-            <a href="../conquistas.php">Conquistas</a>
-        </nav>
-
-        <div class="header-player">
-            <span class="player-status"></span>
-            <span>Explorador espacial</span>
+        <div class="hud-center">
+            <span class="connection-light"></span>
+            <span>SISTEMAS DA NAVE</span>
+            <span class="hud-divider">/</span>
+            <span class="hud-muted">EXPLORAÇÃO ESPACIAL</span>
         </div>
+
+        <a href="../perfil.php" class="pilot-link">
+            <span class="pilot-icon">♙</span>
+            <span><?= escapar($aluno['nome']) ?></span>
+            <span class="pilot-chevron">⌄</span>
+        </a>
     </header>
 
-    <main class="space-container">
+    <main class="cockpit">
 
-        <section class="hero-section">
-            <div class="hero-copy">
-                <div class="eyebrow">
-                    <span class="eyebrow-dot"></span>
-                    CENTRO DE EXPLORAÇÃO MATHRUN
-                </div>
-
-                <h1>
-                    Sua próxima missão
-                    <span>está entre as estrelas.</span>
-                </h1>
-
-                <p>
-                    Explore planetas, resolva desafios matemáticos e avance
-                    pelo universo. Cada resposta aproxima você da próxima descoberta.
-                </p>
-
-                <div class="hero-tags">
-                    <span>✦ Série <?= escapar($serie) ?>º ano</span>
-                    <span>🚀 <?= $totalFases ?> missões</span>
-                    <span>◈ <?= $fasesConcluidas ?> concluídas</span>
-                </div>
-            </div>
-
-            <div class="hero-planet" aria-hidden="true">
-                <div class="planet-orbit orbit-one"></div>
-                <div class="planet-orbit orbit-two"></div>
-                <div class="planet-core">
-                    <div class="planet-crater crater-one"></div>
-                    <div class="planet-crater crater-two"></div>
-                    <div class="planet-crater crater-three"></div>
-                </div>
-                <span class="planet-satellite">✦</span>
-                <span class="planet-spark spark-one">✧</span>
-                <span class="planet-spark spark-two">✦</span>
-            </div>
-        </section>
-
-        <section class="pilot-panel">
-            <div class="pilot-info">
-                <div class="pilot-avatar">👩‍🚀</div>
-
-                <div>
-                    <span class="small-label">COMANDANTE DA EXPEDIÇÃO</span>
-                    <h2><?= escapar($aluno['nome']) ?></h2>
-                    <p>
-                        <?= escapar($aluno['turma'] ?? 'Turma não informada') ?>
-                        · <?= escapar($serie) ?>º ano
-                    </p>
-                </div>
-            </div>
-
-            <div class="pilot-stat">
-                <span class="stat-icon">🏆</span>
-                <div>
-                    <span class="small-label">PONTUAÇÃO</span>
-                    <strong><?= number_format($pontuacaoTotal, 0, ',', '.') ?></strong>
-                    <small>pontos acumulados</small>
-                </div>
-            </div>
-
-            <div class="pilot-progress">
-                <div class="progress-heading">
-                    <span class="small-label">PROGRESSO GALÁCTICO</span>
-                    <strong><?= $percentual ?>%</strong>
-                </div>
-
-                <div
-                    class="progress-track"
-                    role="progressbar"
-                    aria-label="Progresso das missões"
-                    aria-valuenow="<?= $percentual ?>"
-                    aria-valuemin="0"
-                    aria-valuemax="100">
-                    <div
-                        class="progress-fill"
-                        data-progress="<?= $percentual ?>"></div>
-                </div>
-
-                <small>
-                    <?= $fasesConcluidas ?> de <?= $totalFases ?>
-                    missões concluídas
-                </small>
-            </div>
-        </section>
-
-        <section class="missions-section">
-            <div class="section-heading">
-                <div>
-                    <span class="small-label">MAPA DE NAVEGAÇÃO</span>
-                    <h2>Escolha seu próximo destino<span>.</span></h2>
-                    <p>Cada planeta guarda um novo desafio matemático.</p>
-                </div>
-
-                <div class="map-indicator">
-                    <span class="signal-dot"></span>
-                    SISTEMA ONLINE
-                </div>
-            </div>
-
-            <?php if (empty($fases)): ?>
-                <div class="empty-space">
-                    <span>🛰️</span>
-                    <h3>Nenhuma missão encontrada</h3>
-                    <p>
-                        Ainda não há missões cadastradas para o
-                        <?= escapar($serie) ?>º ano.
-                    </p>
-                </div>
-            <?php else: ?>
-
-                <div class="galaxy-map">
-                    <div class="map-route" aria-hidden="true"></div>
-
-                    <?php foreach ($fases as $indice => $fase): ?>
-                        <?php
-                        $planeta = $planetas[$indice % count($planetas)];
-
-                        $concluida = $fase['concluida'] === 1;
-                        $desbloqueada = $fase['desbloqueada'];
-                        $bloqueada = !$desbloqueada;
-
-                        $statusClasse = $concluida
-                            ? 'mission-completed'
-                            : ($bloqueada
-                                ? 'mission-locked'
-                                : 'mission-available');
-
-                        $statusTexto = $concluida
-                            ? 'Missão concluída'
-                            : ($bloqueada
-                                ? 'Missão bloqueada'
-                                : 'Pronto para decolar');
-
-                        $dificuldade = dificuldadeTexto(
-                            $fase['nivel_dificuldade']
-                        );
-                        ?>
-
-                        <article
-                            class="mission-card <?= escapar($statusClasse) ?>"
-                            style="--mission-index: <?= (int) $indice ?>">
-                            <div class="mission-topline">
-                                <span class="mission-number">
-                                    SETOR <?= escapar($planeta['coordenada']) ?>
-                                </span>
-
-                                <?php if ($concluida): ?>
-                                    <span class="mission-status completed">
-                                        ✓ CONCLUÍDA
-                                    </span>
-                                <?php elseif ($bloqueada): ?>
-                                    <span class="mission-status locked">
-                                        🔒 BLOQUEADA
-                                    </span>
-                                <?php else: ?>
-                                    <span class="mission-status available">
-                                        ● DISPONÍVEL
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-
-                            <div class="mission-planet <?= escapar($planeta['classe']) ?>">
-                                <div class="planet-ring"></div>
-                                <span class="planet-emoji">
-                                    <?= escapar($planeta['icone']) ?>
-                                </span>
-
-                                <?php if ($bloqueada): ?>
-                                    <span class="lock-overlay">🔒</span>
-                                <?php elseif ($concluida): ?>
-                                    <span class="planet-check">✓</span>
-                                <?php endif; ?>
-                            </div>
-
-                            <div class="mission-content">
-                                <span class="mission-kicker">
-                                    <?= escapar($planeta['subtitulo']) ?>
-                                </span>
-
-                                <h3><?= escapar($fase['nome']) ?></h3>
-
-                                <p>
-                                    <?= escapar(
-                                        $fase['descricao']
-                                            ?: 'Prepare-se para resolver desafios e explorar este setor.'
-                                    ) ?>
-                                </p>
-
-                                <div class="mission-details">
-                                    <span class="difficulty">
-                                        <span class="difficulty-dot <?= strtolower($dificuldade) ?>"></span>
-                                        <?= escapar($dificuldade) ?>
-                                    </span>
-
-                                    <span class="mission-points">
-                                        ✦ <?= number_format(
-                                                $fase['melhor_pontuacao'],
-                                                0,
-                                                ',',
-                                                '.'
-                                            ) ?> pts
-                                    </span>
-                                </div>
-
-                                <?php if ($bloqueada): ?>
-                                    <button
-                                        class="mission-button button-locked"
-                                        type="button"
-                                        disabled>
-                                        <span>Complete a missão anterior</span>
-                                        <span>🔒</span>
-                                    </button>
-                                <?php else: ?>
-                                    <a
-                                        class="mission-button <?= $concluida ? 'button-replay' : '' ?>"
-                                        href="jogar_mathspace.php?fase_id=<?= (int) $fase['id'] ?>">
-                                        <span>
-                                            <?= $concluida
-                                                ? 'Jogar novamente'
-                                                : 'Iniciar missão' ?>
-                                        </span>
-                                        <span class="button-arrow">↗</span>
-                                    </a>
-                                <?php endif; ?>
-                            </div>
-
-                            <span class="card-orbit-decoration" aria-hidden="true"></span>
-                        </article>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-        </section>
-
-        <section class="mission-tip">
-            <div class="tip-icon">💡</div>
+        <section class="cockpit-heading">
             <div>
-                <strong>Transmissão da central</strong>
+                <div class="system-label">
+                    <span class="system-pulse"></span>
+                    TERMINAL DE NAVEGAÇÃO · SETOR <?= escapar($serie) ?>
+                </div>
+
+                <h1>Comandante, escolha seu <span>destino.</span></h1>
+
                 <p>
-                    Resolva uma missão por vez. Suas descobertas ajudam a
-                    desbloquear novos setores da galáxia.
+                    A galáxia está diante de você. Selecione um ponto no mapa
+                    para consultar sua próxima missão.
                 </p>
             </div>
-            <span class="tip-signal">● AO VIVO</span>
+
+            <div class="ship-status">
+                <span class="status-icon">⌁</span>
+                <div>
+                    <small>STATUS DA EXPEDIÇÃO</small>
+                    <strong><?= $fasesConcluidas === $totalFases && $totalFases > 0
+                                ? 'SETOR EXPLORADO'
+                                : 'NAVE EM ÓRBITA' ?></strong>
+                </div>
+            </div>
         </section>
 
-        <footer class="game-footer">
-            <span>✦ MATHRUN SPACE EXPLORATION</span>
-            <span>O universo é enorme. Sua curiosidade também pode ser.</span>
+        <section class="cockpit-grid">
+
+            <!-- PAINEL ESQUERDO: INFORMAÇÕES DA NAVE -->
+            <aside class="side-console">
+                <div class="console-heading">
+                    <span class="console-icon">⌘</span>
+                    <div>
+                        <small>PAINEL DE BORDO</small>
+                        <h2>Expedição</h2>
+                    </div>
+                    <span class="live-tag">LIVE</span>
+                </div>
+
+                <div class="pilot-card">
+                    <div class="pilot-portrait">👩‍🚀</div>
+
+                    <div class="pilot-data">
+                        <small>COMANDANTE</small>
+                        <strong><?= escapar($aluno['nome']) ?></strong>
+                        <span>
+                            <?= escapar($aluno['turma'] ?? 'Turma não informada') ?>
+                            · <?= escapar($serie) ?>º ano
+                        </span>
+                    </div>
+                </div>
+
+                <div class="console-separator"></div>
+
+                <div class="data-block">
+                    <div class="data-label">
+                        <span>✧</span>
+                        ENERGIA DE EXPLORAÇÃO
+                    </div>
+
+                    <div class="data-value">
+                        <strong><?= $percentual ?>%</strong>
+                        <span><?= $fasesConcluidas ?>/<?= $totalFases ?> missões</span>
+                    </div>
+
+                    <div class="energy-bar">
+                        <div
+                            class="energy-fill"
+                            data-progress="<?= $percentual ?>"></div>
+                    </div>
+
+                    <small class="console-hint">
+                        Progresso da campanha atual
+                    </small>
+                </div>
+
+                <div class="console-separator"></div>
+
+                <div class="data-block">
+                    <div class="data-label">
+                        <span>◇</span>
+                        CRÉDITOS ACUMULADOS
+                    </div>
+
+                    <div class="credits-display">
+                        <span class="credit-symbol">✦</span>
+                        <strong><?= number_format($pontuacaoTotal, 0, ',', '.') ?></strong>
+                        <span>PTS</span>
+                    </div>
+                </div>
+
+                <div class="console-separator"></div>
+
+                <div class="mission-counter">
+                    <div class="counter-orbit">
+                        <span>✦</span>
+                    </div>
+
+                    <div>
+                        <small>OBJETIVO ATUAL</small>
+                        <strong>
+                            <?= $fasesConcluidas === $totalFases && $totalFases > 0
+                                ? 'Todas as missões concluídas!'
+                                : 'Explore o próximo planeta' ?>
+                        </strong>
+                        <p>Novos destinos aguardam sua descoberta.</p>
+                    </div>
+                </div>
+
+                <a href="../conquistas.php" class="console-link">
+                    Ver conquistas e medalhas <span>↗</span>
+                </a>
+            </aside>
+
+            <!-- CENTRO: VISOR PANORÂMICO E MAPA -->
+            <section class="navigation-window">
+                <div class="window-topbar">
+                    <div class="window-title">
+                        <span class="window-dot"></span>
+                        <span>VISOR GALÁCTICO</span>
+                    </div>
+
+                    <div class="coordinates">
+                        <span>COORD.</span>
+                        <strong>MX-<?= escapar($serie) ?>.07</strong>
+                    </div>
+
+                    <div class="radar-status">
+                        <span class="radar-dot"></span>
+                        RADAR ATIVO
+                    </div>
+                </div>
+
+                <div class="galaxy-map" id="galaxyMap">
+
+                    <div class="map-grid" aria-hidden="true"></div>
+                    <div class="map-nebula map-nebula-purple" aria-hidden="true"></div>
+                    <div class="map-nebula map-nebula-blue" aria-hidden="true"></div>
+
+                    <div class="radar-circle radar-circle-one" aria-hidden="true"></div>
+                    <div class="radar-circle radar-circle-two" aria-hidden="true"></div>
+                    <div class="radar-center" aria-hidden="true"></div>
+
+                    <svg
+                        class="route-lines"
+                        viewBox="0 0 1000 600"
+                        preserveAspectRatio="none"
+                        aria-hidden="true">
+                        <defs>
+                            <linearGradient id="routeGradient">
+                                <stop offset="0%" stop-color="#9d9bff" stop-opacity=".2" />
+                                <stop offset="50%" stop-color="#83dfff" stop-opacity=".85" />
+                                <stop offset="100%" stop-color="#b59cff" stop-opacity=".35" />
+                            </linearGradient>
+                        </defs>
+
+                        <path
+                            d="M140 402 Q230 370 370 210"
+                            class="route-path" />
+                        <path
+                            d="M370 210 Q520 150 620 390"
+                            class="route-path" />
+                        <path
+                            d="M620 390 Q760 320 840 174"
+                            class="route-path" />
+
+                        <path
+                            d="M140 402 Q230 370 370 210"
+                            class="route-glow" />
+                        <path
+                            d="M370 210 Q520 150 620 390"
+                            class="route-glow" />
+                        <path
+                            d="M620 390 Q760 320 840 174"
+                            class="route-glow" />
+                    </svg>
+
+                    <div class="map-label label-home">
+                        <span class="label-marker"></span>
+                        PONTO DE PARTIDA
+                    </div>
+
+                    <div class="map-label label-galaxy">
+                        VIA LÁCTEA · SETOR <?= escapar($serie) ?>
+                    </div>
+
+                    <?php if (empty($fases)): ?>
+                        <div class="map-empty">
+                            <span>⌁</span>
+                            <h2>Sinal de missão não encontrado</h2>
+                            <p>Não existem fases cadastradas para esta série.</p>
+                        </div>
+                    <?php else: ?>
+
+                        <?php foreach ($fases as $indice => $fase): ?>
+                            <?php
+                            $destino = $destinos[$indice % count($destinos)];
+                            $concluida = $fase['concluida'] === 1;
+                            $desbloqueada = $fase['desbloqueada'];
+                            $bloqueada = !$desbloqueada;
+                            $selecionada = $indice === $primeiraDisponivel;
+
+                            $status = $concluida
+                                ? 'completed'
+                                : ($bloqueada ? 'locked' : 'available');
+
+                            $statusTexto = $concluida
+                                ? 'CONCLUÍDA'
+                                : ($bloqueada ? 'BLOQUEADA' : 'DISPONÍVEL');
+                            ?>
+
+                            <button
+                                type="button"
+                                class="destination <?= escapar($destino['classe']) ?> <?= escapar($status) ?> <?= $selecionada ? 'selected' : '' ?>"
+                                style="
+                                    --planet-x: <?= (int) $destino['x'] ?>%;
+                                    --planet-y: <?= (int) $destino['y'] ?>%;
+                                    --planet-color: <?= escapar($destino['cor']) ?>;
+                                    --planet-order: <?= (int) $indice ?>;
+                                "
+                                data-destination
+                                data-id="<?= (int) $fase['id'] ?>"
+                                data-name="<?= escapar($fase['nome']) ?>"
+                                data-description="<?= escapar($fase['descricao'] ?: 'Uma nova missão matemática aguarda você neste destino.') ?>"
+                                data-type="<?= escapar($destino['tipo']) ?>"
+                                data-difficulty="<?= escapar(nomeDificuldade($fase['nivel_dificuldade'])) ?>"
+                                data-status="<?= escapar($statusTexto) ?>"
+                                data-points="<?= (int) $fase['melhor_pontuacao'] ?>"
+                                data-completed="<?= $concluida ? '1' : '0' ?>"
+                                data-unlocked="<?= $desbloqueada ? '1' : '0' ?>"
+                                data-url="jogar_mathspace.php?fase_id=<?= (int) $fase['id'] ?>"
+                                aria-pressed="<?= $selecionada ? 'true' : 'false' ?>"
+                                aria-label="<?= escapar($fase['nome']) ?>: <?= escapar($statusTexto) ?>">
+                                <span class="destination-orbit"></span>
+                                <span class="destination-orbit orbit-second"></span>
+
+                                <span class="destination-planet">
+                                    <span class="destination-symbol">
+                                        <?= escapar($destino['icone']) ?>
+                                    </span>
+                                </span>
+
+                                <span class="destination-number">
+                                    <?= str_pad((string) ($indice + 1), 2, '0', STR_PAD_LEFT) ?>
+                                </span>
+
+                                <span class="destination-name">
+                                    <?= escapar($fase['nome']) ?>
+                                </span>
+
+                                <span class="destination-state">
+                                    <?php if ($concluida): ?>
+                                        ✓
+                                    <?php elseif ($bloqueada): ?>
+                                        🔒
+                                    <?php else: ?>
+                                        <span class="mini-signal"></span>
+                                    <?php endif; ?>
+                                </span>
+                            </button>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+
+                    <div class="map-scale">
+                        <span>ESCALA ESTELAR</span>
+                        <span class="scale-line"></span>
+                        <span>1 UA</span>
+                    </div>
+
+                    <div class="map-compass" aria-hidden="true">
+                        <span>N</span>
+                        <div class="compass-arrow">⌃</div>
+                        <span>S</span>
+                    </div>
+                </div>
+
+                <div class="window-bottom">
+                    <div class="bottom-indicator">
+                        <span class="connection-light"></span>
+                        MAPA SINCRONIZADO
+                    </div>
+
+                    <div class="bottom-hint">
+                        <span>⌖</span>
+                        Selecione um planeta para examiná-lo
+                    </div>
+
+                    <div class="map-zoom">
+                        <span>ZOOM</span>
+                        <strong>100%</strong>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAINEL DIREITO: MISSÃO SELECIONADA -->
+            <aside class="mission-console">
+                <div class="console-heading">
+                    <span class="console-icon">⌖</span>
+                    <div>
+                        <small>COMPUTADOR DE BORDO</small>
+                        <h2>Destino selecionado</h2>
+                    </div>
+                </div>
+
+                <div class="selected-destination-visual" id="selectedVisual">
+                    <div class="selected-orbit"></div>
+                    <div class="selected-orbit selected-orbit-two"></div>
+                    <div class="selected-planet">
+                        <span id="selectedSymbol">☾</span>
+                    </div>
+                    <span class="visual-star visual-star-one">✦</span>
+                    <span class="visual-star visual-star-two">✧</span>
+                </div>
+
+                <div class="selected-info">
+                    <span class="selected-kicker" id="selectedType">
+                        DESTINO DE EXPLORAÇÃO
+                    </span>
+
+                    <h2 id="selectedName">Selecione um planeta</h2>
+
+                    <p id="selectedDescription">
+                        Escolha um destino no visor galáctico para consultar
+                        os detalhes da missão.
+                    </p>
+                </div>
+
+                <div class="selected-meta">
+                    <div>
+                        <small>DIFICULDADE</small>
+                        <strong id="selectedDifficulty">---</strong>
+                    </div>
+
+                    <div>
+                        <small>MELHOR PONTUAÇÃO</small>
+                        <strong id="selectedPoints">0 PTS</strong>
+                    </div>
+                </div>
+
+                <div class="selected-status">
+                    <span class="status-square"></span>
+                    <span id="selectedStatus">AGUARDANDO DESTINO</span>
+                </div>
+
+                <a
+                    href="#"
+                    class="launch-button disabled"
+                    id="launchButton"
+                    aria-disabled="true">
+                    <span class="launch-icon">➤</span>
+                    <span id="launchText">Selecione um destino</span>
+                    <span class="launch-arrow">↗</span>
+                </a>
+
+                <p class="launch-caption" id="launchCaption">
+                    A nave aguarda suas coordenadas.
+                </p>
+
+                <div class="console-footer">
+                    <span>SYS.NAV.MATHSPACE</span>
+                    <span>V.01.06</span>
+                </div>
+            </aside>
+
+        </section>
+
+        <footer class="cockpit-footer">
+            <div>
+                <span class="footer-symbol">✦</span>
+                MATHRUN <span class="footer-muted">/ SPACE EXPLORATION</span>
+            </div>
+
+            <div class="footer-center">
+                TODAS AS ROTAS LEVAM A UMA DESCOBERTA
+            </div>
+
+            <a href="../inicio.php">SAIR DA NAVE ↗</a>
         </footer>
+
     </main>
 </body>
 
