@@ -369,11 +369,9 @@ body {
 
     margin-top: 8px;
 
-    background: linear-gradient(
-        135deg,
-        var(--blue),
-        var(--purple)
-    );
+    background: linear-gradient(135deg,
+            var(--blue),
+            var(--purple));
 
     color: white;
 
@@ -471,11 +469,9 @@ body {
 
     border-radius: 18px;
 
-    background: linear-gradient(
-        135deg,
-        var(--blue),
-        var(--purple)
-    );
+    background: linear-gradient(135deg,
+            var(--blue),
+            var(--purple));
 
     color: white;
 
@@ -619,4 +615,38 @@ body {
         font-size: 14px;
     }
 
+}
+
+
+.tipo-acesso {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 22px;
+    padding: 5px;
+    background: #f3f2fc;
+    border-radius: 12px;
+}
+
+.opcao-acesso {
+    padding: 12px 8px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: #77758e;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.opcao-acesso:hover {
+    color: #6255d9;
+}
+
+.opcao-acesso.selecionado {
+    color: #5549c7;
+    background: #ffffff;
+    box-shadow: 0 2px 8px #30265c12;
 }

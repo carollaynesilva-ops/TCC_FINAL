@@ -5,71 +5,134 @@ session_start();
 require_once 'config/config.php';
 
 $erro = "";
+$modo = $_POST["modo"] ?? "aluno";
+
+if (!in_array($modo, ["aluno", "admin"], true)) {
+    $modo = "aluno";
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $email = trim($_POST["email"] ?? "");
+    $identificacao = trim($_POST["identificacao"] ?? "");
     $senha = $_POST["senha"] ?? "";
 
-    if ($email === "" || $senha === "") {
+    if ($identificacao === "" || $senha === "") {
 
         $erro = "Preencha todos os campos.";
-
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-
-        $erro = "Digite um e-mail válido.";
-
     } else {
 
-        $sql = "
-            SELECT
-                id,
-                nome,
-                email,
-                senha,
-                tipo,
-                nivel,
-                xp,
-                pontuacao_total
-            FROM usuarios
-            WHERE email = :email
-        ";
+        if ($modo === "admin") {
 
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ":email" => $email
-        ]);
+            // O administrador entra pelo nome de usuário.
+            if ($identificacao !== "admin") {
 
-        $usuario = $stmt->fetch();
+                $erro = "Usuário ou senha incorretos.";
+            } else {
 
-        if (!$usuario) {
+                $sql = "
+                    SELECT
+                        id,
+                        nome,
+                        email,
+                        senha,
+                        tipo,
+                        nivel,
+                        xp,
+                        pontuacao_total
+                    FROM usuarios
+                    WHERE nome = :nome
+                      AND tipo = 'admin'
+                    LIMIT 1
+                ";
 
-            $erro = "E-mail ou senha incorretos.";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ":nome" => "admin"
+                ]);
 
-        } elseif (!password_verify($senha, $usuario["senha"])) {
+                $usuario = $stmt->fetch();
 
-            $erro = "E-mail ou senha incorretos.";
+                if (
+                    !$usuario ||
+                    !password_verify($senha, $usuario["senha"])
+                ) {
 
+                    $erro = "Usuário ou senha incorretos.";
+                } else {
+
+                    session_regenerate_id(true);
+
+                    $_SESSION["usuario_id"] = $usuario["id"];
+                    $_SESSION["usuario_nome"] = $usuario["nome"];
+                    $_SESSION["usuario_email"] = $usuario["email"];
+                    $_SESSION["usuario_tipo"] = $usuario["tipo"];
+                    $_SESSION["usuario_nivel"] = $usuario["nivel"];
+                    $_SESSION["usuario_xp"] = $usuario["xp"];
+                    $_SESSION["usuario_pontuacao"] =
+                        $usuario["pontuacao_total"];
+
+                    header("Location: admin/admin.php");
+                    exit;
+                }
+            }
         } else {
 
-            // Criando a sessão do usuário
-            $_SESSION["usuario_id"] = $usuario["id"];
-            $_SESSION["usuario_nome"] = $usuario["nome"];
-            $_SESSION["usuario_email"] = $usuario["email"];
-            $_SESSION["usuario_tipo"] = $usuario["tipo"];
-            $_SESSION["usuario_nivel"] = $usuario["nivel"];
-            $_SESSION["usuario_xp"] = $usuario["xp"];
-            $_SESSION["usuario_pontuacao"] = $usuario["pontuacao_total"];
+            // Login normal dos alunos, preservando o funcionamento atual.
+            if (!filter_var($identificacao, FILTER_VALIDATE_EMAIL)) {
 
-            // Evita problemas de segurança com a sessão
-            session_regenerate_id(true);
+                $erro = "Digite um e-mail válido.";
+            } else {
 
-            // Redireciona para a página inicial do aluno
-            header("Location: inicio.php");
-            exit;
+                $sql = "
+                    SELECT
+                        id,
+                        nome,
+                        email,
+                        senha,
+                        tipo,
+                        nivel,
+                        xp,
+                        pontuacao_total
+                    FROM usuarios
+                    WHERE email = :email
+                      AND tipo = 'aluno'
+                    LIMIT 1
+                ";
+
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ":email" => $identificacao
+                ]);
+
+                $usuario = $stmt->fetch();
+
+                if (
+                    !$usuario ||
+                    !password_verify($senha, $usuario["senha"])
+                ) {
+
+                    $erro = "E-mail ou senha incorretos.";
+                } else {
+
+                    session_regenerate_id(true);
+
+                    $_SESSION["usuario_id"] = $usuario["id"];
+                    $_SESSION["usuario_nome"] = $usuario["nome"];
+                    $_SESSION["usuario_email"] = $usuario["email"];
+                    $_SESSION["usuario_tipo"] = $usuario["tipo"];
+                    $_SESSION["usuario_nivel"] = $usuario["nivel"];
+                    $_SESSION["usuario_xp"] = $usuario["xp"];
+                    $_SESSION["usuario_pontuacao"] =
+                        $usuario["pontuacao_total"];
+
+                    header("Location: inicio.php");
+                    exit;
+                }
+            }
         }
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -81,8 +144,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
     <title>Login | MathRun</title>
 
@@ -91,18 +153,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link
         rel="preconnect"
         href="https://fonts.gstatic.com"
-        crossorigin
-    >
+        crossorigin>
 
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+        rel="stylesheet">
 
     <link
         rel="stylesheet"
-        href="assets/css/login.css"
-    >
+        href="assets/css/login.css">
 
 </head>
 
@@ -164,11 +223,45 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <?php endif; ?>
 
 
-            <form
-                method="POST"
-                action=""
-                class="formulario"
-            >
+            <form method="POST" action="" class="formulario">
+
+
+                <div class="tipo-acesso">
+                    <button
+                        type="button"
+                        class="opcao-acesso <?= $modo === 'aluno' ? 'selecionado' : '' ?>"
+                        data-modo="aluno">
+                        Acesso do aluno
+                    </button>
+
+                    <button
+                        type="button"
+                        class="opcao-acesso <?= $modo === 'admin' ? 'selecionado' : '' ?>"
+                        data-modo="admin">
+                        Acesso administrativo
+                    </button>
+                </div>
+
+                <input
+                    type="hidden"
+                    name="modo"
+                    id="modo"
+                    value="<?= htmlspecialchars($modo) ?>">
+
+                <div class="campo">
+                    <label for="identificacao" id="label-identificacao">
+                        <?= $modo === 'admin' ? 'Usuário administrativo' : 'E-mail' ?>
+                    </label>
+
+                    <input
+                        type="<?= $modo === 'admin' ? 'text' : 'email' ?>"
+                        id="identificacao"
+                        name="identificacao"
+                        placeholder="<?= $modo === 'admin' ? 'Digite admin' : 'seuemail@email.com' ?>"
+                        value="<?= htmlspecialchars($_POST['identificacao'] ?? '') ?>"
+                        autocomplete="username"
+                        required>
+                </div>
 
                 <div class="campo">
 
@@ -183,8 +276,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         placeholder="seuemail@email.com"
                         value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
                         autocomplete="email"
-                        required
-                    >
+                        required>
 
                 </div>
 
@@ -201,16 +293,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         name="senha"
                         placeholder="Digite sua senha"
                         autocomplete="current-password"
-                        required
-                    >
+                        required>
 
                 </div>
 
 
                 <button
                     type="submit"
-                    class="btn-entrar"
-                >
+                    class="btn-entrar">
 
                     <span>
                         Entrar no MathRun
@@ -302,6 +392,44 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </section>
 
     </main>
+
+
+    <script>
+        const botoesAcesso = document.querySelectorAll(".opcao-acesso");
+        const campoIdentificacao = document.getElementById("identificacao");
+        const labelIdentificacao = document.getElementById("label-identificacao");
+        const modoInput = document.getElementById("modo");
+
+        botoesAcesso.forEach((botao) => {
+            botao.addEventListener("click", () => {
+                const modoSelecionado = botao.dataset.modo;
+
+                modoInput.value = modoSelecionado;
+
+                botoesAcesso.forEach((opcao) => {
+                    opcao.classList.toggle(
+                        "selecionado",
+                        opcao.dataset.modo === modoSelecionado
+                    );
+                });
+
+                if (modoSelecionado === "admin") {
+                    labelIdentificacao.textContent = "Usuário administrativo";
+                    campoIdentificacao.type = "text";
+                    campoIdentificacao.placeholder = "Digite admin";
+                    campoIdentificacao.value = "admin";
+                } else {
+                    labelIdentificacao.textContent = "E-mail";
+                    campoIdentificacao.type = "email";
+                    campoIdentificacao.placeholder = "seuemail@email.com";
+                    campoIdentificacao.value = "";
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
 
 </body>
 
