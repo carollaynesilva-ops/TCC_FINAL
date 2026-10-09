@@ -184,13 +184,13 @@ if ($hora < 12) {
     <link rel="stylesheet" href="assets/css/inicio.css">
 
     <script src="assets/js/tema.js" defer></script>
-    ```
+    
 
 </head>
 
 <body>
 
-    ```
+    
     <header class="navbar">
 
         <a href="inicio.php" class="brand">
