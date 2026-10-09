@@ -1220,3 +1220,2068 @@ SELECT
     tentativas
 FROM progresso_usuario
 ORDER BY usuario_id, fase_id;
+
+
+-- MathSpace: cadastro completo de fases e perguntas do 6º ao 9º ano
+-- Execute com o banco b17_42774059_tcc já selecionado no phpMyAdmin.
+-- Não contém USE, DROP ou DELETE. Pode ser executado novamente sem duplicar fases/perguntas/alternativas/dicas.
+SET NAMES utf8mb4;
+
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 6, 'Missão Lua', 'Identifique formas, ângulos e perímetros.', 'facil', 1
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 6 AND numero = 1);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 6, 'Missão Marte', 'Resolva operações, frações e medidas.', 'medio', 2
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 6 AND numero = 2);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 6, 'Campo de Asteroides', 'Descubra padrões e resolva problemas.', 'medio', 3
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 6 AND numero = 3);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 6, 'Estação Espacial', 'Calcule áreas e interprete informações simples.', 'dificil', 4
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 6 AND numero = 4);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 7, 'Missão Lua', 'Explore números inteiros e ângulos.', 'facil', 1
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 7 AND numero = 1);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 7, 'Missão Marte', 'Use proporções, porcentagens e números racionais.', 'medio', 2
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 7 AND numero = 2);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 7, 'Campo de Asteroides', 'Resolva equações simples e padrões numéricos.', 'medio', 3
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 7 AND numero = 3);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 7, 'Estação Espacial', 'Analise dados e calcule áreas.', 'dificil', 4
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 7 AND numero = 4);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 8, 'Missão Lua', 'Explore potências, raízes e geometria.', 'facil', 1
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 8 AND numero = 1);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 8, 'Missão Marte', 'Resolva problemas de proporção, descontos e medidas.', 'medio', 2
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 8 AND numero = 2);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 8, 'Campo de Asteroides', 'Resolva expressões algébricas e produtos notáveis.', 'medio', 3
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 8 AND numero = 3);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 8, 'Estação Espacial', 'Use sistemas, volume e análise de dados.', 'dificil', 4
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 8 AND numero = 4);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 9, 'Missão Lua', 'Revise números reais, potências e relações geométricas.', 'facil', 1
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 9 AND numero = 1);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 9, 'Missão Marte', 'Trabalhe com porcentagem, razão e funções.', 'medio', 2
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 9 AND numero = 2);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 9, 'Campo de Asteroides', 'Resolva equações do primeiro grau e padrões.', 'medio', 3
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 9 AND numero = 3);
+INSERT INTO fases (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)
+SELECT 2, 9, 'Estação Espacial', 'Aplique fórmulas de geometria e probabilidade.', 'dificil', 4
+WHERE NOT EXISTS (SELECT 1 FROM fases WHERE jogo_id = 2 AND serie = 9 AND numero = 4);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quantos lados tem um triângulo?', '3', 'Um triângulo possui três lados.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quantos lados tem um triângulo?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '2', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Quantos lados tem um triângulo?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '2');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '3', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Quantos lados tem um triângulo?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '3');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Quantos lados tem um triângulo?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '5', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Quantos lados tem um triângulo?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '5');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Conte os segmentos que formam a figura.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Quantos lados tem um triângulo?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quantos graus mede um ângulo reto?', '90°', 'O ângulo reto mede 90 graus.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quantos graus mede um ângulo reto?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '45°', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Quantos graus mede um ângulo reto?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '45°');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '60°', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Quantos graus mede um ângulo reto?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '60°');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '90°', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Quantos graus mede um ângulo reto?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '90°');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '180°', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Quantos graus mede um ângulo reto?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '180°');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'É o ângulo que parece o canto de um quadrado.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Quantos graus mede um ângulo reto?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Um retângulo mede 5 cm por 3 cm. Qual é o perímetro?', '16 cm', 'O perímetro é 5 + 3 + 5 + 3 = 16 cm.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Um retângulo mede 5 cm por 3 cm. Qual é o perímetro?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8 cm', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Um retângulo mede 5 cm por 3 cm. Qual é o perímetro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '15 cm', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Um retângulo mede 5 cm por 3 cm. Qual é o perímetro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '15 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '16 cm', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Um retângulo mede 5 cm por 3 cm. Qual é o perímetro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '16 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '18 cm', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Um retângulo mede 5 cm por 3 cm. Qual é o perímetro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '18 cm');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some todos os lados.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Um retângulo mede 5 cm por 3 cm. Qual é o perímetro?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Um quadrado tem lado de 4 cm. Qual é seu perímetro?', '16 cm', 'Quatro lados de 4 cm totalizam 16 cm.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Um quadrado tem lado de 4 cm. Qual é seu perímetro?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8 cm', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Um quadrado tem lado de 4 cm. Qual é seu perímetro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12 cm', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Um quadrado tem lado de 4 cm. Qual é seu perímetro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '16 cm', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Um quadrado tem lado de 4 cm. Qual é seu perímetro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '16 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '20 cm', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Um quadrado tem lado de 4 cm. Qual é seu perímetro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '20 cm');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique a medida do lado por quatro.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Um quadrado tem lado de 4 cm. Qual é seu perímetro?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual objeto tem formato parecido com uma esfera?', 'Bola', 'Uma bola lembra uma esfera, um sólido tridimensional.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual objeto tem formato parecido com uma esfera?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'Livro', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Qual objeto tem formato parecido com uma esfera?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'Livro');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'Bola', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Qual objeto tem formato parecido com uma esfera?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'Bola');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'Folha', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Qual objeto tem formato parecido com uma esfera?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'Folha');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'Régua', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Qual objeto tem formato parecido com uma esfera?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'Régua');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Pense em um objeto redondo em todas as direções.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 1 AND q.pergunta = 'Qual objeto tem formato parecido com uma esfera?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quanto é 125 + 37?', '162', '125 + 37 = 162.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quanto é 125 + 37?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '152', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quanto é 125 + 37?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '152');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '162', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quanto é 125 + 37?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '162');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '172', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quanto é 125 + 37?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '172');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '182', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quanto é 125 + 37?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '182');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some primeiro as dezenas e unidades.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quanto é 125 + 37?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quanto é 240 - 85?', '155', '240 - 85 = 155.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quanto é 240 - 85?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '145', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quanto é 240 - 85?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '145');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '150', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quanto é 240 - 85?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '150');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '155', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quanto é 240 - 85?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '155');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '165', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quanto é 240 - 85?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '165');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Subtraia 80 e depois mais 5.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quanto é 240 - 85?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Há 6 caixas com 4 peças em cada uma. Quantas peças há?', '24', '6 × 4 = 24 peças.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Há 6 caixas com 4 peças em cada uma. Quantas peças há?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Há 6 caixas com 4 peças em cada uma. Quantas peças há?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '10');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '20', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Há 6 caixas com 4 peças em cada uma. Quantas peças há?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '20');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '24', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Há 6 caixas com 4 peças em cada uma. Quantas peças há?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '24');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '28', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Há 6 caixas com 4 peças em cada uma. Quantas peças há?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '28');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique caixas pela quantidade em cada caixa.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Há 6 caixas com 4 peças em cada uma. Quantas peças há?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é a metade de 18?', '9', '18 dividido por 2 é 9.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é a metade de 18?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Qual é a metade de 18?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Qual é a metade de 18?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Qual é a metade de 18?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Qual é a metade de 18?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Divida 18 em duas partes iguais.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Qual é a metade de 18?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quantos mililitros existem em 1,5 litro?', '1500 ml', 'Cada litro corresponde a 1000 ml; 1,5 L = 1500 ml.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quantos mililitros existem em 1,5 litro?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '150 ml', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quantos mililitros existem em 1,5 litro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '150 ml');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '500 ml', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quantos mililitros existem em 1,5 litro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '500 ml');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1000 ml', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quantos mililitros existem em 1,5 litro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '1000 ml');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1500 ml', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quantos mililitros existem em 1,5 litro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '1500 ml');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Converta litros em mililitros multiplicando por 1000.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 2 AND q.pergunta = 'Quantos mililitros existem em 1,5 litro?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é o próximo número: 2, 4, 6, 8, ...?', '10', 'A sequência aumenta de 2 em 2.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é o próximo número: 2, 4, 6, 8, ...?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo número: 2, 4, 6, 8, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo número: 2, 4, 6, 8, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '10');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '11', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo número: 2, 4, 6, 8, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '11');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo número: 2, 4, 6, 8, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some 2 ao último número.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo número: 2, 4, 6, 8, ...?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é o próximo número: 5, 10, 15, ...?', '20', 'A sequência aumenta de 5 em 5.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é o próximo número: 5, 10, 15, ...?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '18', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo número: 5, 10, 15, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '18');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '20', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo número: 5, 10, 15, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '20');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '25', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo número: 5, 10, 15, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '25');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '30', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo número: 5, 10, 15, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '30');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Observe a diferença entre os termos.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo número: 5, 10, 15, ...?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'A sequência dobra a cada etapa: 3, 6, 12, ... Qual é o próximo número?', '24', '12 × 2 = 24.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'A sequência dobra a cada etapa: 3, 6, 12, ... Qual é o próximo número?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '18', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'A sequência dobra a cada etapa: 3, 6, 12, ... Qual é o próximo número?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '18');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '20', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'A sequência dobra a cada etapa: 3, 6, 12, ... Qual é o próximo número?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '20');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '24', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'A sequência dobra a cada etapa: 3, 6, 12, ... Qual é o próximo número?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '24');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '36', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'A sequência dobra a cada etapa: 3, 6, 12, ... Qual é o próximo número?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '36');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique o último número por 2.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'A sequência dobra a cada etapa: 3, 6, 12, ... Qual é o próximo número?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Há 4 robôs com 3 baterias cada. Quantas baterias são necessárias?', '12', '4 × 3 = 12 baterias.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Há 4 robôs com 3 baterias cada. Quantas baterias são necessárias?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '7', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Há 4 robôs com 3 baterias cada. Quantas baterias são necessárias?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '7');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Há 4 robôs com 3 baterias cada. Quantas baterias são necessárias?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Há 4 robôs com 3 baterias cada. Quantas baterias são necessárias?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '16', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Há 4 robôs com 3 baterias cada. Quantas baterias são necessárias?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '16');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique robôs pela quantidade de baterias.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = 'Há 4 robôs com 3 baterias cada. Quantas baterias são necessárias?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, '36 astronautas serão divididos igualmente em 4 naves. Quantos vão em cada nave?', '9', '36 ÷ 4 = 9 astronautas por nave.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = '36 astronautas serão divididos igualmente em 4 naves. Quantos vão em cada nave?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = '36 astronautas serão divididos igualmente em 4 naves. Quantos vão em cada nave?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = '36 astronautas serão divididos igualmente em 4 naves. Quantos vão em cada nave?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = '36 astronautas serão divididos igualmente em 4 naves. Quantos vão em cada nave?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = '36 astronautas serão divididos igualmente em 4 naves. Quantos vão em cada nave?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Divida o total de astronautas pelo número de naves.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 3 AND q.pergunta = '36 astronautas serão divididos igualmente em 4 naves. Quantos vão em cada nave?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é a área de um retângulo de 8 cm por 3 cm?', '24 cm²', 'Área do retângulo = base × altura = 8 × 3 = 24 cm².', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é a área de um retângulo de 8 cm por 3 cm?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '11 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um retângulo de 8 cm por 3 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '11 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '16 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um retângulo de 8 cm por 3 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '16 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '24 cm²', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um retângulo de 8 cm por 3 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '24 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '32 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um retângulo de 8 cm por 3 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '32 cm²');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique comprimento e largura.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um retângulo de 8 cm por 3 cm?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Um tapete mede 7 m por 5 m. Qual é sua área?', '35 m²', '7 × 5 = 35 m².', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Um tapete mede 7 m por 5 m. Qual é sua área?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12 m²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Um tapete mede 7 m por 5 m. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12 m²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '24 m²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Um tapete mede 7 m por 5 m. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '24 m²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '30 m²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Um tapete mede 7 m por 5 m. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '30 m²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '35 m²', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Um tapete mede 7 m por 5 m. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '35 m²');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Área é medida em unidades quadradas.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Um tapete mede 7 m por 5 m. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Uma equipe coletou 3, 5 e 2 amostras em três locais. Quantas coletou ao todo?', '10', '3 + 5 + 2 = 10 amostras.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Uma equipe coletou 3, 5 e 2 amostras em três locais. Quantas coletou ao todo?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Uma equipe coletou 3, 5 e 2 amostras em três locais. Quantas coletou ao todo?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Uma equipe coletou 3, 5 e 2 amostras em três locais. Quantas coletou ao todo?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Uma equipe coletou 3, 5 e 2 amostras em três locais. Quantas coletou ao todo?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '10');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Uma equipe coletou 3, 5 e 2 amostras em três locais. Quantas coletou ao todo?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some as três quantidades.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Uma equipe coletou 3, 5 e 2 amostras em três locais. Quantas coletou ao todo?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Em uma caixa há 3 cartões vermelhos e 1 azul. Qual fração representa a chance de tirar o azul?', '1/4', 'Há 1 cartão azul entre 4 cartões ao todo.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Em uma caixa há 3 cartões vermelhos e 1 azul. Qual fração representa a chance de tirar o azul?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1/3', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Em uma caixa há 3 cartões vermelhos e 1 azul. Qual fração representa a chance de tirar o azul?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '1/3');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1/4', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Em uma caixa há 3 cartões vermelhos e 1 azul. Qual fração representa a chance de tirar o azul?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '1/4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '3/4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Em uma caixa há 3 cartões vermelhos e 1 azul. Qual fração representa a chance de tirar o azul?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '3/4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '4/1', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Em uma caixa há 3 cartões vermelhos e 1 azul. Qual fração representa a chance de tirar o azul?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '4/1');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Compare os casos azuis com o total.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Em uma caixa há 3 cartões vermelhos e 1 azul. Qual fração representa a chance de tirar o azul?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Uma roleta tem 4 partes iguais, sendo 1 verde. Qual é a chance de cair no verde?', '1/4', 'Uma das quatro partes é verde.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Uma roleta tem 4 partes iguais, sendo 1 verde. Qual é a chance de cair no verde?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1/2', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Uma roleta tem 4 partes iguais, sendo 1 verde. Qual é a chance de cair no verde?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '1/2');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1/3', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Uma roleta tem 4 partes iguais, sendo 1 verde. Qual é a chance de cair no verde?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '1/3');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1/4', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Uma roleta tem 4 partes iguais, sendo 1 verde. Qual é a chance de cair no verde?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '1/4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '3/4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Uma roleta tem 4 partes iguais, sendo 1 verde. Qual é a chance de cair no verde?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '3/4');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Casos favoráveis divididos pelo total.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 6 AND f.numero = 4 AND q.pergunta = 'Uma roleta tem 4 partes iguais, sendo 1 verde. Qual é a chance de cair no verde?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quanto é -3 + 8?', '5', 'Partindo de -3 e avançando 8 unidades, chegamos a 5.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quanto é -3 + 8?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '-11', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Quanto é -3 + 8?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '-11');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '-5', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Quanto é -3 + 8?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '-5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '5', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Quanto é -3 + 8?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '11', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Quanto é -3 + 8?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '11');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Na reta numérica, avance oito casas para a direita.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Quanto é -3 + 8?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é o valor de |-7|?', '7', 'O módulo representa a distância até zero, sempre não negativa.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é o valor de |-7|?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '-7', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Qual é o valor de |-7|?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '-7');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '0', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Qual é o valor de |-7|?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '0');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '7', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Qual é o valor de |-7|?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '7');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '14', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Qual é o valor de |-7|?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '14');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Conte a distância entre -7 e zero.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Qual é o valor de |-7|?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Dois ângulos de um triângulo medem 50° e 60°. Quanto mede o terceiro?', '70°', 'A soma dos ângulos internos é 180°; 180 - 50 - 60 = 70°.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Dois ângulos de um triângulo medem 50° e 60°. Quanto mede o terceiro?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '60°', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Dois ângulos de um triângulo medem 50° e 60°. Quanto mede o terceiro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '60°');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '70°', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Dois ângulos de um triângulo medem 50° e 60°. Quanto mede o terceiro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '70°');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '80°', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Dois ângulos de um triângulo medem 50° e 60°. Quanto mede o terceiro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '80°');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '90°', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Dois ângulos de um triângulo medem 50° e 60°. Quanto mede o terceiro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '90°');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'A soma dos três ângulos é 180°.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Dois ângulos de um triângulo medem 50° e 60°. Quanto mede o terceiro?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é o resultado de 3²?', '9', '3² = 3 × 3 = 9.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é o resultado de 3²?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Qual é o resultado de 3²?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Qual é o resultado de 3²?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Qual é o resultado de 3²?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Qual é o resultado de 3²?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'O expoente 2 indica multiplicar a base por ela mesma.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Qual é o resultado de 3²?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quanto é 2/5 de 20?', '8', '20 ÷ 5 × 2 = 8.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quanto é 2/5 de 20?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Quanto é 2/5 de 20?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Quanto é 2/5 de 20?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Quanto é 2/5 de 20?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Quanto é 2/5 de 20?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '10');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Divida 20 pelo denominador e multiplique pelo numerador.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 1 AND q.pergunta = 'Quanto é 2/5 de 20?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quanto é 25% de 80?', '20', '25% corresponde a um quarto; 80 ÷ 4 = 20.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quanto é 25% de 80?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Quanto é 25% de 80?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '10');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '15', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Quanto é 25% de 80?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '15');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '20', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Quanto é 25% de 80?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '20');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '25', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Quanto é 25% de 80?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '25');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Calcule a quarta parte de 80.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Quanto é 25% de 80?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Uma receita usa 3 copos para 6 pessoas. Quantos copos para 12 pessoas?', '6', 'O número de pessoas dobrou, então os copos também: 3 × 2 = 6.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Uma receita usa 3 copos para 6 pessoas. Quantos copos para 12 pessoas?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Uma receita usa 3 copos para 6 pessoas. Quantos copos para 12 pessoas?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '5', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Uma receita usa 3 copos para 6 pessoas. Quantos copos para 12 pessoas?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Uma receita usa 3 copos para 6 pessoas. Quantos copos para 12 pessoas?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Uma receita usa 3 copos para 6 pessoas. Quantos copos para 12 pessoas?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Aumente as duas quantidades na mesma proporção.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Uma receita usa 3 copos para 6 pessoas. Quantos copos para 12 pessoas?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual fração é equivalente a 3/4?', '6/8', 'Multiplicando numerador e denominador por 2, obtemos 6/8.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual fração é equivalente a 3/4?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '4/6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Qual fração é equivalente a 3/4?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '4/6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6/8', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Qual fração é equivalente a 3/4?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6/8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '5/8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Qual fração é equivalente a 3/4?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '5/8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '3/8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Qual fração é equivalente a 3/4?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '3/8');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique os dois termos pelo mesmo número.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Qual fração é equivalente a 3/4?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quanto é -12 + 5?', '-7', 'Somar 5 a -12 resulta em -7.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quanto é -12 + 5?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '-17', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Quanto é -12 + 5?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '-17');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '-7', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Quanto é -12 + 5?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '-7');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '7', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Quanto é -12 + 5?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '7');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '17', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Quanto é -12 + 5?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '17');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Avance cinco unidades a partir de -12.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Quanto é -12 + 5?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Um produto de R$ 50 tem desconto de 10%. Qual é o desconto?', 'R$ 5', '10% de 50 é 5 reais.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Um produto de R$ 50 tem desconto de 10%. Qual é o desconto?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 2', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Um produto de R$ 50 tem desconto de 10%. Qual é o desconto?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'R$ 2');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 5', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Um produto de R$ 50 tem desconto de 10%. Qual é o desconto?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'R$ 5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 10', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Um produto de R$ 50 tem desconto de 10%. Qual é o desconto?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'R$ 10');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 15', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Um produto de R$ 50 tem desconto de 10%. Qual é o desconto?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'R$ 15');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, '10% é um décimo do valor.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 2 AND q.pergunta = 'Um produto de R$ 50 tem desconto de 10%. Qual é o desconto?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Se x + 7 = 15, quanto vale x?', '8', 'x = 15 - 7 = 8.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Se x + 7 = 15, quanto vale x?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Se x + 7 = 15, quanto vale x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '7', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Se x + 7 = 15, quanto vale x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '7');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Se x + 7 = 15, quanto vale x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Se x + 7 = 15, quanto vale x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Subtraia 7 dos dois lados.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Se x + 7 = 15, quanto vale x?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é o próximo termo: 4, 8, 12, 16, ...?', '20', 'A sequência aumenta de 4 em 4.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é o próximo termo: 4, 8, 12, 16, ...?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '18', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo termo: 4, 8, 12, 16, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '18');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '20', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo termo: 4, 8, 12, 16, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '20');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '22', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo termo: 4, 8, 12, 16, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '22');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '24', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo termo: 4, 8, 12, 16, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '24');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some 4 ao último termo.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo termo: 4, 8, 12, 16, ...?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Se 3x = 21, quanto vale x?', '7', 'Divida os dois lados por 3: x = 7.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Se 3x = 21, quanto vale x?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Se 3x = 21, quanto vale x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '7', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Se 3x = 21, quanto vale x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '7');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Se 3x = 21, quanto vale x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Se 3x = 21, quanto vale x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Use a operação inversa da multiplicação.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Se 3x = 21, quanto vale x?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quanto é 2 × (5 + 3)?', '16', 'Primeiro 5 + 3 = 8; depois 2 × 8 = 16.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quanto é 2 × (5 + 3)?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '13', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Quanto é 2 × (5 + 3)?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '13');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '15', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Quanto é 2 × (5 + 3)?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '15');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '16', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Quanto é 2 × (5 + 3)?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '16');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '18', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Quanto é 2 × (5 + 3)?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '18');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Resolva primeiro o que está entre parênteses.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Quanto é 2 × (5 + 3)?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Um mapa usa escala 1 cm para 5 km. A distância no mapa é 4 cm. Qual é a distância real?', '20 km', '4 × 5 = 20 km.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Um mapa usa escala 1 cm para 5 km. A distância no mapa é 4 cm. Qual é a distância real?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9 km', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Um mapa usa escala 1 cm para 5 km. A distância no mapa é 4 cm. Qual é a distância real?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9 km');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '15 km', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Um mapa usa escala 1 cm para 5 km. A distância no mapa é 4 cm. Qual é a distância real?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '15 km');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '20 km', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Um mapa usa escala 1 cm para 5 km. A distância no mapa é 4 cm. Qual é a distância real?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '20 km');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '25 km', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Um mapa usa escala 1 cm para 5 km. A distância no mapa é 4 cm. Qual é a distância real?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '25 km');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique a distância do mapa pelo valor da escala.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 3 AND q.pergunta = 'Um mapa usa escala 1 cm para 5 km. A distância no mapa é 4 cm. Qual é a distância real?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é a área de um triângulo de base 10 cm e altura 6 cm?', '30 cm²', 'Área = base × altura ÷ 2 = 10 × 6 ÷ 2 = 30 cm².', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é a área de um triângulo de base 10 cm e altura 6 cm?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '16 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um triângulo de base 10 cm e altura 6 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '16 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '30 cm²', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um triângulo de base 10 cm e altura 6 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '30 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '60 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um triângulo de base 10 cm e altura 6 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '60 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '80 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um triângulo de base 10 cm e altura 6 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '80 cm²');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique base e altura e divida por dois.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um triângulo de base 10 cm e altura 6 cm?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é a média de 6, 8 e 10?', '8', '(6 + 8 + 10) ÷ 3 = 8.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é a média de 6, 8 e 10?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é a média de 6, 8 e 10?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '7', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é a média de 6, 8 e 10?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '7');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é a média de 6, 8 e 10?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é a média de 6, 8 e 10?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some os valores e divida pela quantidade.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é a média de 6, 8 e 10?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Uma sacola tem 2 bolas verdes e 6 amarelas. Qual a probabilidade de tirar uma verde?', '1/4', 'São 2 verdes em 8 bolas: 2/8 = 1/4.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Uma sacola tem 2 bolas verdes e 6 amarelas. Qual a probabilidade de tirar uma verde?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1/2', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Uma sacola tem 2 bolas verdes e 6 amarelas. Qual a probabilidade de tirar uma verde?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '1/2');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1/3', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Uma sacola tem 2 bolas verdes e 6 amarelas. Qual a probabilidade de tirar uma verde?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '1/3');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1/4', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Uma sacola tem 2 bolas verdes e 6 amarelas. Qual a probabilidade de tirar uma verde?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '1/4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '3/4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Uma sacola tem 2 bolas verdes e 6 amarelas. Qual a probabilidade de tirar uma verde?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '3/4');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Simplifique 2/8.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Uma sacola tem 2 bolas verdes e 6 amarelas. Qual a probabilidade de tirar uma verde?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Um retângulo tem área de 48 cm² e largura 6 cm. Qual é o comprimento?', '8 cm', '48 ÷ 6 = 8 cm.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Um retângulo tem área de 48 cm² e largura 6 cm. Qual é o comprimento?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6 cm', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Um retângulo tem área de 48 cm² e largura 6 cm. Qual é o comprimento?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '7 cm', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Um retângulo tem área de 48 cm² e largura 6 cm. Qual é o comprimento?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '7 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8 cm', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Um retângulo tem área de 48 cm² e largura 6 cm. Qual é o comprimento?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9 cm', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Um retângulo tem área de 48 cm² e largura 6 cm. Qual é o comprimento?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9 cm');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Divida a área pela largura.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Um retângulo tem área de 48 cm² e largura 6 cm. Qual é o comprimento?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é o suplemento de um ângulo de 125°?', '55°', 'Ângulos suplementares somam 180°; 180 - 125 = 55°.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é o suplemento de um ângulo de 125°?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '45°', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é o suplemento de um ângulo de 125°?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '45°');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '55°', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é o suplemento de um ângulo de 125°?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '55°');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '65°', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é o suplemento de um ângulo de 125°?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '65°');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '75°', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é o suplemento de um ângulo de 125°?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '75°');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Subtraia 125° de 180°.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 7 AND f.numero = 4 AND q.pergunta = 'Qual é o suplemento de um ângulo de 125°?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quanto é 2⁴?', '16', '2⁴ = 2 × 2 × 2 × 2 = 16.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quanto é 2⁴?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Quanto é 2⁴?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Quanto é 2⁴?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '16', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Quanto é 2⁴?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '16');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '24', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Quanto é 2⁴?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '24');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique quatro fatores iguais a 2.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Quanto é 2⁴?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é a raiz quadrada de 81?', '9', '9 × 9 = 81.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é a raiz quadrada de 81?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '7', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Qual é a raiz quadrada de 81?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '7');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Qual é a raiz quadrada de 81?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Qual é a raiz quadrada de 81?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Qual é a raiz quadrada de 81?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '10');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Procure o número que multiplicado por ele mesmo dá 81.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Qual é a raiz quadrada de 81?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quanto é 3² + 4?', '13', '3² = 9; 9 + 4 = 13.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quanto é 3² + 4?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '11', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Quanto é 3² + 4?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '11');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Quanto é 3² + 4?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '13', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Quanto é 3² + 4?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '13');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '15', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Quanto é 3² + 4?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '15');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Calcule a potência antes da soma.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Quanto é 3² + 4?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Um quadrado tem lado 6 cm. Qual é sua área?', '36 cm²', 'Área = lado × lado = 6 × 6 = 36 cm².', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Um quadrado tem lado 6 cm. Qual é sua área?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Um quadrado tem lado 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '24 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Um quadrado tem lado 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '24 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '30 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Um quadrado tem lado 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '30 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '36 cm²', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Um quadrado tem lado 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '36 cm²');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Eleve a medida do lado ao quadrado.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Um quadrado tem lado 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual número é irracional?', '√2', '√2 não pode ser escrito como uma fração exata de inteiros.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual número é irracional?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '0,5', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Qual número é irracional?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '0,5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '3/4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Qual número é irracional?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '3/4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '√2', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Qual número é irracional?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '√2');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Qual número é irracional?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '4');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Sua representação decimal é infinita e não periódica.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 1 AND q.pergunta = 'Qual número é irracional?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quanto é 15% de 200?', '30', '0,15 × 200 = 30.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quanto é 15% de 200?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '15', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Quanto é 15% de 200?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '15');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '20', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Quanto é 15% de 200?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '20');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '30', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Quanto é 15% de 200?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '30');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '35', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Quanto é 15% de 200?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '35');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, '10% é 20 e 5% é 10; some os dois.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Quanto é 15% de 200?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Se 4 cadernos custam R$ 28, quanto custam 6 pelo mesmo preço unitário?', 'R$ 42', 'Cada caderno custa R$ 7; 6 × 7 = 42.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Se 4 cadernos custam R$ 28, quanto custam 6 pelo mesmo preço unitário?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 35', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Se 4 cadernos custam R$ 28, quanto custam 6 pelo mesmo preço unitário?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'R$ 35');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 40', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Se 4 cadernos custam R$ 28, quanto custam 6 pelo mesmo preço unitário?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'R$ 40');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 42', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Se 4 cadernos custam R$ 28, quanto custam 6 pelo mesmo preço unitário?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'R$ 42');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 48', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Se 4 cadernos custam R$ 28, quanto custam 6 pelo mesmo preço unitário?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'R$ 48');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Encontre primeiro o preço de um caderno.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Se 4 cadernos custam R$ 28, quanto custam 6 pelo mesmo preço unitário?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é a representação decimal de 3/8?', '0,375', '3 ÷ 8 = 0,375.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é a representação decimal de 3/8?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '0,25', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Qual é a representação decimal de 3/8?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '0,25');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '0,375', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Qual é a representação decimal de 3/8?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '0,375');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '0,5', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Qual é a representação decimal de 3/8?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '0,5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '0,75', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Qual é a representação decimal de 3/8?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '0,75');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Divida o numerador pelo denominador.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Qual é a representação decimal de 3/8?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Um valor de 120 aumentou 10%. Qual é o novo valor?', '132', '10% de 120 é 12; 120 + 12 = 132.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Um valor de 120 aumentou 10%. Qual é o novo valor?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '122', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Um valor de 120 aumentou 10%. Qual é o novo valor?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '122');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '128', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Um valor de 120 aumentou 10%. Qual é o novo valor?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '128');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '132', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Um valor de 120 aumentou 10%. Qual é o novo valor?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '132');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '140', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Um valor de 120 aumentou 10%. Qual é o novo valor?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '140');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Calcule o aumento e some ao valor inicial.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Um valor de 120 aumentou 10%. Qual é o novo valor?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Um carro percorre 180 km em 3 horas, à velocidade constante. Qual é a velocidade média?', '60 km/h', 'Velocidade média = distância ÷ tempo = 180 ÷ 3 = 60 km/h.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Um carro percorre 180 km em 3 horas, à velocidade constante. Qual é a velocidade média?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '45 km/h', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Um carro percorre 180 km em 3 horas, à velocidade constante. Qual é a velocidade média?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '45 km/h');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '50 km/h', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Um carro percorre 180 km em 3 horas, à velocidade constante. Qual é a velocidade média?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '50 km/h');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '60 km/h', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Um carro percorre 180 km em 3 horas, à velocidade constante. Qual é a velocidade média?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '60 km/h');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '90 km/h', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Um carro percorre 180 km em 3 horas, à velocidade constante. Qual é a velocidade média?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '90 km/h');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Divida quilômetros por horas.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 2 AND q.pergunta = 'Um carro percorre 180 km em 3 horas, à velocidade constante. Qual é a velocidade média?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Simplifique 3x + 2x.', '5x', 'Termos semelhantes somam seus coeficientes: 3 + 2 = 5.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Simplifique 3x + 2x.');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '5', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Simplifique 3x + 2x.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '5x', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Simplifique 3x + 2x.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '5x');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6x', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Simplifique 3x + 2x.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6x');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'x²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Simplifique 3x + 2x.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'x²');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some apenas os números que acompanham x.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Simplifique 3x + 2x.'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Se x = 4, quanto vale 2x + 3?', '11', '2 × 4 + 3 = 11.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Se x = 4, quanto vale 2x + 3?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Se x = 4, quanto vale 2x + 3?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Se x = 4, quanto vale 2x + 3?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '10');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '11', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Se x = 4, quanto vale 2x + 3?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '11');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '14', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Se x = 4, quanto vale 2x + 3?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '14');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Substitua x por 4.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Se x = 4, quanto vale 2x + 3?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é a fatoração de x² - 9?', '(x - 3)(x + 3)', 'É uma diferença de quadrados: x² - 3².', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é a fatoração de x² - 9?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '(x-9)(x+1)', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Qual é a fatoração de x² - 9?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '(x-9)(x+1)');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '(x-3)(x+3)', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Qual é a fatoração de x² - 9?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '(x-3)(x+3)');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '(x-3)²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Qual é a fatoração de x² - 9?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '(x-3)²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'x(x-9)', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Qual é a fatoração de x² - 9?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'x(x-9)');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Use a forma a² - b² = (a-b)(a+b).', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Qual é a fatoração de x² - 9?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Desenvolva (x + 2)².', 'x² + 4x + 4', '(x + 2)² = x² + 4x + 4.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Desenvolva (x + 2)².');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'x² + 4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Desenvolva (x + 2)².'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'x² + 4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'x² + 2x + 4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Desenvolva (x + 2)².'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'x² + 2x + 4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'x² + 4x + 4', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Desenvolva (x + 2)².'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'x² + 4x + 4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'x² + 2', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Desenvolva (x + 2)².'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'x² + 2');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Use (a+b)² = a² + 2ab + b².', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Desenvolva (x + 2)².'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Resolva 5x - 7 = 18.', '5', '5x = 25, então x = 5.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Resolva 5x - 7 = 18.');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '3', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Resolva 5x - 7 = 18.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '3');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Resolva 5x - 7 = 18.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '5', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Resolva 5x - 7 = 18.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Resolva 5x - 7 = 18.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some 7 aos dois lados e depois divida por 5.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 3 AND q.pergunta = 'Resolva 5x - 7 = 18.'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é o volume de um cubo de aresta 3 cm?', '27 cm³', 'Volume = 3 × 3 × 3 = 27 cm³.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é o volume de um cubo de aresta 3 cm?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9 cm³', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é o volume de um cubo de aresta 3 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9 cm³');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '18 cm³', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é o volume de um cubo de aresta 3 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '18 cm³');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '27 cm³', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é o volume de um cubo de aresta 3 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '27 cm³');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '36 cm³', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é o volume de um cubo de aresta 3 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '36 cm³');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique a aresta por ela mesma três vezes.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é o volume de um cubo de aresta 3 cm?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Resolva o sistema x + y = 10 e x - y = 2. Qual é x?', '6', 'Somando as equações, 2x = 12; portanto x = 6.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Resolva o sistema x + y = 10 e x - y = 2. Qual é x?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Resolva o sistema x + y = 10 e x - y = 2. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '5', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Resolva o sistema x + y = 10 e x - y = 2. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Resolva o sistema x + y = 10 e x - y = 2. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Resolva o sistema x + y = 10 e x - y = 2. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some as duas equações para eliminar y.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Resolva o sistema x + y = 10 e x - y = 2. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é a área de um círculo de raio 2 cm? Use π ≈ 3,14.', '12,56 cm²', 'A = πr² = 3,14 × 4 = 12,56 cm².', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é a área de um círculo de raio 2 cm? Use π ≈ 3,14.');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6,28 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um círculo de raio 2 cm? Use π ≈ 3,14.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6,28 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9,42 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um círculo de raio 2 cm? Use π ≈ 3,14.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9,42 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12,56 cm²', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um círculo de raio 2 cm? Use π ≈ 3,14.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12,56 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '25,12 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um círculo de raio 2 cm? Use π ≈ 3,14.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '25,12 cm²');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Eleve o raio ao quadrado e multiplique por π.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um círculo de raio 2 cm? Use π ≈ 3,14.'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é a média de 12, 15, 18 e 15?', '15', 'A soma é 60 e 60 ÷ 4 = 15.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é a média de 12, 15, 18 e 15?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '14', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é a média de 12, 15, 18 e 15?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '14');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '15', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é a média de 12, 15, 18 e 15?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '15');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '16', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é a média de 12, 15, 18 e 15?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '16');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '18', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é a média de 12, 15, 18 e 15?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '18');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some os quatro dados e divida por quatro.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Qual é a média de 12, 15, 18 e 15?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Uma caixa mede 4 cm × 3 cm × 5 cm. Qual é seu volume?', '60 cm³', 'Volume = 4 × 3 × 5 = 60 cm³.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Uma caixa mede 4 cm × 3 cm × 5 cm. Qual é seu volume?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12 cm³', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Uma caixa mede 4 cm × 3 cm × 5 cm. Qual é seu volume?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12 cm³');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '20 cm³', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Uma caixa mede 4 cm × 3 cm × 5 cm. Qual é seu volume?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '20 cm³');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '45 cm³', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Uma caixa mede 4 cm × 3 cm × 5 cm. Qual é seu volume?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '45 cm³');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '60 cm³', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Uma caixa mede 4 cm × 3 cm × 5 cm. Qual é seu volume?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '60 cm³');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique comprimento, largura e altura.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 8 AND f.numero = 4 AND q.pergunta = 'Uma caixa mede 4 cm × 3 cm × 5 cm. Qual é seu volume?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é √144?', '12', '12 × 12 = 144.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é √144?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Qual é √144?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '10');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '11', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Qual é √144?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '11');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Qual é √144?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '14', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Qual é √144?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '14');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Procure o número cujo quadrado é 144.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Qual é √144?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quanto é 2³ × 2²?', '32', 'Potências de mesma base: 2³ × 2² = 2⁵ = 32.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quanto é 2³ × 2²?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '16', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Quanto é 2³ × 2²?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '16');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '24', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Quanto é 2³ × 2²?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '24');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '32', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Quanto é 2³ × 2²?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '32');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '64', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Quanto é 2³ × 2²?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '64');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some os expoentes quando as bases são iguais e multiplicadas.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Quanto é 2³ × 2²?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Um triângulo tem ângulos 35° e 65°. Qual é o terceiro?', '80°', '180 - 35 - 65 = 80°.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Um triângulo tem ângulos 35° e 65°. Qual é o terceiro?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '70°', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Um triângulo tem ângulos 35° e 65°. Qual é o terceiro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '70°');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '75°', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Um triângulo tem ângulos 35° e 65°. Qual é o terceiro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '75°');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '80°', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Um triângulo tem ângulos 35° e 65°. Qual é o terceiro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '80°');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '90°', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Um triângulo tem ângulos 35° e 65°. Qual é o terceiro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '90°');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'A soma dos ângulos internos é 180°.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Um triângulo tem ângulos 35° e 65°. Qual é o terceiro?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Dois triângulos semelhantes têm razão de lados 2:3. Um lado do menor mede 8 cm. Quanto mede o correspondente no maior?', '12 cm', 'O fator de ampliação é 3/2; 8 × 3/2 = 12.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Dois triângulos semelhantes têm razão de lados 2:3. Um lado do menor mede 8 cm. Quanto mede o correspondente no maior?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10 cm', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Dois triângulos semelhantes têm razão de lados 2:3. Um lado do menor mede 8 cm. Quanto mede o correspondente no maior?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '10 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '11 cm', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Dois triângulos semelhantes têm razão de lados 2:3. Um lado do menor mede 8 cm. Quanto mede o correspondente no maior?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '11 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12 cm', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Dois triângulos semelhantes têm razão de lados 2:3. Um lado do menor mede 8 cm. Quanto mede o correspondente no maior?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '14 cm', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Dois triângulos semelhantes têm razão de lados 2:3. Um lado do menor mede 8 cm. Quanto mede o correspondente no maior?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '14 cm');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique 8 pela razão 3/2.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Dois triângulos semelhantes têm razão de lados 2:3. Um lado do menor mede 8 cm. Quanto mede o correspondente no maior?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é a distância entre -4 e 6 na reta numérica?', '10', 'A distância é |6 - (-4)| = 10.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é a distância entre -4 e 6 na reta numérica?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '2', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Qual é a distância entre -4 e 6 na reta numérica?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '2');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Qual é a distância entre -4 e 6 na reta numérica?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Qual é a distância entre -4 e 6 na reta numérica?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '10');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Qual é a distância entre -4 e 6 na reta numérica?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Calcule a diferença entre os valores.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 1 AND q.pergunta = 'Qual é a distância entre -4 e 6 na reta numérica?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Quanto é 20% de 350?', '70', '0,20 × 350 = 70.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Quanto é 20% de 350?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '35', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Quanto é 20% de 350?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '35');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '50', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Quanto é 20% de 350?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '50');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '70', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Quanto é 20% de 350?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '70');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '80', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Quanto é 20% de 350?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '80');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, '10% é 35; dobre para obter 20%.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Quanto é 20% de 350?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Se y = 2x + 1, quanto vale y quando x = 4?', '9', 'y = 2 × 4 + 1 = 9.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Se y = 2x + 1, quanto vale y quando x = 4?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '7', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Se y = 2x + 1, quanto vale y quando x = 4?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '7');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Se y = 2x + 1, quanto vale y quando x = 4?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Se y = 2x + 1, quanto vale y quando x = 4?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Se y = 2x + 1, quanto vale y quando x = 4?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '10');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Substitua x por 4 na expressão.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Se y = 2x + 1, quanto vale y quando x = 4?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Uma camisa de R$ 80 recebeu desconto de 25%. Qual é o preço final?', 'R$ 60', '25% de 80 é 20; 80 - 20 = 60.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Uma camisa de R$ 80 recebeu desconto de 25%. Qual é o preço final?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 40', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Uma camisa de R$ 80 recebeu desconto de 25%. Qual é o preço final?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'R$ 40');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 55', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Uma camisa de R$ 80 recebeu desconto de 25%. Qual é o preço final?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'R$ 55');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 60', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Uma camisa de R$ 80 recebeu desconto de 25%. Qual é o preço final?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'R$ 60');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 65', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Uma camisa de R$ 80 recebeu desconto de 25%. Qual é o preço final?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = 'R$ 65');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Calcule um quarto de 80 e subtraia.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Uma camisa de R$ 80 recebeu desconto de 25%. Qual é o preço final?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Uma distância de 150 km é percorrida em 2,5 horas. Qual é a velocidade média?', '60 km/h', '150 ÷ 2,5 = 60 km/h.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Uma distância de 150 km é percorrida em 2,5 horas. Qual é a velocidade média?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '50 km/h', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Uma distância de 150 km é percorrida em 2,5 horas. Qual é a velocidade média?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '50 km/h');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '55 km/h', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Uma distância de 150 km é percorrida em 2,5 horas. Qual é a velocidade média?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '55 km/h');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '60 km/h', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Uma distância de 150 km é percorrida em 2,5 horas. Qual é a velocidade média?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '60 km/h');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '75 km/h', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Uma distância de 150 km é percorrida em 2,5 horas. Qual é a velocidade média?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '75 km/h');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Divida a distância pelo tempo.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Uma distância de 150 km é percorrida em 2,5 horas. Qual é a velocidade média?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Se 5 máquinas produzem 100 peças no mesmo período, quantas peças 8 máquinas produzem na mesma proporção?', '160', 'Cada máquina produz 20 peças; 8 × 20 = 160.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Se 5 máquinas produzem 100 peças no mesmo período, quantas peças 8 máquinas produzem na mesma proporção?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '120', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Se 5 máquinas produzem 100 peças no mesmo período, quantas peças 8 máquinas produzem na mesma proporção?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '120');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '140', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Se 5 máquinas produzem 100 peças no mesmo período, quantas peças 8 máquinas produzem na mesma proporção?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '140');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '160', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Se 5 máquinas produzem 100 peças no mesmo período, quantas peças 8 máquinas produzem na mesma proporção?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '160');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '180', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Se 5 máquinas produzem 100 peças no mesmo período, quantas peças 8 máquinas produzem na mesma proporção?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '180');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Encontre a produção por máquina.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 2 AND q.pergunta = 'Se 5 máquinas produzem 100 peças no mesmo período, quantas peças 8 máquinas produzem na mesma proporção?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Resolva 3x + 5 = 20.', '5', '3x = 15, então x = 5.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Resolva 3x + 5 = 20.');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '3', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Resolva 3x + 5 = 20.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '3');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Resolva 3x + 5 = 20.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '5', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Resolva 3x + 5 = 20.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Resolva 3x + 5 = 20.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Subtraia 5 e divida por 3.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Resolva 3x + 5 = 20.'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é o próximo termo: 3, 7, 11, 15, ...?', '19', 'A sequência aumenta de 4 em 4.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é o próximo termo: 3, 7, 11, 15, ...?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '17', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo termo: 3, 7, 11, 15, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '17');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '18', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo termo: 3, 7, 11, 15, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '18');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '19', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo termo: 3, 7, 11, 15, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '19');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '20', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo termo: 3, 7, 11, 15, ...?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '20');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some 4 ao último termo.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Qual é o próximo termo: 3, 7, 11, 15, ...?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Resolva 2(x - 3) = 10.', '8', 'x - 3 = 5, então x = 8.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Resolva 2(x - 3) = 10.');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '5', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Resolva 2(x - 3) = 10.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Resolva 2(x - 3) = 10.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Resolva 2(x - 3) = 10.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Resolva 2(x - 3) = 10.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '10');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Divida por 2 e depois some 3.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Resolva 2(x - 3) = 10.'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'As raízes de x² - 9 = 0 são?', '-3 e 3', 'x² = 9, então x pode ser -3 ou 3.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'As raízes de x² - 9 = 0 são?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '3 apenas', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'As raízes de x² - 9 = 0 são?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '3 apenas');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '-3 apenas', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'As raízes de x² - 9 = 0 são?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '-3 apenas');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '-3 e 3', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'As raízes de x² - 9 = 0 são?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '-3 e 3');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '0 e 9', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'As raízes de x² - 9 = 0 são?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '0 e 9');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Pense nos dois números cujo quadrado é 9.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'As raízes de x² - 9 = 0 são?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Um número somado ao seu dobro resulta em 27. Qual é o número?', '9', 'x + 2x = 27; 3x = 27; x = 9.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Um número somado ao seu dobro resulta em 27. Qual é o número?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Um número somado ao seu dobro resulta em 27. Qual é o número?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Um número somado ao seu dobro resulta em 27. Qual é o número?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Um número somado ao seu dobro resulta em 27. Qual é o número?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '9');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Um número somado ao seu dobro resulta em 27. Qual é o número?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '12');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Monte a equação x + 2x = 27.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 3 AND q.pergunta = 'Um número somado ao seu dobro resulta em 27. Qual é o número?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é o volume de um cilindro de raio 3 cm e altura 4 cm? Use π ≈ 3,14.', '113,04 cm³', 'V = πr²h = 3,14 × 9 × 4 = 113,04 cm³.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é o volume de um cilindro de raio 3 cm e altura 4 cm? Use π ≈ 3,14.');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '37,68 cm³', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é o volume de um cilindro de raio 3 cm e altura 4 cm? Use π ≈ 3,14.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '37,68 cm³');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '75,36 cm³', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é o volume de um cilindro de raio 3 cm e altura 4 cm? Use π ≈ 3,14.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '75,36 cm³');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '113,04 cm³', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é o volume de um cilindro de raio 3 cm e altura 4 cm? Use π ≈ 3,14.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '113,04 cm³');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '150,72 cm³', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é o volume de um cilindro de raio 3 cm e altura 4 cm? Use π ≈ 3,14.'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '150,72 cm³');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Multiplique π pelo raio ao quadrado e pela altura.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é o volume de um cilindro de raio 3 cm e altura 4 cm? Use π ≈ 3,14.'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é a distância entre os pontos (0,0) e (3,4)?', '5', 'Pelo teorema de Pitágoras, √(3² + 4²) = √25 = 5.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é a distância entre os pontos (0,0) e (3,4)?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '4', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é a distância entre os pontos (0,0) e (3,4)?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '5', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é a distância entre os pontos (0,0) e (3,4)?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é a distância entre os pontos (0,0) e (3,4)?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '7', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é a distância entre os pontos (0,0) e (3,4)?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '7');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Use a distância como hipotenusa de um triângulo retângulo.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é a distância entre os pontos (0,0) e (3,4)?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Em um grupo de 20 estudantes, 8 preferem robótica. Qual porcentagem prefere robótica?', '40%', '8 ÷ 20 = 0,4 = 40%.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Em um grupo de 20 estudantes, 8 preferem robótica. Qual porcentagem prefere robótica?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '20%', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Em um grupo de 20 estudantes, 8 preferem robótica. Qual porcentagem prefere robótica?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '20%');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '30%', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Em um grupo de 20 estudantes, 8 preferem robótica. Qual porcentagem prefere robótica?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '30%');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '40%', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Em um grupo de 20 estudantes, 8 preferem robótica. Qual porcentagem prefere robótica?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '40%');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '50%', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Em um grupo de 20 estudantes, 8 preferem robótica. Qual porcentagem prefere robótica?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '50%');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Divida 8 por 20 e transforme em porcentagem.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Em um grupo de 20 estudantes, 8 preferem robótica. Qual porcentagem prefere robótica?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Uma caixa tem 3 cartões azuis e 2 vermelhos. Qual é a probabilidade de tirar um vermelho?', '2/5', 'Há 2 cartões vermelhos em 5 cartões no total.', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Uma caixa tem 3 cartões azuis e 2 vermelhos. Qual é a probabilidade de tirar um vermelho?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1/5', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Uma caixa tem 3 cartões azuis e 2 vermelhos. Qual é a probabilidade de tirar um vermelho?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '1/5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '2/5', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Uma caixa tem 3 cartões azuis e 2 vermelhos. Qual é a probabilidade de tirar um vermelho?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '2/5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '3/5', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Uma caixa tem 3 cartões azuis e 2 vermelhos. Qual é a probabilidade de tirar um vermelho?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '3/5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1/2', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Uma caixa tem 3 cartões azuis e 2 vermelhos. Qual é a probabilidade de tirar um vermelho?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '1/2');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Divida a quantidade de cartões vermelhos pelo total.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Uma caixa tem 3 cartões azuis e 2 vermelhos. Qual é a probabilidade de tirar um vermelho?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+INSERT INTO questoes (fase_id, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Qual é a área de um trapézio com bases 8 cm e 12 cm e altura 5 cm?', '50 cm²', 'A = (B+b)h/2 = (12+8)×5/2 = 50 cm².', 100 FROM fases f
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id = f.id AND q.pergunta = 'Qual é a área de um trapézio com bases 8 cm e 12 cm e altura 5 cm?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '40 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um trapézio com bases 8 cm e 12 cm e altura 5 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '40 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '45 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um trapézio com bases 8 cm e 12 cm e altura 5 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '45 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '50 cm²', TRUE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um trapézio com bases 8 cm e 12 cm e altura 5 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '50 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '60 cm²', FALSE FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um trapézio com bases 8 cm e 12 cm e altura 5 cm?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id = q.id AND a.texto = '60 cm²');
+INSERT INTO dicas (questao_id, ordem, texto, custo_xp)
+SELECT q.id, 1, 'Some as bases, multiplique pela altura e divida por dois.', 0 FROM questoes q JOIN fases f ON f.id = q.fase_id
+WHERE f.jogo_id = 2 AND f.serie = 9 AND f.numero = 4 AND q.pergunta = 'Qual é a área de um trapézio com bases 8 cm e 12 cm e altura 5 cm?'
+AND NOT EXISTS (SELECT 1 FROM dicas d WHERE d.questao_id = q.id AND d.ordem = 1);
+
+-- Conferência: deve haver 4 fases e 20 questões por série.
+SELECT serie, COUNT(*) AS fases FROM fases WHERE jogo_id = 2 AND serie BETWEEN 6 AND 9 GROUP BY serie ORDER BY serie;
+SELECT f.serie, f.numero, f.nome, COUNT(q.id) AS questoes
+FROM fases f LEFT JOIN questoes q ON q.fase_id = f.id
+WHERE f.jogo_id = 2 AND f.serie BETWEEN 6 AND 9
+GROUP BY f.serie, f.numero, f.nome ORDER BY f.serie, f.numero;
+SELECT f.serie, COUNT(q.id) AS total_questoes, SUM((SELECT COUNT(*) FROM alternativas a WHERE a.questao_id = q.id)) AS total_alternativas
+FROM fases f JOIN questoes q ON q.fase_id = f.id
+WHERE f.jogo_id = 2 AND f.serie BETWEEN 6 AND 9 GROUP BY f.serie ORDER BY f.serie;
