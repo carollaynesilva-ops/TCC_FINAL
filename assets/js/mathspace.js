@@ -1,32 +1,105 @@
+
 document.addEventListener('DOMContentLoaded', () => {
-    const destinations = document.querySelectorAll('[data-destination]');
+    const mapa = document.getElementById('galaxyMap');
+    const foguete = document.getElementById('rocketCursor');
+    const destinos = document.querySelectorAll('[data-destination]');
 
-    const selectedVisual = document.getElementById('selectedVisual');
-    const selectedPlanet = selectedVisual?.querySelector('.selected-planet');
+    const visualSelecionado = document.getElementById('selectedVisual');
+    const planetaSelecionado = document.getElementById('selectedPlanet');
+    const simboloSelecionado = document.getElementById('selectedSymbol');
 
-    const selectedSymbol = document.getElementById('selectedSymbol');
-    const selectedType = document.getElementById('selectedType');
-    const selectedName = document.getElementById('selectedName');
-    const selectedDescription = document.getElementById('selectedDescription');
-    const selectedDifficulty = document.getElementById('selectedDifficulty');
-    const selectedPoints = document.getElementById('selectedPoints');
-    const selectedStatus = document.getElementById('selectedStatus');
+    const tipoSelecionado = document.getElementById('selectedType');
+    const nomeSelecionado = document.getElementById('selectedName');
+    const descricaoSelecionada = document.getElementById('selectedDescription');
+    const dificuldadeSelecionada = document.getElementById('selectedDifficulty');
+    const pontosSelecionados = document.getElementById('selectedPoints');
+    const estadoSelecionado = document.getElementById('selectedStatus');
 
-    const launchButton = document.getElementById('launchButton');
-    const launchText = document.getElementById('launchText');
-    const launchCaption = document.getElementById('launchCaption');
+    const botaoLancamento = document.getElementById('launchButton');
+    const textoLancamento = document.getElementById('launchText');
+    const legendaLancamento = document.getElementById('launchCaption');
 
-    // Anima as barras de progresso da cabine.
-    document.querySelectorAll('[data-progress]').forEach((bar) => {
-        const progress = Number(bar.dataset.progress) || 0;
+    let ultimoX = 0;
+    let ultimoY = 0;
+
+    /*
+     * FOGUETE DO PONTEIRO
+     * Ele aparece apenas dentro da área do mapa.
+     */
+
+    if (mapa && foguete) {
+        mapa.addEventListener('pointerenter', (evento) => {
+            if (evento.pointerType === 'touch') return;
+
+            foguete.classList.add('active');
+        });
+
+        mapa.addEventListener('pointermove', (evento) => {
+            if (evento.pointerType === 'touch') return;
+
+            const x = evento.clientX;
+            const y = evento.clientY;
+
+            const diferencaX = x - ultimoX;
+            const diferencaY = y - ultimoY;
+
+            if (ultimoX !== 0 || ultimoY !== 0) {
+                const angulo = Math.atan2(diferencaY, diferencaX);
+                const graus = angulo * (180 / Math.PI);
+
+                foguete.style.setProperty(
+                    '--rocket-angle',
+                    `${graus + 45}deg`
+                );
+
+                foguete.querySelector('.rocket-body').style.transform =
+                    `rotate(${graus + 45}deg)`;
+            }
+
+            foguete.style.left = `${x}px`;
+            foguete.style.top = `${y}px`;
+
+            ultimoX = x;
+            ultimoY = y;
+        });
+
+        mapa.addEventListener('pointerleave', () => {
+            foguete.classList.remove('active');
+            ultimoX = 0;
+            ultimoY = 0;
+        });
+    }
+
+    /*
+     * BARRA DE PROGRESSO
+     */
+
+    document.querySelectorAll('[data-progress]').forEach((barra) => {
+        const progresso = Number(barra.dataset.progress) || 0;
+
+        barra.style.width = '0%';
 
         requestAnimationFrame(() => {
-            bar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+            barra.style.width =
+                `${Math.min(100, Math.max(0, progresso))}%`;
         });
     });
 
+    /*
+     * SELEÇÃO DE PLANETAS E ATUALIZAÇÃO DO PAINEL
+     */
+
     function selecionarDestino(destino) {
-        destinations.forEach((item) => {
+        if (
+            !destino ||
+            !nomeSelecionado ||
+            !descricaoSelecionada ||
+            !botaoLancamento
+        ) {
+            return;
+        }
+
+        destinos.forEach((item) => {
             const selecionado = item === destino;
 
             item.classList.toggle('selected', selecionado);
@@ -34,117 +107,165 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const nome = destino.dataset.name || 'Destino desconhecido';
-        const descricao = destino.dataset.description || 'Nenhuma descrição disponível.';
+        const descricao =
+            destino.dataset.description || 'Nenhuma descrição disponível.';
+
         const tipo = destino.dataset.type || 'DESTINO DE EXPLORAÇÃO';
         const dificuldade = destino.dataset.difficulty || 'Não informada';
-        const pontos = Number(destino.dataset.points) || 0;
 
+        const pontos = Number(destino.dataset.points) || 0;
         const concluida = destino.dataset.completed === '1';
         const desbloqueada = destino.dataset.unlocked === '1';
+
         const cor = getComputedStyle(destino)
             .getPropertyValue('--planet-color')
             .trim() || '#a9baff';
 
-        selectedSymbol.textContent =
-            destino.querySelector('.destination-symbol')?.textContent.trim() || '✦';
+        const simbolo = destino
+            .querySelector('.destination-marker')
+            ?.textContent.trim() || '✦';
 
-        selectedType.textContent = tipo;
-        selectedName.textContent = nome;
-        selectedDescription.textContent = descricao;
-        selectedDifficulty.textContent = dificuldade;
+        if (simboloSelecionado) {
+            simboloSelecionado.textContent = simbolo;
+        }
 
-        selectedPoints.textContent =
-            `${pontos.toLocaleString('pt-BR')} PTS`;
+        if (tipoSelecionado) {
+            tipoSelecionado.textContent = tipo;
+        }
 
-        // Ajusta a aparência do planeta no painel de destino.
-        if (selectedPlanet) {
-            selectedPlanet.style.background = `
+        nomeSelecionado.textContent = nome;
+        descricaoSelecionada.textContent = descricao;
+
+        if (dificuldadeSelecionada) {
+            dificuldadeSelecionada.textContent = dificuldade;
+        }
+
+        if (pontosSelecionados) {
+            pontosSelecionados.textContent =
+                `${pontos.toLocaleString('pt-BR')} PTS`;
+        }
+
+        /*
+         * A aparência do planeta do painel muda de acordo
+         * com o planeta escolhido no mapa.
+         */
+
+        if (planetaSelecionado) {
+            planetaSelecionado.style.background = `
                 radial-gradient(
-                    circle at 30% 25%,
-                    rgba(255,255,255,.7),
-                    transparent 6%
+                    ellipse at 28% 20%,
+                    rgba(255,255,255,.9),
+                    transparent 7%
                 ),
                 radial-gradient(
-                    circle at 32% 28%,
+                    ellipse at 32% 28%,
                     color-mix(in srgb, ${cor} 75%, white),
-                    ${cor} 46%,
-                    #111833 100%
+                    ${cor} 42%,
+                    #11152f 100%
                 )
             `;
 
-            selectedPlanet.style.boxShadow = `
-                inset -15px -14px 25px rgba(0,0,0,.55),
-                inset 5px 5px 13px rgba(255,255,255,.13),
-                0 0 33px color-mix(in srgb, ${cor} 35%, transparent)
+            planetaSelecionado.style.boxShadow = `
+                inset -22px -15px 25px rgba(0,0,0,.75),
+                inset 7px 6px 12px rgba(255,255,255,.16),
+                0 0 32px color-mix(in srgb, ${cor} 35%, transparent)
             `;
         }
 
-        if (selectedVisual) {
-            selectedVisual.style.background = `
+        if (visualSelecionado) {
+            visualSelecionado.style.background = `
                 radial-gradient(
                     ellipse at center,
                     color-mix(in srgb, ${cor} 22%, transparent),
                     transparent 70%
                 ),
-                rgba(8,13,32,.52)
+                rgba(8,13,32,.65)
             `;
 
-            selectedVisual.querySelectorAll('.selected-orbit').forEach((orbit, index) => {
-                orbit.style.borderColor = index === 0
-                    ? `color-mix(in srgb, ${cor} 75%, white 10%)`
-                    : `color-mix(in srgb, ${cor} 40%, transparent)`;
-            });
+            visualSelecionado
+                .querySelectorAll('.selected-orbit')
+                .forEach((orbita, indice) => {
+                    orbita.style.borderColor = indice === 0
+                        ? `color-mix(in srgb, ${cor} 75%, white 10%)`
+                        : `color-mix(in srgb, ${cor} 40%, transparent)`;
+                });
         }
 
-        // Atualiza o status e a possibilidade de iniciar a missão.
-        launchButton.classList.remove('disabled');
+        botaoLancamento.classList.remove('disabled');
+        botaoLancamento.setAttribute('aria-disabled', 'false');
 
         if (concluida) {
-            selectedStatus.textContent = 'MISSÃO CONCLUÍDA';
-            launchText.textContent = 'Jogar novamente';
-            launchCaption.textContent =
+            if (estadoSelecionado) {
+                estadoSelecionado.textContent = 'MISSÃO CONCLUÍDA';
+            }
+
+            textoLancamento.textContent = 'Jogar novamente';
+
+            legendaLancamento.textContent =
                 'Revise o desafio e tente superar sua pontuação anterior.';
 
-            launchButton.href = destino.dataset.url;
-            launchButton.setAttribute('aria-disabled', 'false');
+            botaoLancamento.href = destino.dataset.url || '#';
 
         } else if (desbloqueada) {
-            selectedStatus.textContent = 'MISSÃO DISPONÍVEL';
-            launchText.textContent = 'Iniciar missão';
-            launchCaption.textContent =
-                'Sistemas prontos. Confirme sua próxima viagem.';
+            if (estadoSelecionado) {
+                estadoSelecionado.textContent = 'MISSÃO DISPONÍVEL';
+            }
 
-            launchButton.href = destino.dataset.url;
-            launchButton.setAttribute('aria-disabled', 'false');
+            textoLancamento.textContent = 'Iniciar missão';
+
+            legendaLancamento.textContent =
+                'Sistemas prontos. Prepare-se para a próxima viagem.';
+
+            botaoLancamento.href = destino.dataset.url || '#';
 
         } else {
-            selectedStatus.textContent = 'ACESSO RESTRITO';
-            launchText.textContent = 'Destino bloqueado';
-            launchCaption.textContent =
+            if (estadoSelecionado) {
+                estadoSelecionado.textContent = 'ACESSO RESTRITO';
+            }
+
+            textoLancamento.textContent = 'Destino bloqueado';
+
+            legendaLancamento.textContent =
                 'Conclua a missão anterior para liberar esta região.';
 
-            launchButton.href = '#';
-            launchButton.classList.add('disabled');
-            launchButton.setAttribute('aria-disabled', 'true');
+            botaoLancamento.href = '#';
+            botaoLancamento.classList.add('disabled');
+            botaoLancamento.setAttribute('aria-disabled', 'true');
         }
     }
 
-    destinations.forEach((destino) => {
+    destinos.forEach((destino) => {
         destino.addEventListener('click', () => {
             selecionarDestino(destino);
         });
+
+        /*
+         * Permite navegar pelos planetas com teclado.
+         */
+
+        destino.addEventListener('keydown', (evento) => {
+            if (evento.key === 'Enter' || evento.key === ' ') {
+                evento.preventDefault();
+                selecionarDestino(destino);
+            }
+        });
     });
 
-    launchButton?.addEventListener('click', (event) => {
-        if (launchButton.getAttribute('aria-disabled') === 'true') {
-            event.preventDefault();
-        }
-    });
+    if (botaoLancamento) {
+        botaoLancamento.addEventListener('click', (evento) => {
+            if (
+                botaoLancamento.getAttribute('aria-disabled') === 'true' ||
+                botaoLancamento.getAttribute('href') === '#'
+            ) {
+                evento.preventDefault();
+            }
+        });
+    }
 
     const destinoInicial =
         document.querySelector('[data-destination].selected') ||
         document.querySelector('[data-destination][data-unlocked="1"]') ||
-        destinations[0];
+        destinos[0];
 
     if (destinoInicial) {
         selecionarDestino(destinoInicial);
