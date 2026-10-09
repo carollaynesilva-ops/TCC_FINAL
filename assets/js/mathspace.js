@@ -1,273 +1,366 @@
+import * as THREE from 'three';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const mapa = document.getElementById('galaxyMap');
-    const foguete = document.getElementById('rocketCursor');
-    const destinos = document.querySelectorAll('[data-destination]');
+    const mapViewport = document.getElementById('mapViewport');
+    const destinations = [...document.querySelectorAll('[data-destination]')];
+    const missionEmpty = document.getElementById('missionEmpty');
+    const missionDetails = document.getElementById('missionDetails');
+    const planetCanvas = document.getElementById('planetCanvas');
+    const planetStage = document.getElementById('planetStage');
+    const planetFallback = document.getElementById('planetStageFallback');
+    const selectedType = document.getElementById('selectedType');
+    const selectedName = document.getElementById('selectedName');
+    const selectedDescription = document.getElementById('selectedDescription');
+    const selectedDifficulty = document.getElementById('selectedDifficulty');
+    const selectedPoints = document.getElementById('selectedPoints');
+    const selectedStatus = document.getElementById('selectedStatus');
+    const selectedStatusLine = document.querySelector('.mission-status-line');
+    const selectedStatusDot = document.getElementById('selectedStatusDot');
+    const stageCaption = document.getElementById('stageCaption');
+    const launchButton = document.getElementById('launchButton');
+    const launchText = document.getElementById('launchText');
+    const launchCaption = document.getElementById('launchCaption');
+    const cursorRocket = document.getElementById('cursorRocket');
+    const toast = document.getElementById('missionToast');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const visualSelecionado = document.getElementById('selectedVisual');
-    const planetaSelecionado = document.getElementById('selectedPlanet');
-    const simboloSelecionado = document.getElementById('selectedSymbol');
+    let activeDestination = null;
+    let toastTimer = null;
+    let renderer = null;
+    let scene = null;
+    let camera = null;
+    let planetMesh = null;
+    let atmosphereMesh = null;
+    let ringMesh = null;
+    let animationFrame = null;
+    let lastFrame = 0;
+    let resizeObserver = null;
 
-    const tipoSelecionado = document.getElementById('selectedType');
-    const nomeSelecionado = document.getElementById('selectedName');
-    const descricaoSelecionada = document.getElementById('selectedDescription');
-    const dificuldadeSelecionada = document.getElementById('selectedDifficulty');
-    const pontosSelecionados = document.getElementById('selectedPoints');
-    const estadoSelecionado = document.getElementById('selectedStatus');
+    const planetPresets = {
+        moon: { color: 0x9cc5d8, secondary: 0x5e7897, roughness: .98, cratered: true, atmosphere: 0x8cecff, type: 'rocky' },
+        mars: { color: 0xd77870, secondary: 0x7f344f, roughness: .96, cratered: true, atmosphere: 0xff9ebc, type: 'rocky' },
+        asteroids: { color: 0x9a91bb, secondary: 0x51466f, roughness: 1, cratered: true, atmosphere: 0xa995ff, type: 'rocky' },
+        station: { color: 0x6ed7db, secondary: 0x3b5d9a, roughness: .68, cratered: false, atmosphere: 0x83f4e6, type: 'gas' },
+        unknown: { color: 0x8c8ee8, secondary: 0x3c397e, roughness: .9, cratered: true, atmosphere: 0xc2a2ff, type: 'rocky' }
+    };
 
-    const botaoLancamento = document.getElementById('launchButton');
-    const textoLancamento = document.getElementById('launchText');
-    const legendaLancamento = document.getElementById('launchCaption');
+    function makeSurfaceTexture(preset, seed = 1) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        const base = new THREE.Color(preset.color);
+        const secondary = new THREE.Color(preset.secondary);
+        const gradient = ctx.createLinearGradient(0, 0, 512, 256);
+        gradient.addColorStop(0, `#${base.getHexString()}`);
+        gradient.addColorStop(.5, `#${secondary.getHexString()}`);
+        gradient.addColorStop(1, `#${base.clone().multiplyScalar(.5).getHexString()}`);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 512, 256);
 
-    let ultimoX = 0;
-    let ultimoY = 0;
-
-    /*
-     * FOGUETE DO PONTEIRO
-     * Ele aparece apenas dentro da área do mapa.
-     */
-
-    if (mapa && foguete) {
-        mapa.addEventListener('pointerenter', (evento) => {
-            if (evento.pointerType === 'touch') return;
-
-            foguete.classList.add('active');
-        });
-
-        mapa.addEventListener('pointermove', (evento) => {
-            if (evento.pointerType === 'touch') return;
-
-            const x = evento.clientX;
-            const y = evento.clientY;
-
-            const diferencaX = x - ultimoX;
-            const diferencaY = y - ultimoY;
-
-            if (ultimoX !== 0 || ultimoY !== 0) {
-                const angulo = Math.atan2(diferencaY, diferencaX);
-                const graus = angulo * (180 / Math.PI);
-
-                foguete.style.setProperty(
-                    '--rocket-angle',
-                    `${graus + 45}deg`
-                );
-
-                foguete.querySelector('.rocket-body').style.transform =
-                    `rotate(${graus + 45}deg)`;
+        let s = seed * 9301 + 49297;
+        const random = () => { s = (s * 233280 + 49297) % 233280; return s / 233280; };
+        for (let i = 0; i < 720; i++) {
+            const x = random() * 512;
+            const y = random() * 256;
+            const radius = preset.cratered ? 1 + random() * 10 : 2 + random() * 22;
+            const shade = random() > .5 ? 1 : -1;
+            const alpha = .035 + random() * .16;
+            const color = shade > 0 ? '#f0f5ff' : '#071026';
+            const g = ctx.createRadialGradient(x - radius * .2, y - radius * .2, 0, x, y, radius);
+            g.addColorStop(0, `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`);
+            g.addColorStop(1, `${color}00`);
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            if (preset.cratered && i % 3 === 0) {
+                ctx.strokeStyle = `rgba(230,240,255,${alpha * .7})`;
+                ctx.lineWidth = .7;
+                ctx.beginPath();
+                ctx.arc(x, y, radius * .65, 0, Math.PI * 2);
+                ctx.stroke();
             }
-
-            foguete.style.left = `${x}px`;
-            foguete.style.top = `${y}px`;
-
-            ultimoX = x;
-            ultimoY = y;
-        });
-
-        mapa.addEventListener('pointerleave', () => {
-            foguete.classList.remove('active');
-            ultimoX = 0;
-            ultimoY = 0;
-        });
+        }
+        if (preset.type === 'gas') {
+            for (let i = 0; i < 22; i++) {
+                const y = random() * 256;
+                ctx.fillStyle = `rgba(230,245,255,${.025 + random() * .08})`;
+                ctx.fillRect(0, y, 512, 2 + random() * 12);
+            }
+        }
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.anisotropy = 4;
+        return texture;
     }
 
-    /*
-     * BARRA DE PROGRESSO
-     */
+    function makeBumpTexture(seed = 2) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#777777';
+        ctx.fillRect(0, 0, 256, 128);
+        let s = seed * 134775813;
+        const random = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+        for (let i = 0; i < 900; i++) {
+            const x = random() * 256, y = random() * 128, r = 1 + random() * 6;
+            const shade = Math.floor(70 + random() * 150);
+            ctx.fillStyle = `rgb(${shade},${shade},${shade})`;
+            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        }
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.colorSpace = THREE.NoColorSpace;
+        return texture;
+    }
 
-    document.querySelectorAll('[data-progress]').forEach((barra) => {
-        const progresso = Number(barra.dataset.progress) || 0;
+    function disposePlanet() {
+        if (!scene) return;
+        if (planetMesh) {
+            scene.remove(planetMesh);
+            planetMesh.geometry.dispose();
+            planetMesh.material.map?.dispose();
+            planetMesh.material.bumpMap?.dispose();
+            planetMesh.material.dispose();
+            planetMesh = null;
+        }
+        if (atmosphereMesh) {
+            scene.remove(atmosphereMesh);
+            atmosphereMesh.geometry.dispose();
+            atmosphereMesh.material.dispose();
+            atmosphereMesh = null;
+        }
+        if (ringMesh) {
+            scene.remove(ringMesh);
+            ringMesh.geometry.dispose();
+            ringMesh.material.dispose();
+            ringMesh = null;
+        }
+    }
 
-        barra.style.width = '0%';
-
-        requestAnimationFrame(() => {
-            barra.style.width =
-                `${Math.min(100, Math.max(0, progresso))}%`;
+    function createPlanet(planetClass, hexColor, seed) {
+        if (!renderer || !scene) return;
+        disposePlanet();
+        const preset = { ...(planetPresets[planetClass] || planetPresets.unknown) };
+        const custom = new THREE.Color(hexColor || '#8cecff');
+        preset.atmosphere = custom.getHex();
+        const geometry = new THREE.SphereGeometry(1, 72, 56);
+        const material = new THREE.MeshStandardMaterial({
+            map: makeSurfaceTexture(preset, seed),
+            bumpMap: makeBumpTexture(seed),
+            bumpScale: preset.cratered ? .055 : .018,
+            roughness: preset.roughness,
+            metalness: .02
         });
-    });
+        planetMesh = new THREE.Mesh(geometry, material);
+        planetMesh.rotation.z = .22;
+        scene.add(planetMesh);
 
-    /*
-     * SELEÇÃO DE PLANETAS E ATUALIZAÇÃO DO PAINEL
-     */
-
-    function selecionarDestino(destino) {
-        if (
-            !destino ||
-            !nomeSelecionado ||
-            !descricaoSelecionada ||
-            !botaoLancamento
-        ) {
-            return;
+        const atmosphereMaterial = new THREE.ShaderMaterial({
+            uniforms: { glowColor: { value: new THREE.Color(preset.atmosphere) } },
+            vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vViewPosition;
+        void main() {
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          vNormal = normalize(normalMatrix * normal);
+          vViewPosition = -mvPosition.xyz;
+          gl_Position = projectionMatrix * mvPosition;
         }
+      `,
+            fragmentShader: `
+        uniform vec3 glowColor;
+        varying vec3 vNormal;
+        varying vec3 vViewPosition;
+        void main() {
+          float intensity = pow(0.72 - dot(normalize(vNormal), normalize(vViewPosition)), 2.2);
+          gl_FragColor = vec4(glowColor, clamp(intensity * 1.35, 0.0, 0.72));
+        }
+      `,
+            blending: THREE.AdditiveBlending,
+            side: THREE.BackSide,
+            transparent: true,
+            depthWrite: false
+        });
+        atmosphereMesh = new THREE.Mesh(new THREE.SphereGeometry(1.12, 64, 48), atmosphereMaterial);
+        scene.add(atmosphereMesh);
 
-        destinos.forEach((item) => {
-            const selecionado = item === destino;
+        if (planetClass === 'station') {
+            ringMesh = new THREE.Mesh(
+                new THREE.RingGeometry(1.25, 1.68, 96),
+                new THREE.MeshBasicMaterial({ color: 0x9bdfff, side: THREE.DoubleSide, transparent: true, opacity: .62 })
+            );
+            ringMesh.rotation.x = Math.PI / 2.5;
+            ringMesh.rotation.y = .22;
+            scene.add(ringMesh);
+        }
+        if (planetFallback) planetFallback.style.opacity = '0';
+    }
 
-            item.classList.toggle('selected', selecionado);
-            item.setAttribute('aria-pressed', String(selecionado));
+    function initRenderer() {
+        if (!planetCanvas || !planetStage || !window.WebGLRenderingContext) return;
+        try {
+            renderer = new THREE.WebGLRenderer({ canvas: planetCanvas, alpha: true, antialias: true, powerPreference: 'low-power' });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.12;
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
+            camera.position.set(0, 0, 4.4);
+            scene.add(new THREE.AmbientLight(0x8aa9ff, 1.25));
+            const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
+            keyLight.position.set(-3, 2.5, 4);
+            scene.add(keyLight);
+            const pinkRim = new THREE.PointLight(0xff8ce6, 5, 8);
+            pinkRim.position.set(2.5, .4, -1.5);
+            scene.add(pinkRim);
+            const blueRim = new THREE.PointLight(0x63cfff, 4, 8);
+            blueRim.position.set(-2, -1.5, -2);
+            scene.add(blueRim);
+            const starGeometry = new THREE.BufferGeometry();
+            const starCount = 650;
+            const starPositions = new Float32Array(starCount * 3);
+            for (let i = 0; i < starPositions.length; i++) starPositions[i] = (Math.random() - .5) * 14;
+            starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+            const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0xcdeaff, size: .018, transparent: true, opacity: .6 }));
+            scene.add(stars);
+            const resize = () => {
+                if (!renderer || !planetStage) return;
+                const width = Math.max(1, planetStage.clientWidth);
+                const height = Math.max(1, planetStage.clientHeight);
+                renderer.setSize(width, height, false);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+            };
+            resizeObserver = new ResizeObserver(resize);
+            resizeObserver.observe(planetStage);
+            resize();
+            const render = (time) => {
+                animationFrame = requestAnimationFrame(render);
+                if (reduceMotion && time - lastFrame < 100) return;
+                lastFrame = time;
+                if (planetMesh) planetMesh.rotation.y += reduceMotion ? 0 : .0025;
+                if (atmosphereMesh && planetMesh) atmosphereMesh.rotation.copy(planetMesh.rotation);
+                if (ringMesh) ringMesh.rotation.z += reduceMotion ? 0 : .0012;
+                renderer.render(scene, camera);
+            };
+            animationFrame = requestAnimationFrame(render);
+        } catch (error) {
+            console.warn('Three.js não pôde iniciar; usando planeta CSS como alternativa.', error);
+            renderer = null;
+            if (planetCanvas) planetCanvas.style.display = 'none';
+            if (planetFallback) planetFallback.style.opacity = '1';
+        }
+    }
+
+    function showToast(message) {
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    function selectDestination(destination) {
+        activeDestination = destination;
+        destinations.forEach((item) => {
+            const selected = item === destination;
+            item.classList.toggle('selected', selected);
+            item.setAttribute('aria-pressed', String(selected));
         });
 
-        const nome = destino.dataset.name || 'Destino desconhecido';
-        const descricao =
-            destino.dataset.description || 'Nenhuma descrição disponível.';
+        const isCompleted = destination.dataset.completed === '1';
+        const isUnlocked = destination.dataset.unlocked === '1';
+        const planetClass = destination.dataset.planetClass || 'unknown';
+        const color = destination.dataset.color || '#8cecff';
+        const phaseName = destination.dataset.name || destination.dataset.planet || 'Setor desconhecido';
 
-        const tipo = destino.dataset.type || 'DESTINO DE EXPLORAÇÃO';
-        const dificuldade = destino.dataset.difficulty || 'Não informada';
+        missionEmpty.hidden = true;
+        missionDetails.hidden = false;
+        missionDetails.style.setProperty('--selected-planet-color', color);
+        planetStage?.style.setProperty('--selected-planet-color', color);
+        selectedType.textContent = destination.dataset.type || 'SETOR DE EXPLORAÇÃO';
+        selectedName.textContent = phaseName;
+        selectedDescription.textContent = destination.dataset.description || 'Explore esta região e conclua os desafios matemáticos para avançar.';
+        selectedDifficulty.textContent = destination.dataset.difficulty || 'Não informada';
+        selectedPoints.textContent = `${Number(destination.dataset.points || 0).toLocaleString('pt-BR')} PTS`;
+        stageCaption.textContent = `DESTINO ${String(destination.dataset.number || '00').padStart(2, '0')} / HOLOGRAMA ATIVO`;
 
-        const pontos = Number(destino.dataset.points) || 0;
-        const concluida = destino.dataset.completed === '1';
-        const desbloqueada = destino.dataset.unlocked === '1';
+        selectedStatusLine.classList.toggle('is-locked', !isUnlocked && !isCompleted);
+        selectedStatusLine.classList.toggle('is-completed', isCompleted);
+        selectedStatusDot.style.background = isCompleted ? '#7df5c6' : (isUnlocked ? '#72ffe0' : '#a1a8c0');
+        selectedStatusDot.style.boxShadow = `0 0 8px ${isCompleted ? '#7df5c6' : (isUnlocked ? '#72ffe0' : '#a1a8c0')}`;
 
-        const cor = getComputedStyle(destino)
-            .getPropertyValue('--planet-color')
-            .trim() || '#a9baff';
-
-        const simbolo = destino
-            .querySelector('.destination-marker')
-            ?.textContent.trim() || '✦';
-
-        if (simboloSelecionado) {
-            simboloSelecionado.textContent = simbolo;
-        }
-
-        if (tipoSelecionado) {
-            tipoSelecionado.textContent = tipo;
-        }
-
-        nomeSelecionado.textContent = nome;
-        descricaoSelecionada.textContent = descricao;
-
-        if (dificuldadeSelecionada) {
-            dificuldadeSelecionada.textContent = dificuldade;
-        }
-
-        if (pontosSelecionados) {
-            pontosSelecionados.textContent =
-                `${pontos.toLocaleString('pt-BR')} PTS`;
-        }
-
-        /*
-         * A aparência do planeta do painel muda de acordo
-         * com o planeta escolhido no mapa.
-         */
-
-        if (planetaSelecionado) {
-            planetaSelecionado.style.background = `
-                radial-gradient(
-                    ellipse at 28% 20%,
-                    rgba(255,255,255,.9),
-                    transparent 7%
-                ),
-                radial-gradient(
-                    ellipse at 32% 28%,
-                    color-mix(in srgb, ${cor} 75%, white),
-                    ${cor} 42%,
-                    #11152f 100%
-                )
-            `;
-
-            planetaSelecionado.style.boxShadow = `
-                inset -22px -15px 25px rgba(0,0,0,.75),
-                inset 7px 6px 12px rgba(255,255,255,.16),
-                0 0 32px color-mix(in srgb, ${cor} 35%, transparent)
-            `;
-        }
-
-        if (visualSelecionado) {
-            visualSelecionado.style.background = `
-                radial-gradient(
-                    ellipse at center,
-                    color-mix(in srgb, ${cor} 22%, transparent),
-                    transparent 70%
-                ),
-                rgba(8,13,32,.65)
-            `;
-
-            visualSelecionado
-                .querySelectorAll('.selected-orbit')
-                .forEach((orbita, indice) => {
-                    orbita.style.borderColor = indice === 0
-                        ? `color-mix(in srgb, ${cor} 75%, white 10%)`
-                        : `color-mix(in srgb, ${cor} 40%, transparent)`;
-                });
-        }
-
-        botaoLancamento.classList.remove('disabled');
-        botaoLancamento.setAttribute('aria-disabled', 'false');
-
-        if (concluida) {
-            if (estadoSelecionado) {
-                estadoSelecionado.textContent = 'MISSÃO CONCLUÍDA';
-            }
-
-            textoLancamento.textContent = 'Jogar novamente';
-
-            legendaLancamento.textContent =
-                'Revise o desafio e tente superar sua pontuação anterior.';
-
-            botaoLancamento.href = destino.dataset.url || '#';
-
-        } else if (desbloqueada) {
-            if (estadoSelecionado) {
-                estadoSelecionado.textContent = 'MISSÃO DISPONÍVEL';
-            }
-
-            textoLancamento.textContent = 'Iniciar missão';
-
-            legendaLancamento.textContent =
-                'Sistemas prontos. Prepare-se para a próxima viagem.';
-
-            botaoLancamento.href = destino.dataset.url || '#';
-
+        launchButton.classList.toggle('is-disabled', !isUnlocked);
+        if (isCompleted) {
+            selectedStatus.textContent = 'MISSÃO CONCLUÍDA';
+            launchText.textContent = 'Jogar novamente';
+            launchCaption.textContent = 'Revisite o setor e tente superar sua pontuação.';
+            launchButton.href = destination.dataset.url || '#';
+            launchButton.setAttribute('aria-disabled', 'false');
+        } else if (isUnlocked) {
+            selectedStatus.textContent = 'MISSÃO DISPONÍVEL';
+            launchText.textContent = 'Iniciar missão';
+            launchCaption.textContent = 'Propulsores prontos. Aguardando confirmação.';
+            launchButton.href = destination.dataset.url || '#';
+            launchButton.setAttribute('aria-disabled', 'false');
         } else {
-            if (estadoSelecionado) {
-                estadoSelecionado.textContent = 'ACESSO RESTRITO';
-            }
-
-            textoLancamento.textContent = 'Destino bloqueado';
-
-            legendaLancamento.textContent =
-                'Conclua a missão anterior para liberar esta região.';
-
-            botaoLancamento.href = '#';
-            botaoLancamento.classList.add('disabled');
-            botaoLancamento.setAttribute('aria-disabled', 'true');
+            selectedStatus.textContent = 'ACESSO RESTRITO';
+            launchText.textContent = 'Destino bloqueado';
+            launchCaption.textContent = 'Conclua a missão anterior para liberar esta região.';
+            launchButton.href = '#';
+            launchButton.setAttribute('aria-disabled', 'true');
         }
+
+        if (renderer) createPlanet(planetClass, color, Number(destination.dataset.number || 1));
     }
 
-    destinos.forEach((destino) => {
-        destino.addEventListener('click', () => {
-            selecionarDestino(destino);
-        });
+    destinations.forEach((destination) => destination.addEventListener('click', () => selectDestination(destination)));
 
-        /*
-         * Permite navegar pelos planetas com teclado.
-         */
-
-        destino.addEventListener('keydown', (evento) => {
-            if (evento.key === 'Enter' || evento.key === ' ') {
-                evento.preventDefault();
-                selecionarDestino(destino);
-            }
-        });
+    launchButton?.addEventListener('click', (event) => {
+        if (launchButton.getAttribute('aria-disabled') === 'true') {
+            event.preventDefault();
+            showToast('MISSÃO BLOQUEADA // Conclua o setor anterior para continuar.');
+        }
     });
 
-    if (botaoLancamento) {
-        botaoLancamento.addEventListener('click', (evento) => {
-            if (
-                botaoLancamento.getAttribute('aria-disabled') === 'true' ||
-                botaoLancamento.getAttribute('href') === '#'
-            ) {
-                evento.preventDefault();
+    if (mapViewport && cursorRocket && window.matchMedia('(pointer: fine)').matches) {
+        mapViewport.addEventListener('pointerenter', () => {
+            cursorRocket.classList.add('visible');
+            mapViewport.classList.add('rocket-cursor');
+        });
+        mapViewport.addEventListener('pointerleave', () => {
+            cursorRocket.classList.remove('visible');
+            mapViewport.classList.remove('rocket-cursor');
+        });
+        mapViewport.addEventListener('pointermove', (event) => {
+            cursorRocket.style.left = `${event.clientX}px`;
+            cursorRocket.style.top = `${event.clientY}px`;
+            if (event.movementX || event.movementY) {
+                const angle = Math.atan2(event.movementY, event.movementX) * 180 / Math.PI + 45;
+                cursorRocket.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
             }
         });
     }
 
-    const destinoInicial =
-        document.querySelector('[data-destination].selected') ||
-        document.querySelector('[data-destination][data-unlocked="1"]') ||
-        destinos[0];
+    document.querySelectorAll('[data-progress]').forEach((bar) => {
+        const progress = Number(bar.dataset.progress) || 0;
+        requestAnimationFrame(() => { bar.style.width = `${Math.min(100, Math.max(0, progress))}%`; });
+    });
 
-    if (destinoInicial) {
-        selecionarDestino(destinoInicial);
+    initRenderer();
+    if (destinations.length) {
+        const firstUnlocked = destinations.find((item) => item.dataset.unlocked === '1');
+        selectDestination(firstUnlocked || destinations[0]);
     }
+
+    window.addEventListener('beforeunload', () => {
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        if (resizeObserver) resizeObserver.disconnect();
+        disposePlanet();
+        renderer?.dispose();
+    });
 });
