@@ -356,6 +356,16 @@ $questoesRespondidas = [];
 
 $respostasValidadas = [];
 
+// ========================================================= 
+// TOTAL DE QUESTÕES QUE PRECISAM SER RESPONDIDAS 
+// ========================================================= 
+
+// Contamos as questões que ainda não foram acertadas 
+// antes de começar a processar as respostas desta partida.
+
+$totalQuestoesDaPartida = 
+    $totalQuestoes - count($questoesJaAcertadas);
+
 // =========================================================
 // VALIDAR CADA RESPOSTA
 // =========================================================
@@ -582,7 +592,7 @@ foreach ($respostas as $resposta) {
 
 if (
     count($questoesRespondidas) !==
-    $totalQuestoes
+    $totalQuestoesDaPartida
 ) {
 
     http_response_code(400);
@@ -590,7 +600,7 @@ if (
     echo json_encode([
         "sucesso" => false,
         "mensagem" =>
-        "Nem todas as questões foram respondidas."
+        "Nem todas as questões desta tentativa foram respondidas."
     ]);
 
     exit;
