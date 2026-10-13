@@ -6,7 +6,7 @@ require_once 'config/config.php';
 
 $erro = "";
 
-// Verifica se existe uma configuração de senha administrativa.
+// Configuração da senha administrativa
 $arquivoAdmin = __DIR__ . '/config/admin.php';
 $senhaAdminHash = '';
 
@@ -14,6 +14,7 @@ if (file_exists($arquivoAdmin)) {
     require $arquivoAdmin;
 }
 
+// Processamento dos formulários
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $acao = $_POST["acao"] ?? "aluno";
@@ -108,8 +109,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 }
-?>
 
+?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -168,7 +169,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     </header>
 
-
     <main class="login-container">
 
         <section class="login-card">
@@ -189,7 +189,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             </div>
 
-
             <?php if ($erro !== ""): ?>
 
                 <div class="mensagem erro">
@@ -198,46 +197,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             <?php endif; ?>
 
+            <!-- LOGIN DO ALUNO -->
 
             <form method="POST" action="" class="formulario">
-
-
-                <div class="tipo-acesso">
-                    <button
-                        type="button"
-                        class="opcao-acesso <?= $modo === 'aluno' ? 'selecionado' : '' ?>"
-                        data-modo="aluno">
-                        Acesso do aluno
-                    </button>
-
-                    <button
-                        type="button"
-                        class="opcao-acesso <?= $modo === 'admin' ? 'selecionado' : '' ?>"
-                        data-modo="admin">
-                        Acesso administrativo
-                    </button>
-                </div>
-
-                <input
-                    type="hidden"
-                    name="modo"
-                    id="modo"
-                    value="<?= htmlspecialchars($modo) ?>">
-
-                <div class="campo">
-                    <label for="identificacao" id="label-identificacao">
-                        <?= $modo === 'admin' ? 'Usuário administrativo' : 'E-mail' ?>
-                    </label>
-
-                    <input
-                        type="<?= $modo === 'admin' ? 'text' : 'email' ?>"
-                        id="identificacao"
-                        name="identificacao"
-                        placeholder="<?= $modo === 'admin' ? 'Digite admin' : 'seuemail@email.com' ?>"
-                        value="<?= htmlspecialchars($_POST['identificacao'] ?? '') ?>"
-                        autocomplete="username"
-                        required>
-                </div>
 
                 <div class="campo">
 
@@ -256,7 +218,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 </div>
 
-
                 <div class="campo">
 
                     <label for="senha">
@@ -272,7 +233,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         required>
 
                 </div>
-
 
                 <button
                     type="submit"
@@ -290,10 +250,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             </form>
 
+            <!-- ACESSO ADMINISTRATIVO -->
 
             <details class="admin-access">
 
                 <summary>
+
                     <span class="admin-access-icon">⌘</span>
 
                     <span class="admin-access-text">
@@ -302,6 +264,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </span>
 
                     <span class="admin-access-arrow">＋</span>
+
                 </summary>
 
                 <form method="POST" action="" class="admin-form">
@@ -327,9 +290,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     </div>
 
-                    <button type="submit" class="btn-entrar admin-btn">
+                    <button
+                        type="submit"
+                        class="btn-entrar admin-btn">
 
-                        <span>Acessar painel administrativo</span>
+                        <span>
+                            Acessar painel administrativo
+                        </span>
 
                         <strong>→</strong>
 
@@ -338,8 +305,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </form>
 
             </details>
-
-
 
             <p class="cadastro-mobile">
 
@@ -352,7 +317,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </p>
 
         </section>
-
 
         <section class="login-visual">
 
@@ -367,9 +331,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </h2>
 
                 <p>
-                    Seu progresso, suas conquistas e seus desafios estão esperando por você.
+                    Seu progresso, suas conquistas e seus desafios
+                    estão esperando por você.
                 </p>
-
 
                 <div class="stats-example">
 
@@ -385,7 +349,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     </div>
 
-
                     <div class="stat">
 
                         <span>
@@ -397,7 +360,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         </strong>
 
                     </div>
-
 
                     <div class="stat">
 
@@ -418,44 +380,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </section>
 
     </main>
-
-
-    <script>
-        const botoesAcesso = document.querySelectorAll(".opcao-acesso");
-        const campoIdentificacao = document.getElementById("identificacao");
-        const labelIdentificacao = document.getElementById("label-identificacao");
-        const modoInput = document.getElementById("modo");
-
-        botoesAcesso.forEach((botao) => {
-            botao.addEventListener("click", () => {
-                const modoSelecionado = botao.dataset.modo;
-
-                modoInput.value = modoSelecionado;
-
-                botoesAcesso.forEach((opcao) => {
-                    opcao.classList.toggle(
-                        "selecionado",
-                        opcao.dataset.modo === modoSelecionado
-                    );
-                });
-
-                if (modoSelecionado === "admin") {
-                    labelIdentificacao.textContent = "Usuário administrativo";
-                    campoIdentificacao.type = "text";
-                    campoIdentificacao.placeholder = "Digite admin";
-                    campoIdentificacao.value = "admin";
-                } else {
-                    labelIdentificacao.textContent = "E-mail";
-                    campoIdentificacao.type = "email";
-                    campoIdentificacao.placeholder = "seuemail@email.com";
-                    campoIdentificacao.value = "";
-                }
-            });
-        });
-    </script>
-</body>
-
-</html>
 
 </body>
 
