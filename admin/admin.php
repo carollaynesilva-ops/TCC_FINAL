@@ -2,6 +2,10 @@
 
 session_start();
 
+// ==========================================
+// PROTEÇÃO DO PAINEL ADMINISTRATIVO
+// ==========================================
+
 if (($_SESSION["admin_autenticado"] ?? false) !== true) {
     header("Location: ../login.php");
     exit;
@@ -9,500 +13,1058 @@ if (($_SESSION["admin_autenticado"] ?? false) !== true) {
 
 require_once "../config/config.php";
 
+// ==========================================
+// VARIÁVEIS INICIAIS
+// ==========================================
 
-// Escapar textos antes de exibi-los no HTML.
-function escapar($valor)
+$erroBanco = "";
+
+$totalAlunos = 0;
+$totalJogos = 0;
+$totalFases = 0;
+$totalQuestoes = 0;
+$totalPartidas = 0;
+$totalMedalhas = 0;
+
+$desempenhoJogos = [];
+$rankingAlunos = [];
+$partidasRecentes = [];
+
+$taxaAcertos = 0;
+
+// Escapa textos para exibição segura no HTML.
+function adminEsc($valor)
 {
-    return htmlspecialchars((string) $valor, ENT_QUOTES, "UTF-8");
+    return htmlspecialchars(
+        (string) ($valor ?? ""),
+        ENT_QUOTES,
+        "UTF-8"
+    );
 }
 
-// Estatísticas gerais.
-$sqlEstatisticas = "
-    SELECT
-        (SELECT COUNT(*)
-         FROM usuarios
-         WHERE tipo = 'aluno') AS total_alunos,
+// ==========================================
+// CONSULTAS AO BANCO DE DADOS
+// ==========================================
 
-        (SELECT COUNT(*)
-         FROM historico_partidas) AS total_partidas,
+try {
 
-        (SELECT COALESCE(SUM(acertos), 0)
-         FROM historico_partidas) AS total_acertos,
+    // Total de alunos
+    $stmt = $pdo->query("
+        SELECT COUNT(*)
+        FROM usuarios
+        WHERE tipo = 'aluno'
+    ");
 
-        (SELECT COALESCE(SUM(erros), 0)
-         FROM historico_partidas) AS total_erros
-";
+    $totalAlunos = (int) $stmt->fetchColumn();
 
-$estatisticas = $pdo->query($sqlEstatisticas)->fetch();
 
-$totalAlunos = (int) $estatisticas["total_alunos"];
-$totalPartidas = (int) $estatisticas["total_partidas"];
-$totalAcertos = (int) $estatisticas["total_acertos"];
-$totalErros = (int) $estatisticas["total_erros"];
+    // Total de jogos
+    $stmt = $pdo->query("
+        SELECT COUNT(*)
+        FROM jogos
+    ");
 
-$totalRespostas = $totalAcertos + $totalErros;
+    $totalJogos = (int) $stmt->fetchColumn();
 
-$aproveitamento = $totalRespostas > 0
-    ? round(($totalAcertos / $totalRespostas) * 100, 1)
-    : 0;
 
-// Desempenho separado por jogo.
-$sqlJogos = "
-    SELECT
-        j.nome,
-        COUNT(hp.id) AS partidas,
-        COALESCE(SUM(hp.acertos), 0) AS acertos,
-        COALESCE(SUM(hp.erros), 0) AS erros
-    FROM jogos j
-    LEFT JOIN historico_partidas hp
-        ON hp.jogo_id = j.id
-    GROUP BY j.id, j.nome
-    ORDER BY j.id
-";
+    // Total de fases
+    $stmt = $pdo->query("
+        SELECT COUNT(*)
+        FROM fases
+    ");
 
-$desempenhoJogos = $pdo->query($sqlJogos)->fetchAll();
+    $totalFases = (int) $stmt->fetchColumn();
 
-// Partidas realizadas recentemente.
-$sqlRecentes = "
-    SELECT
-        u.nome AS aluno,
-        j.nome AS jogo,
-        f.nome AS fase,
-        hp.pontuacao,
-        hp.acertos,
-        hp.erros,
-        hp.data_partida
-    FROM historico_partidas hp
-    INNER JOIN usuarios u
-        ON u.id = hp.usuario_id
-    INNER JOIN jogos j
-        ON j.id = hp.jogo_id
-    INNER JOIN fases f
-        ON f.id = hp.fase_id
-    ORDER BY hp.data_partida DESC
-    LIMIT 8
-";
 
-$partidasRecentes = $pdo->query($sqlRecentes)->fetchAll();
+    // Total de questões
+    $stmt = $pdo->query("
+        SELECT COUNT(*)
+        FROM questoes
+    ");
 
-// Alunos com as maiores pontuações acumuladas.
-$sqlRanking = "
-    SELECT nome, pontuacao_total, xp
-    FROM usuarios
-    WHERE tipo = 'aluno'
-    ORDER BY pontuacao_total DESC, xp DESC
-    LIMIT 5
-";
+    $totalQuestoes = (int) $stmt->fetchColumn();
 
-$rankingAlunos = $pdo->query($sqlRanking)->fetchAll();
+
+    // Total de partidas
+    $stmt = $pdo->query("
+        SELECT COUNT(*)
+        FROM historico_partidas
+    ");
+
+    $totalPartidas = (int) $stmt->fetchColumn();
+
+
+    // Total de medalhas cadastradas
+    $stmt = $pdo->query("
+        SELECT COUNT(*)
+        FROM medalhas
+    ");
+
+    $totalMedalhas = (int) $stmt->fetchColumn();
+
+
+    // ==========================================
+    // DESEMPENHO POR JOGO
+    // ==========================================
+
+    $sqlDesempenho = "
+        SELECT
+            j.id,
+            j.nome,
+            COUNT(h.id) AS partidas,
+            COALESCE(SUM(h.acertos), 0) AS acertos,
+            COALESCE(SUM(h.erros), 0) AS erros,
+            COALESCE(SUM(h.pontuacao), 0) AS pontos,
+            CASE
+                WHEN SUM(h.acertos + h.erros) > 0
+                THEN ROUND(
+                    SUM(h.acertos) * 100.0 /
+                    SUM(h.acertos + h.erros),
+                    1
+                )
+                ELSE 0
+            END AS taxa_acertos
+        FROM jogos j
+        LEFT JOIN historico_partidas h
+            ON h.jogo_id = j.id
+        GROUP BY j.id, j.nome
+        ORDER BY partidas DESC, j.nome ASC
+    ";
+
+    $stmt = $pdo->query($sqlDesempenho);
+
+    $desempenhoJogos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+    // ==========================================
+    // RANKING DOS ALUNOS
+    // ==========================================
+
+    $sqlRanking = "
+        SELECT
+            id,
+            nome,
+            email,
+            serie,
+            turma,
+            nivel,
+            xp,
+            pontuacao_total
+        FROM usuarios
+        WHERE tipo = 'aluno'
+        ORDER BY pontuacao_total DESC, xp DESC, nome ASC
+        LIMIT 5
+    ";
+
+    $stmt = $pdo->query($sqlRanking);
+
+    $rankingAlunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+    // ==========================================
+    // PARTIDAS RECENTES
+    // ==========================================
+
+    $sqlRecentes = "
+        SELECT
+            h.id,
+            h.pontuacao,
+            h.acertos,
+            h.erros,
+            h.dicas_usadas,
+            h.data_partida,
+            u.nome AS aluno_nome,
+            j.nome AS jogo_nome,
+            f.nome AS fase_nome,
+            f.serie AS fase_serie
+        FROM historico_partidas h
+        INNER JOIN usuarios u
+            ON u.id = h.usuario_id
+        INNER JOIN jogos j
+            ON j.id = h.jogo_id
+        INNER JOIN fases f
+            ON f.id = h.fase_id
+        ORDER BY h.data_partida DESC, h.id DESC
+        LIMIT 8
+    ";
+
+    $stmt = $pdo->query($sqlRecentes);
+
+    $partidasRecentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+    // ==========================================
+    // TAXA GERAL DE ACERTOS
+    // ==========================================
+
+    $stmt = $pdo->query("
+        SELECT
+            COALESCE(SUM(acertos), 0) AS total_acertos,
+            COALESCE(SUM(erros), 0) AS total_erros
+        FROM historico_partidas
+    ");
+
+    $resumoRespostas = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $acertosGerais = (int) $resumoRespostas["total_acertos"];
+    $errosGerais = (int) $resumoRespostas["total_erros"];
+
+    $totalRespostas = $acertosGerais + $errosGerais;
+
+    if ($totalRespostas > 0) {
+        $taxaAcertos = round(
+            ($acertosGerais / $totalRespostas) * 100,
+            1
+        );
+    }
+} catch (PDOException $e) {
+
+    error_log("Erro no painel administrativo: " . $e->getMessage());
+
+    $erroBanco = "Não foi possível carregar todos os dados do painel. Verifique a conexão e a estrutura do banco de dados.";
+}
+
+// ==========================================
+// SAUDAÇÃO
+// ==========================================
+
+$hora = (int) date("H");
+
+if ($hora < 12) {
+    $saudacao = "Bom dia";
+} elseif ($hora < 18) {
+    $saudacao = "Boa tarde";
+} else {
+    $saudacao = "Boa noite";
+}
+
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Administração | MathRun</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="css/admin.css">
+    <title>Painel Administrativo | MathRun</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="css/admin.css">
+
 </head>
 
 <body>
 
     <div class="admin-layout">
 
+        <!-- ==================================
+             MENU LATERAL
+        =================================== -->
+
         <aside class="sidebar">
-            <a href="admin.php" class="logo">
-                <span class="logo-icon">M</span>
-                <span>MathRun <small>ADMINISTRAÇÃO</small></span>
+
+            <a href="admin.php" class="admin-brand">
+                <span class="brand-icon">M</span>
+
+                <span>
+                    Math<span class="brand-highlight">Run</span>
+                    <small>PAINEL ADMINISTRATIVO</small>
+                </span>
             </a>
 
-            <p class="menu-label">PAINEL</p>
+            <div class="sidebar-label">
+                MENU PRINCIPAL
+            </div>
 
-            <nav class="menu">
-                <a href="admin.php" class="menu-link ativo">
-                    <span>▦</span> Visão geral
+            <nav class="sidebar-nav">
+
+                <a href="admin.php" class="nav-link ativo">
+                    <span class="nav-icon">⌂</span>
+                    <span>Visão geral</span>
                 </a>
 
-                <a href="alunos.php" class="menu-link">
-                    <span>♙</span> Alunos
+                <a href="alunos.php" class="nav-link">
+                    <span class="nav-icon">♙</span>
+                    <span>Alunos</span>
                 </a>
 
-                <a href="desempenho.php" class="menu-link">
-                    <span>▤</span> Desempenho
+                <a href="desempenho.php" class="nav-link">
+                    <span class="nav-icon">▥</span>
+                    <span>Desempenho</span>
                 </a>
 
-                <a href="questoes.php" class="menu-link">
-                    <span>✎</span> Questões
+                <a href="questoes.php" class="nav-link">
+                    <span class="nav-icon">✎</span>
+                    <span>Questões</span>
                 </a>
 
-                <a href="fases.php" class="menu-link">
-                    <span>⚑</span> Fases dos jogos
+                <a href="fases.php" class="nav-link">
+                    <span class="nav-icon">⚑</span>
+                    <span>Fases</span>
                 </a>
+
             </nav>
 
             <div class="sidebar-bottom">
-                <div class="admin-avatar">A</div>
 
-                <div class="admin-info">
-                    <strong>Administrador</strong>
-                    <span>Gestão do MathRun</span>
+                <div class="admin-profile">
+
+                    <div class="admin-avatar">A</div>
+
+                    <div class="admin-profile-info">
+                        <strong>Administrador</strong>
+                        <span>MathRun</span>
+                    </div>
+
                 </div>
 
-                <a href="../logout.php" class="logout" title="Sair da conta">
-                    ↗
+                <a href="../index.php" class="nav-link sair-link">
+                    <span class="nav-icon">↗</span>
+                    <span>Voltar ao site</span>
                 </a>
+
             </div>
+
         </aside>
 
-        <main class="main-content">
+
+        <!-- ==================================
+             CONTEÚDO PRINCIPAL
+        =================================== -->
+
+        <main class="admin-main">
 
             <header class="topbar">
+
                 <div>
-                    <p class="breadcrumb">MathRun / Administração</p>
+                    <span class="breadcrumb">
+                        Painel / Visão geral
+                    </span>
+
                     <h1>Painel administrativo</h1>
-                    <p class="subtitle">
-                        Acompanhe os alunos e o desempenho nos jogos.
-                    </p>
                 </div>
 
-                <div class="topbar-tag">
-                    <span class="status-dot"></span>
-                    Área administrativa
+                <div class="topbar-right">
+
+                    <span class="status-indicator"></span>
+
+                    <span class="status-text">
+                        Área administrativa
+                    </span>
+
                 </div>
+
             </header>
 
-            <section class="welcome">
-                <div>
-                    <span class="welcome-label">VISÃO GERAL</span>
 
-                    <h2>Os números da jornada matemática.</h2>
+            <section class="dashboard-content">
 
-                    <p>
-                        Acompanhe a participação dos alunos e os resultados
-                        registrados no MathChef e no MathSpace.
-                    </p>
+                <!-- BOAS-VINDAS -->
+
+                <div class="welcome-section">
+
+                    <div class="welcome-text">
+
+                        <span class="section-eyebrow">
+                            CENTRAL DE CONTROLE
+                        </span>
+
+                        <h2>
+                            <?= adminEsc($saudacao) ?>!
+                            <span>Vamos acompanhar o MathRun?</span>
+                        </h2>
+
+                        <p>
+                            Aqui você acompanha os alunos, os jogos
+                            e os resultados da plataforma.
+                        </p>
+
+                    </div>
+
+                    <div class="welcome-decoration" aria-hidden="true">
+                        <span class="math-symbol">+</span>
+                        <span class="math-symbol">÷</span>
+                        <span class="math-symbol">π</span>
+                        <span class="math-symbol">√</span>
+                    </div>
+
                 </div>
 
-                <div class="welcome-symbol" aria-hidden="true">
-                    <span>∑</span>
-                    <span>÷</span>
-                    <span>π</span>
-                </div>
-            </section>
 
-            <section class="stats-grid">
+                <!-- ERROS DE CONSULTA -->
 
-                <article class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Alunos cadastrados</span>
-                        <span class="stat-icon roxo">♙</span>
-                    </div>
+                <?php if ($erroBanco !== ""): ?>
 
-                    <strong class="stat-number">
-                        <?= number_format($totalAlunos, 0, ",", ".") ?>
-                    </strong>
-
-                    <span class="stat-description">
-                        Contas de alunos registradas
-                    </span>
-                </article>
-
-                <article class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Partidas realizadas</span>
-                        <span class="stat-icon azul">▦</span>
-                    </div>
-
-                    <strong class="stat-number">
-                        <?= number_format($totalPartidas, 0, ",", ".") ?>
-                    </strong>
-
-                    <span class="stat-description">
-                        Partidas registradas no sistema
-                    </span>
-                </article>
-
-                <article class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Respostas corretas</span>
-                        <span class="stat-icon verde">✓</span>
-                    </div>
-
-                    <strong class="stat-number">
-                        <?= number_format($totalAcertos, 0, ",", ".") ?>
-                    </strong>
-
-                    <span class="stat-description">
-                        Acertos registrados nas partidas
-                    </span>
-                </article>
-
-                <article class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Respostas incorretas</span>
-                        <span class="stat-icon vermelho">×</span>
-                    </div>
-
-                    <strong class="stat-number">
-                        <?= number_format($totalErros, 0, ",", ".") ?>
-                    </strong>
-
-                    <span class="stat-description">
-                        Erros registrados nas partidas
-                    </span>
-                </article>
-
-            </section>
-
-            <section class="content-grid">
-
-                <article class="panel performance-panel">
-                    <div class="panel-heading">
-                        <div>
-                            <h2>Desempenho por jogo</h2>
-                            <p>Comparação dos acertos e erros registrados.</p>
-                        </div>
-
-                        <span class="panel-icon">⌁</span>
-                    </div>
-
-                    <?php foreach ($desempenhoJogos as $jogo): ?>
-
-                        <?php
-                        $acertosJogo = (int) $jogo["acertos"];
-                        $errosJogo = (int) $jogo["erros"];
-
-                        $respostasJogo = $acertosJogo + $errosJogo;
-
-                        $percentualAcertos = $respostasJogo > 0
-                            ? round(($acertosJogo / $respostasJogo) * 100, 1)
-                            : 0;
-
-                        $percentualErros = $respostasJogo > 0
-                            ? round(($errosJogo / $respostasJogo) * 100, 1)
-                            : 0;
-                        ?>
-
-                        <div class="game-performance">
-
-                            <div class="game-heading">
-                                <strong><?= escapar($jogo["nome"]) ?></strong>
-
-                                <span>
-                                    <?= (int) $jogo["partidas"] ?>
-                                    <?= (int) $jogo["partidas"] === 1
-                                        ? "partida"
-                                        : "partidas" ?>
-                                </span>
-                            </div>
-
-                            <div class="progress-track">
-                                <div
-                                    class="progress-correct"
-                                    style="width: <?= $percentualAcertos ?>%">
-                                </div>
-                            </div>
-
-                            <div class="game-legend">
-                                <span class="legend-correct">
-                                    <i></i>
-                                    <?= number_format($acertosJogo, 0, ",", ".") ?>
-                                    acertos
-                                </span>
-
-                                <span class="legend-wrong">
-                                    <i></i>
-                                    <?= number_format($errosJogo, 0, ",", ".") ?>
-                                    erros
-                                </span>
-
-                                <strong><?= $percentualAcertos ?>%</strong>
-                            </div>
-
-                        </div>
-
-                    <?php endforeach; ?>
-
-                    <div class="general-performance">
-                        <div>
-                            <span>Aproveitamento geral</span>
-                            <p>
-                                <?= number_format($totalRespostas, 0, ",", ".") ?>
-                                respostas contabilizadas
-                            </p>
-                        </div>
-
-                        <strong><?= $aproveitamento ?>%</strong>
-                    </div>
-
-                    <div class="general-track">
-                        <div style="width: <?= $aproveitamento ?>%"></div>
-                    </div>
-                </article>
-
-                <article class="panel ranking-panel">
-                    <div class="panel-heading">
-                        <div>
-                            <h2>Alunos em destaque</h2>
-                            <p>Maiores pontuações acumuladas.</p>
-                        </div>
-                    </div>
-
-                    <?php if (count($rankingAlunos) > 0): ?>
-
-                        <div class="ranking-list">
-
-                            <?php foreach ($rankingAlunos as $indice => $aluno): ?>
-
-                                <div class="ranking-item">
-                                    <span class="ranking-position">
-                                        <?= $indice + 1 ?>
-                                    </span>
-
-                                    <div class="ranking-avatar">
-                                        <?= escapar(
-                                            strtoupper(
-                                                substr($aluno["nome"], 0, 1)
-                                            )
-                                        ) ?>
-                                    </div>
-
-                                    <div class="ranking-student">
-                                        <strong><?= escapar($aluno["nome"]) ?></strong>
-                                        <span>
-                                            <?= number_format(
-                                                (int) $aluno["xp"],
-                                                0,
-                                                ",",
-                                                "."
-                                            ) ?> XP
-                                        </span>
-                                    </div>
-
-                                    <strong class="ranking-points">
-                                        <?= number_format(
-                                            (int) $aluno["pontuacao_total"],
-                                            0,
-                                            ",",
-                                            "."
-                                        ) ?>
-                                        <small>pts</small>
-                                    </strong>
-                                </div>
-
-                            <?php endforeach; ?>
-
-                        </div>
-
-                    <?php else: ?>
-
-                        <div class="empty-state">
-                            <span>♙</span>
-                            <p>Ainda não há alunos cadastrados.</p>
-                        </div>
-
-                    <?php endif; ?>
-
-                </article>
-
-            </section>
-
-            <section class="panel recent-panel">
-
-                <div class="panel-heading">
-                    <div>
-                        <h2>Partidas recentes</h2>
-                        <p>Últimas atividades registradas pelos alunos.</p>
-                    </div>
-
-                    <a href="desempenho.php" class="text-link">
-                        Ver desempenho →
-                    </a>
-                </div>
-
-                <?php if (count($partidasRecentes) > 0): ?>
-
-                    <div class="table-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Aluno</th>
-                                    <th>Jogo</th>
-                                    <th>Fase</th>
-                                    <th>Acertos</th>
-                                    <th>Erros</th>
-                                    <th>Pontuação</th>
-                                    <th>Data</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <?php foreach ($partidasRecentes as $partida): ?>
-
-                                    <tr>
-                                        <td class="student-cell">
-                                            <?= escapar($partida["aluno"]) ?>
-                                        </td>
-
-                                        <td><?= escapar($partida["jogo"]) ?></td>
-
-                                        <td><?= escapar($partida["fase"]) ?></td>
-
-                                        <td>
-                                            <span class="result-pill correct">
-                                                <?= (int) $partida["acertos"] ?>
-                                            </span>
-                                        </td>
-
-                                        <td>
-                                            <span class="result-pill wrong">
-                                                <?= (int) $partida["erros"] ?>
-                                            </span>
-                                        </td>
-
-                                        <td class="points-cell">
-                                            <?= number_format(
-                                                (int) $partida["pontuacao"],
-                                                0,
-                                                ",",
-                                                "."
-                                            ) ?> pts
-                                        </td>
-
-                                        <td>
-                                            <?= date(
-                                                "d/m/Y H:i",
-                                                strtotime($partida["data_partida"])
-                                            ) ?>
-                                        </td>
-                                    </tr>
-
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-
-                <?php else: ?>
-
-                    <div class="empty-state">
-                        <span>▦</span>
-                        <p>Nenhuma partida foi registrada ainda.</p>
-                        <small>
-                            Quando os alunos jogarem, as partidas aparecerão aqui.
-                        </small>
+                    <div class="alerta-erro">
+                        <?= adminEsc($erroBanco) ?>
                     </div>
 
                 <?php endif; ?>
 
-            </section>
 
-            <footer class="footer">
-                <span>MathRun · Painel administrativo</span>
-                <span>Aprender, jogar e evoluir.</span>
-            </footer>
+                <!-- ==================================
+                     CARDS DE ESTATÍSTICAS
+                =================================== -->
+
+                <section class="stats-grid">
+
+                    <article class="stat-card stat-blue">
+
+                        <div class="stat-top">
+                            <span class="stat-label">
+                                Alunos cadastrados
+                            </span>
+
+                            <span class="stat-icon">♙</span>
+                        </div>
+
+                        <strong class="stat-number">
+                            <?= number_format($totalAlunos, 0, ',', '.') ?>
+                        </strong>
+
+                        <span class="stat-description">
+                            Contas de estudantes
+                        </span>
+
+                    </article>
+
+
+                    <article class="stat-card stat-purple">
+
+                        <div class="stat-top">
+                            <span class="stat-label">
+                                Partidas realizadas
+                            </span>
+
+                            <span class="stat-icon">▷</span>
+                        </div>
+
+                        <strong class="stat-number">
+                            <?= number_format($totalPartidas, 0, ',', '.') ?>
+                        </strong>
+
+                        <span class="stat-description">
+                            Registros de partidas
+                        </span>
+
+                    </article>
+
+
+                    <article class="stat-card stat-pink">
+
+                        <div class="stat-top">
+                            <span class="stat-label">
+                                Questões cadastradas
+                            </span>
+
+                            <span class="stat-icon">✎</span>
+                        </div>
+
+                        <strong class="stat-number">
+                            <?= number_format($totalQuestoes, 0, ',', '.') ?>
+                        </strong>
+
+                        <span class="stat-description">
+                            Questões disponíveis no banco
+                        </span>
+
+                    </article>
+
+
+                    <article class="stat-card stat-orange">
+
+                        <div class="stat-top">
+                            <span class="stat-label">
+                                Fases cadastradas
+                            </span>
+
+                            <span class="stat-icon">⚑</span>
+                        </div>
+
+                        <strong class="stat-number">
+                            <?= number_format($totalFases, 0, ',', '.') ?>
+                        </strong>
+
+                        <span class="stat-description">
+                            Fases de todos os jogos e séries
+                        </span>
+
+                    </article>
+
+                </section>
+
+
+                <!-- ==================================
+                     RESUMO DA PLATAFORMA
+                =================================== -->
+
+                <section class="summary-grid">
+
+                    <article class="summary-card">
+
+                        <div class="summary-heading">
+                            <div>
+                                <span class="section-eyebrow">
+                                    PLATAFORMA
+                                </span>
+
+                                <h3>Resumo geral</h3>
+                            </div>
+
+                            <span class="summary-icon">▦</span>
+                        </div>
+
+                        <div class="summary-list">
+
+                            <div class="summary-row">
+                                <span>Jogos cadastrados</span>
+                                <strong>
+                                    <?= number_format($totalJogos, 0, ',', '.') ?>
+                                </strong>
+                            </div>
+
+                            <div class="summary-row">
+                                <span>Medalhas cadastradas</span>
+                                <strong>
+                                    <?= number_format($totalMedalhas, 0, ',', '.') ?>
+                                </strong>
+                            </div>
+
+                            <div class="summary-row">
+                                <span>Total de respostas</span>
+                                <strong>
+                                    <?= number_format(
+                                        $acertosGerais + $errosGerais,
+                                        0,
+                                        ',',
+                                        '.'
+                                    ) ?>
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+                    <article class="summary-card accuracy-card">
+
+                        <div class="summary-heading">
+                            <div>
+                                <span class="section-eyebrow">
+                                    APRENDIZAGEM
+                                </span>
+
+                                <h3>Taxa geral de acertos</h3>
+                            </div>
+
+                            <span class="summary-icon">◎</span>
+                        </div>
+
+                        <div class="accuracy-content">
+
+                            <div class="accuracy-number">
+                                <?= number_format($taxaAcertos, 1, ',', '.') ?>%
+                            </div>
+
+                            <div
+                                class="progress-track"
+                                role="progressbar"
+                                aria-label="Taxa geral de acertos"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                aria-valuenow="<?= $taxaAcertos ?>">
+
+                                <div
+                                    class="progress-fill"
+                                    style="width: <?= max(0, min(100, $taxaAcertos)) ?>%">
+                                </div>
+
+                            </div>
+
+                            <p>
+                                <?= number_format($acertosGerais, 0, ',', '.') ?>
+                                acertos e
+                                <?= number_format($errosGerais, 0, ',', '.') ?>
+                                erros registrados.
+                            </p>
+
+                        </div>
+
+                    </article>
+
+                </section>
+
+
+                <!-- ==================================
+                     DESEMPENHO DOS JOGOS
+                =================================== -->
+
+                <section class="panel-card">
+
+                    <div class="panel-heading">
+
+                        <div>
+                            <span class="section-eyebrow">
+                                RESULTADOS
+                            </span>
+
+                            <h3>Desempenho por jogo</h3>
+
+                            <p>
+                                Comparativo dos resultados registrados
+                                em cada jogo.
+                            </p>
+                        </div>
+
+                        <a href="desempenho.php" class="text-link">
+                            Ver desempenho →
+                        </a>
+
+                    </div>
+
+
+                    <?php if (empty($desempenhoJogos)): ?>
+
+                        <div class="empty-state">
+                            <span class="empty-icon">▥</span>
+
+                            <strong>Nenhum jogo cadastrado</strong>
+
+                            <p>
+                                Os jogos aparecerão aqui quando estiverem
+                                cadastrados no banco de dados.
+                            </p>
+                        </div>
+
+                    <?php else: ?>
+
+                        <div class="table-responsive">
+
+                            <table class="admin-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>Jogo</th>
+                                        <th>Partidas</th>
+                                        <th>Acertos</th>
+                                        <th>Erros</th>
+                                        <th>Taxa de acertos</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    <?php foreach ($desempenhoJogos as $jogo): ?>
+
+                                        <tr>
+
+                                            <td>
+                                                <div class="game-name">
+
+                                                    <span class="game-dot">
+                                                        <?= (int) $jogo["id"] === 1
+                                                            ? "M"
+                                                            : "S" ?>
+                                                    </span>
+
+                                                    <strong>
+                                                        <?= adminEsc($jogo["nome"]) ?>
+                                                    </strong>
+
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                <?= number_format(
+                                                    (int) $jogo["partidas"],
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                ) ?>
+                                            </td>
+
+                                            <td class="number-success">
+                                                <?= number_format(
+                                                    (int) $jogo["acertos"],
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                ) ?>
+                                            </td>
+
+                                            <td class="number-error">
+                                                <?= number_format(
+                                                    (int) $jogo["erros"],
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                ) ?>
+                                            </td>
+
+                                            <td>
+
+                                                <div class="table-progress">
+
+                                                    <span>
+                                                        <?= number_format(
+                                                            (float) $jogo["taxa_acertos"],
+                                                            1,
+                                                            ',',
+                                                            '.'
+                                                        ) ?>%
+                                                    </span>
+
+                                                    <div class="mini-progress">
+
+                                                        <div
+                                                            style="width: <?= max(
+                                                                                0,
+                                                                                min(
+                                                                                    100,
+                                                                                    (float) $jogo["taxa_acertos"]
+                                                                                )
+                                                                            ) ?>%">
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                    <?php endforeach; ?>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    <?php endif; ?>
+
+                </section>
+
+
+                <!-- ==================================
+                     RANKING E PARTIDAS RECENTES
+                =================================== -->
+
+                <section class="bottom-grid">
+
+
+                    <!-- RANKING -->
+
+                    <article class="panel-card">
+
+                        <div class="panel-heading">
+
+                            <div>
+                                <span class="section-eyebrow">
+                                    DESTAQUES
+                                </span>
+
+                                <h3>Ranking de alunos</h3>
+                            </div>
+
+                            <span class="heading-icon">♛</span>
+
+                        </div>
+
+
+                        <?php if (empty($rankingAlunos)): ?>
+
+                            <div class="empty-state">
+                                <strong>Nenhum aluno cadastrado</strong>
+                                <p>
+                                    O ranking aparecerá quando houver
+                                    alunos cadastrados.
+                                </p>
+                            </div>
+
+                        <?php else: ?>
+
+                            <div class="ranking-list">
+
+                                <?php foreach ($rankingAlunos as $indice => $aluno): ?>
+
+                                    <div class="ranking-item">
+
+                                        <span class="ranking-position pos-<?= $indice + 1 ?>">
+                                            <?= $indice + 1 ?>
+                                        </span>
+
+                                        <div class="ranking-avatar">
+                                            <?= adminEsc(
+                                                strtoupper(
+                                                    mb_substr(
+                                                        $aluno["nome"],
+                                                        0,
+                                                        1,
+                                                        "UTF-8"
+                                                    )
+                                                )
+                                            ) ?>
+                                        </div>
+
+                                        <div class="ranking-info">
+
+                                            <strong>
+                                                <?= adminEsc($aluno["nome"]) ?>
+                                            </strong>
+
+                                            <span>
+
+                                                <?php if (!empty($aluno["serie"])): ?>
+
+                                                    <?= (int) $aluno["serie"] ?>º ano
+
+                                                    <?php if (!empty($aluno["turma"])): ?>
+                                                        · <?= adminEsc($aluno["turma"]) ?>
+                                                    <?php endif; ?>
+
+                                                    ·
+
+                                                <?php endif; ?>
+
+                                                Nível
+                                                <?= (int) $aluno["nivel"] ?>
+
+                                            </span>
+
+                                        </div>
+
+                                        <div class="ranking-points">
+
+                                            <strong>
+                                                <?= number_format(
+                                                    (int) $aluno["pontuacao_total"],
+                                                    0,
+                                                    ',',
+                                                    '.'
+                                                ) ?>
+                                            </strong>
+
+                                            <span>pontos</span>
+
+                                        </div>
+
+                                    </div>
+
+                                <?php endforeach; ?>
+
+                            </div>
+
+                        <?php endif; ?>
+
+                    </article>
+
+
+                    <!-- PARTIDAS RECENTES -->
+
+                    <article class="panel-card">
+
+                        <div class="panel-heading">
+
+                            <div>
+                                <span class="section-eyebrow">
+                                    ATIVIDADE
+                                </span>
+
+                                <h3>Partidas recentes</h3>
+                            </div>
+
+                            <span class="heading-icon">◷</span>
+
+                        </div>
+
+
+                        <?php if (empty($partidasRecentes)): ?>
+
+                            <div class="empty-state">
+                                <strong>Nenhuma partida registrada</strong>
+                                <p>
+                                    As atividades dos alunos aparecerão
+                                    aqui quando forem registradas.
+                                </p>
+                            </div>
+
+                        <?php else: ?>
+
+                            <div class="recent-list">
+
+                                <?php foreach ($partidasRecentes as $partida): ?>
+
+                                    <div class="recent-item">
+
+                                        <div class="recent-icon">
+                                            ▷
+                                        </div>
+
+                                        <div class="recent-info">
+
+                                            <strong>
+                                                <?= adminEsc($partida["aluno_nome"]) ?>
+                                            </strong>
+
+                                            <span>
+                                                <?= adminEsc($partida["jogo_nome"]) ?>
+                                                ·
+                                                <?= adminEsc($partida["fase_nome"]) ?>
+                                                ·
+                                                <?= (int) $partida["fase_serie"] ?>º ano
+                                            </span>
+
+                                            <small>
+                                                <?php
+                                                $timestamp = strtotime(
+                                                    $partida["data_partida"]
+                                                );
+
+                                                echo $timestamp
+                                                    ? date("d/m/Y H:i", $timestamp)
+                                                    : "Data indisponível";
+                                                ?>
+                                            </small>
+
+                                        </div>
+
+                                        <div class="recent-score">
+
+                                            <strong>
+                                                +<?= number_format(
+                                                        (int) $partida["pontuacao"],
+                                                        0,
+                                                        ',',
+                                                        '.'
+                                                    ) ?>
+                                            </strong>
+
+                                            <span>pontos</span>
+
+                                        </div>
+
+                                    </div>
+
+                                <?php endforeach; ?>
+
+                            </div>
+
+                        <?php endif; ?>
+
+                    </article>
+
+                </section>
+
+
+                <!-- ==================================
+                     ATALHOS ADMINISTRATIVOS
+                =================================== -->
+
+                <section class="panel-card shortcuts-card">
+
+                    <div class="panel-heading">
+
+                        <div>
+                            <span class="section-eyebrow">
+                                ACESSO RÁPIDO
+                            </span>
+
+                            <h3>Gerenciar plataforma</h3>
+
+                            <p>
+                                Acesse diretamente as principais ferramentas.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="shortcuts-grid">
+
+                        <a href="alunos.php" class="shortcut-item">
+                            <span class="shortcut-icon shortcut-blue">♙</span>
+
+                            <span>
+                                <strong>Alunos</strong>
+                                <small>Consultar estudantes</small>
+                            </span>
+
+                            <span class="shortcut-arrow">→</span>
+                        </a>
+
+
+                        <a href="desempenho.php" class="shortcut-item">
+                            <span class="shortcut-icon shortcut-purple">▥</span>
+
+                            <span>
+                                <strong>Desempenho</strong>
+                                <small>Acompanhar resultados</small>
+                            </span>
+
+                            <span class="shortcut-arrow">→</span>
+                        </a>
+
+
+                        <a href="questoes.php" class="shortcut-item">
+                            <span class="shortcut-icon shortcut-pink">✎</span>
+
+                            <span>
+                                <strong>Questões</strong>
+                                <small>Gerenciar perguntas</small>
+                            </span>
+
+                            <span class="shortcut-arrow">→</span>
+                        </a>
+
+
+                        <a href="fases.php" class="shortcut-item">
+                            <span class="shortcut-icon shortcut-orange">⚑</span>
+
+                            <span>
+                                <strong>Fases</strong>
+                                <small>Gerenciar desafios</small>
+                            </span>
+
+                            <span class="shortcut-arrow">→</span>
+                        </a>
+
+                    </div>
+
+                </section>
+
+
+                <footer class="admin-footer">
+
+                    <span>
+                        MathRun · Painel administrativo
+                    </span>
+
+                    <span>
+                        Aprender também é evoluir.
+                    </span>
+
+                </footer>
+
+            </section>
 
         </main>
 
