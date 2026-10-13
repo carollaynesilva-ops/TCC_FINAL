@@ -1861,3 +1861,91 @@ body::after {
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+
+/* =========================================
+   RANKING E ATIVIDADES COM ALTURA IGUAL
+========================================= */
+
+.bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 22px;
+}
+
+.bottom-grid>.panel-card {
+    height: 392px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* As listas ocupam o espaço disponível */
+.bottom-grid .ranking-list,
+.bottom-grid .recent-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* Mantém o botão no final do container */
+.bottom-grid .list-toggle {
+    flex-shrink: 0;
+    margin-top: auto;
+    padding: 11px 16px;
+}
+
+/* Espaçamento uniforme entre registros */
+.bottom-grid .ranking-list,
+.bottom-grid .recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Separação discreta entre itens */
+.bottom-grid .ranking-item,
+.bottom-grid .recent-item {
+    flex-shrink: 0;
+    padding-top: 14px;
+    padding-bottom: 14px;
+}
+
+/* Registros ocultos até clicar em Ver mais */
+.bottom-grid .ranking-item:nth-child(n + 4),
+.bottom-grid .recent-item:nth-child(n + 4) {
+    display: none;
+}
+
+/* Exibe os demais registros ao expandir */
+.bottom-grid .ranking-list.lista-expandida .ranking-item,
+.bottom-grid .recent-list.lista-expandida .recent-item {
+    display: flex;
+}
+
+/* Rolagem discreta quando a lista estiver expandida */
+.bottom-grid .lista-expandida {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #454466 transparent;
+}
+
+/* Telas menores */
+@media (max-width: 850px) {
+    .bottom-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .bottom-grid>.panel-card {
+        height: 392px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bottom-grid>.panel-card {
+        height: 370px;
+        padding: 18px;
+    }
+}
