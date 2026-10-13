@@ -1,14 +1,14 @@
 <?php
+
 session_start();
 
-// Permitir acesso somente a administradores.
-if (!isset($_SESSION["tipo"]) || $_SESSION["tipo"] !== "admin") {
+if (($_SESSION["admin_autenticado"] ?? false) !== true) {
     header("Location: ../login.php");
     exit;
 }
 
-// Conexão oficial do projeto.
 require_once "../config/config.php";
+
 
 // Escapar textos antes de exibi-los no HTML.
 function escapar($valor)

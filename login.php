@@ -5,135 +5,111 @@ session_start();
 require_once 'config/config.php';
 
 $erro = "";
-$modo = $_POST["modo"] ?? "aluno";
 
-if (!in_array($modo, ["aluno", "admin"], true)) {
-    $modo = "aluno";
+// Verifica se existe uma configuração de senha administrativa.
+$arquivoAdmin = __DIR__ . '/config/admin.php';
+$senhaAdminHash = '';
+
+if (file_exists($arquivoAdmin)) {
+    require $arquivoAdmin;
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $identificacao = trim($_POST["identificacao"] ?? "");
-    $senha = $_POST["senha"] ?? "";
+    $acao = $_POST["acao"] ?? "aluno";
 
-    if ($identificacao === "" || $senha === "") {
+    // ==========================================
+    // LOGIN ADMINISTRATIVO
+    // ==========================================
 
-        $erro = "Preencha todos os campos.";
-    } else {
+    if ($acao === "admin") {
 
-        if ($modo === "admin") {
+        $senhaAdmin = $_POST["senha_admin"] ?? "";
 
-            // O administrador entra pelo nome de usuário.
-            if ($identificacao !== "admin") {
+        if ($senhaAdminHash === '') {
 
-                $erro = "Usuário ou senha incorretos.";
-            } else {
+            $erro = "O acesso administrativo ainda não foi configurado.";
+        } elseif (
+            $senhaAdmin !== "" &&
+            password_verify($senhaAdmin, $senhaAdminHash)
+        ) {
 
-                $sql = "
-                    SELECT
-                        id,
-                        nome,
-                        email,
-                        senha,
-                        tipo,
-                        nivel,
-                        xp,
-                        pontuacao_total
-                    FROM usuarios
-                    WHERE nome = :nome
-                      AND tipo = 'admin'
-                    LIMIT 1
-                ";
+            session_regenerate_id(true);
 
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([
-                    ":nome" => "admin"
-                ]);
+            $_SESSION["admin_autenticado"] = true;
 
-                $usuario = $stmt->fetch();
-
-                if (
-                    !$usuario ||
-                    !password_verify($senha, $usuario["senha"])
-                ) {
-
-                    $erro = "Usuário ou senha incorretos.";
-                } else {
-
-                    session_regenerate_id(true);
-
-                    $_SESSION["usuario_id"] = $usuario["id"];
-                    $_SESSION["usuario_nome"] = $usuario["nome"];
-                    $_SESSION["usuario_email"] = $usuario["email"];
-                    $_SESSION["usuario_tipo"] = $usuario["tipo"];
-                    $_SESSION["usuario_nivel"] = $usuario["nivel"];
-                    $_SESSION["usuario_xp"] = $usuario["xp"];
-                    $_SESSION["usuario_pontuacao"] =
-                        $usuario["pontuacao_total"];
-
-                    header("Location: admin/admin.php");
-                    exit;
-                }
-            }
+            header("Location: admin/admin.php");
+            exit;
         } else {
 
-            // Login normal dos alunos, preservando o funcionamento atual.
-            if (!filter_var($identificacao, FILTER_VALIDATE_EMAIL)) {
+            $erro = "Senha administrativa incorreta.";
+        }
 
-                $erro = "Digite um e-mail válido.";
+        // ==========================================
+        // LOGIN NORMAL DO ALUNO
+        // ==========================================
+
+    } else {
+
+        $email = trim($_POST["email"] ?? "");
+        $senha = $_POST["senha"] ?? "";
+
+        if ($email === "" || $senha === "") {
+
+            $erro = "Preencha todos os campos.";
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
+            $erro = "Digite um e-mail válido.";
+        } else {
+
+            $sql = "
+                SELECT
+                    id,
+                    nome,
+                    email,
+                    senha,
+                    tipo,
+                    nivel,
+                    xp,
+                    pontuacao_total
+                FROM usuarios
+                WHERE email = :email
+            ";
+
+            $stmt = $pdo->prepare($sql);
+
+            $stmt->execute([
+                ":email" => $email
+            ]);
+
+            $usuario = $stmt->fetch();
+
+            if (!$usuario) {
+
+                $erro = "E-mail ou senha incorretos.";
+            } elseif (!password_verify($senha, $usuario["senha"])) {
+
+                $erro = "E-mail ou senha incorretos.";
             } else {
 
-                $sql = "
-                    SELECT
-                        id,
-                        nome,
-                        email,
-                        senha,
-                        tipo,
-                        nivel,
-                        xp,
-                        pontuacao_total
-                    FROM usuarios
-                    WHERE email = :email
-                      AND tipo = 'aluno'
-                    LIMIT 1
-                ";
+                session_regenerate_id(true);
 
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([
-                    ":email" => $identificacao
-                ]);
+                $_SESSION["usuario_id"] = $usuario["id"];
+                $_SESSION["usuario_nome"] = $usuario["nome"];
+                $_SESSION["usuario_email"] = $usuario["email"];
+                $_SESSION["usuario_tipo"] = $usuario["tipo"];
+                $_SESSION["usuario_nivel"] = $usuario["nivel"];
+                $_SESSION["usuario_xp"] = $usuario["xp"];
+                $_SESSION["usuario_pontuacao"] = $usuario["pontuacao_total"];
 
-                $usuario = $stmt->fetch();
-
-                if (
-                    !$usuario ||
-                    !password_verify($senha, $usuario["senha"])
-                ) {
-
-                    $erro = "E-mail ou senha incorretos.";
-                } else {
-
-                    session_regenerate_id(true);
-
-                    $_SESSION["usuario_id"] = $usuario["id"];
-                    $_SESSION["usuario_nome"] = $usuario["nome"];
-                    $_SESSION["usuario_email"] = $usuario["email"];
-                    $_SESSION["usuario_tipo"] = $usuario["tipo"];
-                    $_SESSION["usuario_nivel"] = $usuario["nivel"];
-                    $_SESSION["usuario_xp"] = $usuario["xp"];
-                    $_SESSION["usuario_pontuacao"] =
-                        $usuario["pontuacao_total"];
-
-                    header("Location: inicio.php");
-                    exit;
-                }
+                header("Location: inicio.php");
+                exit;
             }
         }
     }
 }
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -313,6 +289,56 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </button>
 
             </form>
+
+
+            <details class="admin-access">
+
+                <summary>
+                    <span class="admin-access-icon">⌘</span>
+
+                    <span class="admin-access-text">
+                        <strong>Acesso administrativo</strong>
+                        <small>Área restrita à administração</small>
+                    </span>
+
+                    <span class="admin-access-arrow">＋</span>
+                </summary>
+
+                <form method="POST" action="" class="admin-form">
+
+                    <input
+                        type="hidden"
+                        name="acao"
+                        value="admin">
+
+                    <div class="campo">
+
+                        <label for="senha_admin">
+                            Senha administrativa
+                        </label>
+
+                        <input
+                            type="password"
+                            id="senha_admin"
+                            name="senha_admin"
+                            placeholder="Digite a senha administrativa"
+                            autocomplete="current-password"
+                            required>
+
+                    </div>
+
+                    <button type="submit" class="btn-entrar admin-btn">
+
+                        <span>Acessar painel administrativo</span>
+
+                        <strong>→</strong>
+
+                    </button>
+
+                </form>
+
+            </details>
+
 
 
             <p class="cadastro-mobile">

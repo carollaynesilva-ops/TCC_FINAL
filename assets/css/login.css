@@ -650,3 +650,84 @@ body {
     background: #ffffff;
     box-shadow: 0 2px 8px #30265c12;
 }
+
+
+
+/* ACESSO ADMINISTRATIVO */
+
+.admin-access {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid #ececf5;
+}
+
+.admin-access summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    list-style: none;
+    cursor: pointer;
+}
+
+.admin-access summary::-webkit-details-marker {
+    display: none;
+}
+
+.admin-access-icon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    color: #6255d9;
+    background: #f0eeff;
+    border-radius: 12px;
+    font-size: 20px;
+}
+
+.admin-access-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.admin-access-text strong {
+    color: #34334f;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.admin-access-text small {
+    color: #9292a7;
+    font-size: 11px;
+}
+
+.admin-access-arrow {
+    color: #6255d9;
+    font-size: 21px;
+    transition: transform 0.2s;
+}
+
+.admin-access[open] .admin-access-arrow {
+    transform: rotate(45deg);
+}
+
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 20px;
+}
+
+.admin-btn {
+    width: 100%;
+}
+
+.admin-access input {
+    width: 100%;
+}
+
+.admin-access .campo {
+    margin-bottom: 0;
+}
