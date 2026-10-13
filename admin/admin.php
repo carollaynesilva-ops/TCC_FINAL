@@ -803,7 +803,7 @@ if ($hora < 12) {
 
                         <?php else: ?>
 
-                            <div class="ranking-list">
+                            <div class="ranking-list" id="rankingLista">
 
                                 <?php foreach ($rankingAlunos as $indice => $aluno): ?>
 
@@ -874,6 +874,18 @@ if ($hora < 12) {
 
                             </div>
 
+
+
+
+                            <button
+                                type="button"
+                                class="list-toggle"
+                                aria-expanded="false"
+                                aria-controls="rankingLista"
+                                onclick="alternarLista('rankingLista', this)">
+                                <span class="toggle-label">Ver mais alunos</span>
+                                <span class="toggle-arrow">⌄</span>
+                            </button>
                         <?php endif; ?>
 
                     </article>
@@ -910,7 +922,7 @@ if ($hora < 12) {
 
                         <?php else: ?>
 
-                            <div class="recent-list">
+                            <div class="recent-list" id="partidasLista">
 
                                 <?php foreach ($partidasRecentes as $partida): ?>
 
@@ -968,6 +980,18 @@ if ($hora < 12) {
                                 <?php endforeach; ?>
 
                             </div>
+
+
+                            <button
+                                type="button"
+                                class="list-toggle"
+                                aria-expanded="false"
+                                aria-controls="partidasLista"
+                                onclick="alternarLista('partidasLista', this)">
+                                <span class="toggle-label">Ver mais partidas</span>
+                                <span class="toggle-arrow">⌄</span>
+                            </button>
+
 
                         <?php endif; ?>
 
@@ -1069,6 +1093,35 @@ if ($hora < 12) {
         </main>
 
     </div>
+
+
+    <script>
+        function alternarLista(id, botao) {
+            const lista = document.getElementById(id);
+
+            if (!lista) return;
+
+            const expandida = lista.classList.toggle("lista-expandida");
+
+            botao.setAttribute("aria-expanded", expandida);
+
+            const texto = botao.querySelector(".toggle-label");
+
+            if (id === "rankingLista") {
+                texto.textContent = expandida ?
+                    "Ver menos alunos" :
+                    "Ver mais alunos";
+            } else {
+                texto.textContent = expandida ?
+                    "Ver menos partidas" :
+                    "Ver mais partidas";
+            }
+        }
+    </script>
+</body>
+
+</html>
+
 
 </body>
 

@@ -1763,3 +1763,101 @@ body::after {
         transition-duration: 0.01ms !important;
     }
 }
+
+
+/* =========================================
+   LISTAS COMPACTAS: RANKING E ATIVIDADES
+========================================= */
+
+.ranking-list,
+.recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Esconde os registros a partir do quarto */
+.ranking-item:nth-child(n + 4),
+.recent-item:nth-child(n + 4) {
+    display: none;
+}
+
+/* Quando expandida, mostra todos os registros */
+.ranking-list.lista-expandida .ranking-item,
+.recent-list.lista-expandida .recent-item {
+    display: flex;
+}
+
+/* Botão Ver mais / Ver menos */
+.list-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    width: 100%;
+    margin-top: 18px;
+    padding: 11px 16px;
+
+    border: 1px solid #343650;
+    border-radius: 10px;
+
+    background: #202238;
+    color: #b7b8ff;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.list-toggle:hover {
+    background: #292b47;
+    border-color: #7774ff;
+    color: #ffffff;
+}
+
+.list-toggle .toggle-arrow {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.list-toggle[aria-expanded="true"] .toggle-arrow {
+    transform: rotate(180deg);
+}
+
+/* Mantém os containers alinhados */
+.bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 22px;
+}
+
+.bottom-grid>.panel-card {
+    min-width: 0;
+    height: fit-content;
+}
+
+/* Evita que nomes grandes estourem o layout */
+.ranking-info,
+.recent-info {
+    min-width: 0;
+}
+
+.ranking-info strong,
+.recent-info strong {
+    overflow-wrap: anywhere;
+}
+
+/* Celulares e telas menores */
+@media (max-width: 850px) {
+    .bottom-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
