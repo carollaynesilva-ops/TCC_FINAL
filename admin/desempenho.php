@@ -747,18 +747,29 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
                 return;
             }
 
+
             new Chart(canvas, {
-                type: "bar",
+                type: "line",
+
                 data: {
                     labels: dadosFases.map(item => item.fase),
 
                     datasets: [{
                         label: "Acertos por fase",
                         data: dadosFases.map(item => Number(item.acertos) || 0),
-                        backgroundColor: "rgba(139, 123, 255, 0.8)",
+
                         borderColor: "#8b7bff",
-                        borderWidth: 1,
-                        borderRadius: 6
+                        backgroundColor: "rgba(139, 123, 255, 0.15)",
+
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: "#a99cff",
+                        pointBorderColor: "#151825",
+                        pointBorderWidth: 2,
+
+                        tension: 0.3,
+                        fill: true
                     }]
                 },
 
@@ -790,12 +801,20 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
                     scales: {
                         y: {
                             beginAtZero: true,
+
                             ticks: {
                                 precision: 0,
                                 color: "#9297ab"
                             },
+
                             grid: {
                                 color: "rgba(143, 151, 190, 0.12)"
+                            },
+
+                            title: {
+                                display: true,
+                                text: "Quantidade de acertos",
+                                color: "#9297ab"
                             }
                         },
 
@@ -806,6 +825,7 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
                                 maxRotation: 45,
                                 minRotation: 0
                             },
+
                             grid: {
                                 display: false
                             }
@@ -813,6 +833,7 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
                     }
                 }
             });
+
         });
     </script>
 
