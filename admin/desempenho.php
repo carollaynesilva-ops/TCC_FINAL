@@ -1,358 +1,532 @@
 <?php
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
+session_start();
 
-if (($_SESSION["admin_autenticado"] ?? false) !== true) {
-    header("Location: ../login.php");
+if (!isset($_SESSION["admin_autenticado"])) {
+    header("Location: login.php");
     exit;
 }
 
 require_once "../config/config.php";
 
-function h($valor): string
+/*
+|--------------------------------------------------------------------------
+| FUNÇÕES AUXILIARES
+|--------------------------------------------------------------------------
+*/
+
+function h($valor)
 {
-    return htmlspecialchars((string)($valor ?? ""), ENT_QUOTES, "UTF-8");
+    return htmlspecialchars(
+        (string) ($valor ?? ""),
+        ENT_QUOTES,
+        "UTF-8"
+    );
 }
 
-function percentual($acertos, $total): float
+function percentual($acertos, $erros)
 {
-    return (int)$total > 0
-        ? round(((int)$acertos / (int)$total) * 100, 1)
-        : 0;
-}
+    $total = (int) $acertos + (int) $erros;
 
-$periodos = [
-    "7" => "Últimos 7 dias",
-    "30" => "Últimos 30 dias",
-    "90" => "Últimos 90 dias",
-    "todos" => "Todo o período"
-];
-
-$periodo = $_GET["periodo"] ?? "30";
-if (!array_key_exists($periodo, $periodos)) {
-    $periodo = "30";
-}
-
-$turma = trim($_GET["turma"] ?? "");
-$alunoId = filter_input(INPUT_GET, "aluno", FILTER_VALIDATE_INT) ?: 0;
-
-$turmasValidas = [];
-for ($serie = 6; $serie <= 9; $serie++) {
-    foreach (["A", "B"] as $letra) {
-        $turmasValidas[] = $serie . $letra;
+    if ($total === 0) {
+        return 0;
     }
+
+    return round(((int) $acertos / $total) * 100, 1);
 }
 
-if (!in_array($turma, $turmasValidas, true)) {
-    $turma = "";
+function formatarNumero($numero)
+{
+    return number_format((float) $numero, 0, ",", ".");
 }
 
 /*
- * Os dias são convertidos para inteiro e só aceitam
- * valores definidos na lista de períodos acima.
- */
-$whereData = "";
-if ($periodo !== "todos") {
-    $dias = (int)$periodo;
-    $whereData = " AND hp.data_partida >= DATE_SUB(CURDATE(), INTERVAL $dias DAY)";
-}
+|--------------------------------------------------------------------------
+| VERIFICAÇÃO DAS COLUNAS OPCIONAIS
+|--------------------------------------------------------------------------
+| O sistema pode ter versões do banco com ou sem as colunas serie e sala.
+| A verificação evita que a página quebre caso elas ainda não existam.
+*/
 
-$whereUsuarios = "u.tipo = 'aluno'";
-$params = [];
-
-if ($turma !== "") {
-    $whereUsuarios .= " AND CONCAT(u.serie, UPPER(u.turma)) = :turma";
-    $params[":turma"] = $turma;
-}
-
-$resumo = [
-    "alunos_ativos" => 0,
-    "partidas" => 0,
-    "acertos" => 0,
-    "erros" => 0,
-    "media_pontos" => 0
-];
-
-$alunos = [];
-$evolucao = [];
-$comparativoJogos = [];
-$evolucaoAluno = [];
-$jogosAluno = [];
-$alunoSelecionado = null;
-$erroBanco = "";
-
-$totalAcertos = 0;
-$totalErros = 0;
-$taxaAcerto = 0;
+$colunasUsuarios = [];
 
 try {
-    /*
-     * Lista de alunos de acordo com a turma escolhida.
-     */
-    $sql = "SELECT id, nome, serie, turma
-            FROM usuarios
-            WHERE tipo = 'aluno'";
+    $consultaColunas = $pdo->query("SHOW COLUMNS FROM usuarios");
 
-    if ($turma !== "") {
-        $sql .= " AND CONCAT(serie, UPPER(turma)) = :turma";
+    foreach ($consultaColunas->fetchAll(PDO::FETCH_ASSOC) as $coluna) {
+        $colunasUsuarios[] = $coluna["Field"];
     }
+} catch (PDOException $e) {
+    die("Não foi possível consultar a estrutura dos usuários.");
+}
 
-    $sql .= " ORDER BY nome";
+$temSerie = in_array("serie", $colunasUsuarios, true);
+$temSala = in_array("sala", $colunasUsuarios, true);
 
-    $stmt = $pdo->prepare($sql);
+$temTurma = $temSerie && $temSala;
 
-    if ($turma !== "") {
-        $stmt->bindValue(":turma", $turma, PDO::PARAM_STR);
-    }
+/*
+|--------------------------------------------------------------------------
+| FILTROS
+|--------------------------------------------------------------------------
+*/
 
-    $stmt->execute();
-    $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$periodosPermitidos = [
+    "7" => 7,
+    "30" => 30,
+    "90" => 90,
+    "todos" => 0
+];
 
-    /*
-     * Confere se o aluno escolhido pertence ao filtro atual.
-     */
-    if ($alunoId > 0) {
-        $alunoEncontrado = false;
+$periodo = $_GET["periodo"] ?? "30";
 
-        foreach ($alunos as $aluno) {
-            if ((int)$aluno["id"] === $alunoId) {
-                $alunoEncontrado = true;
-                break;
-            }
+if (!array_key_exists($periodo, $periodosPermitidos)) {
+    $periodo = "30";
+}
+
+$dias = $periodosPermitidos[$periodo];
+
+$turma = trim($_GET["turma"] ?? "");
+$alunoId = filter_input(INPUT_GET, "aluno", FILTER_VALIDATE_INT);
+$jogoId = filter_input(INPUT_GET, "jogo", FILTER_VALIDATE_INT);
+
+$alunoId = $alunoId && $alunoId > 0 ? $alunoId : 0;
+$jogoId = $jogoId && $jogoId > 0 ? $jogoId : 0;
+
+/*
+|--------------------------------------------------------------------------
+| LISTAS PARA OS FILTROS
+|--------------------------------------------------------------------------
+*/
+
+$sqlTurmas = [];
+
+if ($temTurma) {
+    $consultaTurmas = $pdo->query("
+        SELECT DISTINCT
+            CONCAT(serie, sala) AS turma
+        FROM usuarios
+        WHERE tipo = 'aluno'
+          AND serie IS NOT NULL
+          AND sala IS NOT NULL
+        ORDER BY serie, sala
+    ");
+
+    $sqlTurmas = $consultaTurmas->fetchAll(PDO::FETCH_COLUMN);
+}
+
+$sqlAlunos = "
+    SELECT id, nome
+    FROM usuarios
+    WHERE tipo = 'aluno'
+";
+
+$paramsAlunos = [];
+
+if ($temTurma && $turma !== "") {
+    $sqlAlunos .= " AND CONCAT(serie, sala) = :turma";
+    $paramsAlunos[":turma"] = $turma;
+}
+
+$sqlAlunos .= " ORDER BY nome";
+
+$consultaAlunos = $pdo->prepare($sqlAlunos);
+$consultaAlunos->execute($paramsAlunos);
+$alunos = $consultaAlunos->fetchAll(PDO::FETCH_ASSOC);
+
+$consultaJogos = $pdo->query("
+    SELECT id, nome
+    FROM jogos
+    ORDER BY nome
+");
+
+$jogos = $consultaJogos->fetchAll(PDO::FETCH_ASSOC);
+
+/*
+|--------------------------------------------------------------------------
+| VALIDAR OS FILTROS RECEBIDOS
+|--------------------------------------------------------------------------
+*/
+
+$idsAlunos = array_map(
+    "intval",
+    array_column($alunos, "id")
+);
+
+if ($alunoId > 0 && !in_array($alunoId, $idsAlunos, true)) {
+    $alunoId = 0;
+}
+
+$idsJogos = array_map(
+    "intval",
+    array_column($jogos, "id")
+);
+
+if ($jogoId > 0 && !in_array($jogoId, $idsJogos, true)) {
+    $jogoId = 0;
+}
+
+/*
+|--------------------------------------------------------------------------
+| CONDIÇÕES DAS CONSULTAS
+|--------------------------------------------------------------------------
+*/
+
+$whereData = "";
+$paramsData = [];
+
+if ($dias > 0) {
+    $whereData = " AND hp.data_partida >= DATE_SUB(NOW(), INTERVAL :dias DAY)";
+    $paramsData[":dias"] = $dias;
+}
+
+$whereTurma = "";
+$paramsTurma = [];
+
+if ($temTurma && $turma !== "") {
+    $whereTurma = " AND CONCAT(u.serie, u.sala) = :turma";
+    $paramsTurma[":turma"] = $turma;
+}
+
+$whereAluno = "";
+$paramsAluno = [];
+
+if ($alunoId > 0) {
+    $whereAluno = " AND hp.usuario_id = :aluno";
+    $paramsAluno[":aluno"] = $alunoId;
+}
+
+$whereJogo = "";
+$paramsJogo = [];
+
+if ($jogoId > 0) {
+    $whereJogo = " AND hp.jogo_id = :jogo";
+    $paramsJogo[":jogo"] = $jogoId;
+}
+
+$paramsBase = array_merge(
+    $paramsData,
+    $paramsTurma,
+    $paramsAluno,
+    $paramsJogo
+);
+
+/*
+|--------------------------------------------------------------------------
+| INDICADORES GERAIS
+|--------------------------------------------------------------------------
+*/
+
+$sqlResumo = "
+    SELECT
+        COUNT(DISTINCT hp.usuario_id) AS alunos_analisados,
+        COUNT(hp.id) AS partidas,
+        COALESCE(SUM(hp.acertos), 0) AS acertos,
+        COALESCE(SUM(hp.erros), 0) AS erros,
+        COALESCE(AVG(hp.pontuacao), 0) AS media_pontos
+    FROM historico_partidas hp
+    INNER JOIN usuarios u ON u.id = hp.usuario_id
+    WHERE u.tipo = 'aluno'
+    $whereData
+    $whereTurma
+    $whereAluno
+    $whereJogo
+";
+
+$consultaResumo = $pdo->prepare($sqlResumo);
+$consultaResumo->execute($paramsBase);
+$resumo = $consultaResumo->fetch(PDO::FETCH_ASSOC);
+
+$alunosAnalisados = (int) ($resumo["alunos_analisados"] ?? 0);
+$partidas = (int) ($resumo["partidas"] ?? 0);
+$totalAcertos = (int) ($resumo["acertos"] ?? 0);
+$totalErros = (int) ($resumo["erros"] ?? 0);
+$mediaPontos = (float) ($resumo["media_pontos"] ?? 0);
+
+$taxaGeral = percentual($totalAcertos, $totalErros);
+
+/*
+|--------------------------------------------------------------------------
+| GRÁFICO: DESEMPENHO POR FASE
+|--------------------------------------------------------------------------
+*/
+
+$sqlEvolucao = "
+    SELECT
+        f.id AS fase_id,
+        f.nome AS fase,
+        j.nome AS jogo,
+        COALESCE(SUM(hp.acertos), 0) AS acertos,
+        COALESCE(SUM(hp.erros), 0) AS erros,
+        COUNT(hp.id) AS partidas
+    FROM historico_partidas hp
+    INNER JOIN usuarios u ON u.id = hp.usuario_id
+    INNER JOIN fases f ON f.id = hp.fase_id
+    INNER JOIN jogos j ON j.id = hp.jogo_id
+    WHERE u.tipo = 'aluno'
+    $whereData
+    $whereTurma
+    $whereAluno
+    $whereJogo
+    GROUP BY f.id, f.nome, j.nome, f.numero
+    ORDER BY j.nome, f.numero
+";
+
+$consultaEvolucao = $pdo->prepare($sqlEvolucao);
+$consultaEvolucao->execute($paramsBase);
+$evolucao = $consultaEvolucao->fetchAll(PDO::FETCH_ASSOC);
+
+/*
+|--------------------------------------------------------------------------
+| COMPARAÇÃO ENTRE OS JOGOS
+|--------------------------------------------------------------------------
+| A comparação considera todos os jogos para continuar sendo útil mesmo
+| quando o filtro de um jogo específico estiver selecionado.
+*/
+
+$sqlComparacao = "
+    SELECT
+        j.id,
+        j.nome,
+        COUNT(hp.id) AS partidas,
+        COALESCE(SUM(hp.acertos), 0) AS acertos,
+        COALESCE(SUM(hp.erros), 0) AS erros,
+        COALESCE(AVG(hp.pontuacao), 0) AS media_pontos
+    FROM jogos j
+    LEFT JOIN historico_partidas hp
+        ON hp.jogo_id = j.id
+";
+
+$paramsComparacao = [];
+
+if ($dias > 0) {
+    $sqlComparacao .= "
+        AND hp.data_partida >= DATE_SUB(NOW(), INTERVAL :dias DAY)
+    ";
+
+    $paramsComparacao[":dias"] = $dias;
+}
+
+$sqlComparacao .= "
+    LEFT JOIN usuarios u ON u.id = hp.usuario_id
+    WHERE (u.tipo = 'aluno' OR hp.id IS NULL)
+";
+
+if ($temTurma && $turma !== "") {
+    $sqlComparacao .= " AND (CONCAT(u.serie, u.sala) = :turma OR hp.id IS NULL)";
+    $paramsComparacao[":turma"] = $turma;
+}
+
+if ($alunoId > 0) {
+    $sqlComparacao .= " AND (hp.usuario_id = :aluno OR hp.id IS NULL)";
+    $paramsComparacao[":aluno"] = $alunoId;
+}
+
+$sqlComparacao .= "
+    GROUP BY j.id, j.nome
+    ORDER BY j.nome
+";
+
+$consultaComparacao = $pdo->prepare($sqlComparacao);
+$consultaComparacao->execute($paramsComparacao);
+$comparacaoJogos = $consultaComparacao->fetchAll(PDO::FETCH_ASSOC);
+
+/*
+|--------------------------------------------------------------------------
+| ANÁLISE INDIVIDUAL
+|--------------------------------------------------------------------------
+*/
+
+$alunoSelecionado = null;
+$evolucaoAluno = [];
+$resumoAlunoJogos = [];
+$taxaAluno = 0;
+$pontosAluno = 0;
+$partidasAluno = 0;
+
+if ($alunoId > 0) {
+    $consultaAluno = $pdo->prepare("
+        SELECT id, nome, email
+        FROM usuarios
+        WHERE id = :id
+          AND tipo = 'aluno'
+        LIMIT 1
+    ");
+
+    $consultaAluno->execute([":id" => $alunoId]);
+    $alunoSelecionado = $consultaAluno->fetch(PDO::FETCH_ASSOC);
+
+    if ($alunoSelecionado) {
+        $whereJogoAluno = "";
+        $paramsJogoAluno = [];
+
+        if ($jogoId > 0) {
+            $whereJogoAluno = " AND hp.jogo_id = :jogo";
+            $paramsJogoAluno[":jogo"] = $jogoId;
         }
 
-        if (!$alunoEncontrado) {
-            $alunoId = 0;
-        }
-    }
-
-    /*
-     * Indicadores gerais.
-     */
-    $sql = "SELECT
-                COUNT(DISTINCT hp.usuario_id) AS alunos_ativos,
+        $sqlResumoAluno = "
+            SELECT
                 COUNT(hp.id) AS partidas,
                 COALESCE(SUM(hp.acertos), 0) AS acertos,
                 COALESCE(SUM(hp.erros), 0) AS erros,
-                COALESCE(AVG(hp.pontuacao), 0) AS media_pontos
+                COALESCE(SUM(hp.pontuacao), 0) AS pontos
             FROM historico_partidas hp
-            INNER JOIN usuarios u ON u.id = hp.usuario_id
-            WHERE $whereUsuarios $whereData";
+            WHERE hp.usuario_id = :aluno
+            $whereData
+            $whereJogoAluno
+        ";
 
-    $stmt = $pdo->prepare($sql);
+        $paramsResumoAluno = array_merge(
+            [":aluno" => $alunoId],
+            $paramsData,
+            $paramsJogoAluno
+        );
 
-    foreach ($params as $chave => $valor) {
-        $stmt->bindValue($chave, $valor, PDO::PARAM_STR);
-    }
+        $consultaResumoAluno = $pdo->prepare($sqlResumoAluno);
+        $consultaResumoAluno->execute($paramsResumoAluno);
+        $dadosResumoAluno = $consultaResumoAluno->fetch(PDO::FETCH_ASSOC);
 
-    $stmt->execute();
-    $resumo = $stmt->fetch(PDO::FETCH_ASSOC) ?: $resumo;
+        $partidasAluno = (int) ($dadosResumoAluno["partidas"] ?? 0);
+        $pontosAluno = (int) ($dadosResumoAluno["pontos"] ?? 0);
 
-    $totalAcertos = (int)$resumo["acertos"];
-    $totalErros = (int)$resumo["erros"];
+        $taxaAluno = percentual(
+            $dadosResumoAluno["acertos"] ?? 0,
+            $dadosResumoAluno["erros"] ?? 0
+        );
 
-    $taxaAcerto = percentual(
-        $totalAcertos,
-        $totalAcertos + $totalErros
-    );
+        /*
+        |------------------------------------------------------------------
+        | Evolução diária do aluno
+        |------------------------------------------------------------------
+        */
 
+        $sqlEvolucaoAluno = "
+            SELECT
+                DATE(hp.data_partida) AS data,
+                SUM(hp.acertos) AS acertos,
+                SUM(hp.erros) AS erros
+            FROM historico_partidas hp
+            WHERE hp.usuario_id = :aluno
+            $whereData
+            $whereJogoAluno
+            GROUP BY DATE(hp.data_partida)
+            ORDER BY DATE(hp.data_partida)
+        ";
 
-    /*
- * Desempenho por fase.
- * Cada fase aparece separadamente, mesmo que o aluno
- * tenha jogado várias fases no mesmo dia.
- */
-    $sql = "SELECT
-            f.id AS fase_id,
-            f.nome AS fase_nome,
-            f.numero AS fase_numero,
-            f.serie AS fase_serie,
-            j.nome AS jogo_nome,
-            COALESCE(SUM(hp.acertos), 0) AS acertos,
-            COALESCE(SUM(hp.erros), 0) AS erros,
-            COUNT(hp.id) AS partidas
-        FROM historico_partidas hp
-        INNER JOIN usuarios u ON u.id = hp.usuario_id
-        INNER JOIN fases f ON f.id = hp.fase_id
-        INNER JOIN jogos j ON j.id = hp.jogo_id
-        WHERE $whereUsuarios $whereData";
+        $consultaEvolucaoAluno = $pdo->prepare($sqlEvolucaoAluno);
+        $consultaEvolucaoAluno->execute($paramsResumoAluno);
 
-    if ($alunoId > 0) {
-        $sql .= " AND hp.usuario_id = :aluno_grafico";
-    }
+        $evolucaoAluno = $consultaEvolucaoAluno->fetchAll(PDO::FETCH_ASSOC);
 
-    $sql .= " GROUP BY
-            f.id, f.nome, f.numero, f.serie, j.nome
-          ORDER BY
-            j.id, f.serie, f.numero";
-
-    $stmt = $pdo->prepare($sql);
-
-    foreach ($params as $chave => $valor) {
-        $stmt->bindValue($chave, $valor, PDO::PARAM_STR);
-    }
-
-    if ($alunoId > 0) {
-        $stmt->bindValue(":aluno_grafico", $alunoId, PDO::PARAM_INT);
-    }
-
-    $stmt->execute();
-
-    $evolucao = [];
-
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
-        $nomeFase = $linha["jogo_nome"]
-            . " · Fase "
-            . $linha["fase_numero"]
-            . ": "
-            . $linha["fase_nome"];
-
-        if (!empty($linha["fase_serie"])) {
-            $nomeFase .= " (" . $linha["fase_serie"] . "º ano)";
+        foreach ($evolucaoAluno as &$dia) {
+            $dia["taxa"] = percentual(
+                $dia["acertos"],
+                $dia["erros"]
+            );
         }
 
-        $evolucao[] = [
-            "fase" => $nomeFase,
-            "acertos" => (int)$linha["acertos"],
-            "erros" => (int)$linha["erros"],
-            "partidas" => (int)$linha["partidas"]
-        ];
-    }
+        unset($dia);
 
+        /*
+        |------------------------------------------------------------------
+        | Resultado do aluno por jogo
+        |------------------------------------------------------------------
+        */
 
-    /*
-     * Comparação entre MathChef e MathSpace.
-     */
-    $sql = "SELECT
+        $sqlJogosAluno = "
+            SELECT
                 j.nome,
                 COUNT(hp.id) AS partidas,
                 COALESCE(SUM(hp.acertos), 0) AS acertos,
                 COALESCE(SUM(hp.erros), 0) AS erros,
-                COALESCE(AVG(hp.pontuacao), 0) AS media_pontos
-            FROM historico_partidas hp
-            INNER JOIN jogos j ON j.id = hp.jogo_id
-            INNER JOIN usuarios u ON u.id = hp.usuario_id
-            WHERE $whereUsuarios $whereData
-            GROUP BY j.id, j.nome
-            ORDER BY j.id";
+                COALESCE(SUM(hp.pontuacao), 0) AS pontos
+            FROM jogos j
+            LEFT JOIN historico_partidas hp
+                ON hp.jogo_id = j.id
+                AND hp.usuario_id = :aluno
+        ";
 
-    $stmt = $pdo->prepare($sql);
-
-    foreach ($params as $chave => $valor) {
-        $stmt->bindValue($chave, $valor, PDO::PARAM_STR);
-    }
-
-    $stmt->execute();
-    $comparativoJogos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    /*
-     * Análise individual do aluno selecionado.
-     */
-    if ($alunoId > 0) {
-        $stmt = $pdo->prepare(
-            "SELECT id, nome, serie, turma
-             FROM usuarios
-             WHERE id = :id AND tipo = 'aluno'
-             LIMIT 1"
-        );
-
-        $stmt->execute([":id" => $alunoId]);
-        $alunoSelecionado = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($alunoSelecionado) {
-            $sql = "SELECT
-                        DATE(data_partida) AS dia,
-                        SUM(acertos) AS acertos,
-                        SUM(erros) AS erros
-                    FROM historico_partidas
-                    WHERE usuario_id = :aluno $whereData
-                    GROUP BY DATE(data_partida)
-                    ORDER BY dia";
-
-            /*
-             * whereData usa o alias hp. Para a consulta individual,
-             * substituímos o alias pelo nome da tabela.
-             */
-            $whereDataIndividual = "";
-
-            if ($periodo !== "todos") {
-                $dias = (int)$periodo;
-                $whereDataIndividual =
-                    " AND data_partida >= DATE_SUB(CURDATE(), INTERVAL $dias DAY)";
-            }
-
-            $sql = "SELECT
-                        DATE(data_partida) AS dia,
-                        SUM(acertos) AS acertos,
-                        SUM(erros) AS erros
-                    FROM historico_partidas
-                    WHERE usuario_id = :aluno $whereDataIndividual
-                    GROUP BY DATE(data_partida)
-                    ORDER BY dia";
-
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindValue(":aluno", $alunoId, PDO::PARAM_INT);
-            $stmt->execute();
-
-            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
-                $total = (int)$linha["acertos"] + (int)$linha["erros"];
-
-                $evolucaoAluno[] = [
-                    "dia" => date("d/m", strtotime($linha["dia"])),
-                    "taxa" => percentual($linha["acertos"], $total)
-                ];
-            }
-
-            $sql = "SELECT
-                        j.nome,
-                        COUNT(hp.id) AS partidas,
-                        COALESCE(SUM(hp.acertos), 0) AS acertos,
-                        COALESCE(SUM(hp.erros), 0) AS erros
-                    FROM historico_partidas hp
-                    INNER JOIN jogos j ON j.id = hp.jogo_id
-                    WHERE hp.usuario_id = :aluno $whereData
-                    GROUP BY j.id, j.nome
-                    ORDER BY j.id";
-
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindValue(":aluno", $alunoId, PDO::PARAM_INT);
-            $stmt->execute();
-
-            $jogosAluno = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($dias > 0) {
+            $sqlJogosAluno .= "
+                AND hp.data_partida >= DATE_SUB(NOW(), INTERVAL :dias DAY)
+            ";
         }
+
+        $sqlJogosAluno .= "
+            GROUP BY j.id, j.nome
+            ORDER BY j.nome
+        ";
+
+        $consultaJogosAluno = $pdo->prepare($sqlJogosAluno);
+
+        $paramsJogosAluno = [":aluno" => $alunoId];
+
+        if ($dias > 0) {
+            $paramsJogosAluno[":dias"] = $dias;
+        }
+
+        $consultaJogosAluno->execute($paramsJogosAluno);
+        $resumoAlunoJogos = $consultaJogosAluno->fetchAll(PDO::FETCH_ASSOC);
     }
-} catch (PDOException $e) {
-    error_log("Erro em desempenho.php: " . $e->getMessage());
-
-    $erroBanco = "Não foi possível carregar os dados. Verifique a conexão, as tabelas e as colunas do banco.";
-
-    $resumo = [
-        "alunos_ativos" => 0,
-        "partidas" => 0,
-        "acertos" => 0,
-        "erros" => 0,
-        "media_pontos" => 0
-    ];
-
-    $totalAcertos = 0;
-    $totalErros = 0;
-    $taxaAcerto = 0;
-
-    $evolucao = [];
-    $comparativoJogos = [];
-    $evolucaoAluno = [];
-    $jogosAluno = [];
 }
 
-$serieLabel = $turma !== "" ? $turma : "Todas as turmas";
+/*
+|--------------------------------------------------------------------------
+| DADOS PARA OS GRÁFICOS
+|--------------------------------------------------------------------------
+*/
+
+$labelsFases = [];
+$dadosAcertosFases = [];
+$dadosErrosFases = [];
+
+foreach ($evolucao as $fase) {
+    $labelsFases[] = $fase["jogo"] . " - " . $fase["fase"];
+    $dadosAcertosFases[] = (int) $fase["acertos"];
+    $dadosErrosFases[] = (int) $fase["erros"];
+}
+
+$labelsJogos = [];
+$dadosTaxaJogos = [];
+
+foreach ($comparacaoJogos as $jogo) {
+    $labelsJogos[] = $jogo["nome"];
+    $dadosTaxaJogos[] = percentual(
+        $jogo["acertos"],
+        $jogo["erros"]
+    );
+}
+
+$labelsAluno = [];
+$dadosTaxaAluno = [];
+
+foreach ($evolucaoAluno as $dia) {
+    $dataFormatada = date(
+        "d/m",
+        strtotime($dia["data"])
+    );
+
+    $labelsAluno[] = $dataFormatada;
+    $dadosTaxaAluno[] = (float) $dia["taxa"];
+}
+
+$nomePeriodo = [
+    "7" => "Últimos 7 dias",
+    "30" => "Últimos 30 dias",
+    "90" => "Últimos 90 dias",
+    "todos" => "Todo o período"
+][$periodo];
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
     <title>Desempenho | MathRun</title>
 
@@ -366,410 +540,761 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
 
     <div class="admin-layout">
 
+        <!-- MENU LATERAL -->
+
         <aside class="sidebar">
 
-            <a href="admin.php" class="logo">
+            <div class="logo">
                 <span class="logo-icon">M</span>
-                <span>
-                    MathRun
-                    <small>ADMINISTRAÇÃO</small>
-                </span>
-            </a>
+                <span>MathRun</span>
+            </div>
 
-            <p class="menu-label">PAINEL</p>
+            <p class="menu-label">MENU PRINCIPAL</p>
 
-            <nav class="menu" aria-label="Menu administrativo">
+            <nav class="menu">
+
                 <a href="admin.php" class="menu-link">
-                    <span>▦</span> Visão geral
+                    <span class="menu-icon">⌂</span>
+                    <span>Início</span>
                 </a>
 
                 <a href="alunos.php" class="menu-link">
-                    <span>♙</span> Alunos
+                    <span class="menu-icon">♙</span>
+                    <span>Alunos</span>
                 </a>
 
-                <a href="desempenho.php" class="menu-link ativo">
-                    <span>▤</span> Desempenho
+                <a
+                    href="desempenho.php"
+                    class="menu-link active"
+                    aria-current="page">
+                    <span class="menu-icon">▥</span>
+                    <span>Desempenho</span>
                 </a>
 
                 <a href="questoes.php" class="menu-link">
-                    <span>✎</span> Questões
+                    <span class="menu-icon">☷</span>
+                    <span>Questões</span>
                 </a>
 
                 <a href="fases.php" class="menu-link">
-                    <span>⚑</span> Fases dos jogos
+                    <span class="menu-icon">⚑</span>
+                    <span>Fases</span>
                 </a>
+
             </nav>
 
             <div class="sidebar-bottom">
-                <div class="admin-avatar">A</div>
-
-                <div class="admin-info">
-                    <strong>Administrador</strong>
-                    <span>Gestão do MathRun</span>
-                </div>
-
-                <a href="../logout.php" class="logout" title="Sair da conta">
-                    ↗
+                <a href="../logout.php" class="menu-link logout-link">
+                    <span class="menu-icon">↪</span>
+                    <span>Sair</span>
                 </a>
             </div>
 
         </aside>
 
+        <!-- CONTEÚDO PRINCIPAL -->
+
         <main class="main-content desempenho-main">
 
             <header class="topbar">
                 <div>
-                    <p class="breadcrumb">
-                        MathRun / Administração / Desempenho
-                    </p>
-
-                    <h1>Desempenho dos alunos</h1>
-
-                    <p class="subtitle">
-                        Acompanhe os resultados registrados nos jogos e identifique tendências.
+                    <p class="topbar-eyebrow">PAINEL ADMINISTRATIVO</p>
+                    <h1>Desempenho</h1>
+                    <p class="topbar-description">
+                        Acompanhe os resultados e a evolução dos alunos no MathRun.
                     </p>
                 </div>
 
-                <div class="topbar-tag">
+                <div class="admin-status">
                     <span class="status-dot"></span>
-                    Dados do sistema
+                    Área administrativa
                 </div>
             </header>
 
-            <?php if ($erroBanco !== ""): ?>
-                <div class="admin-alert error">
-                    <?= h($erroBanco) ?>
-                </div>
-            <?php endif; ?>
+            <!-- FILTROS -->
 
-            <form class="filters-panel panel" method="get">
+            <section class="painel filtros-panel">
 
-                <div class="filters-heading">
+                <div class="section-heading">
                     <div>
-                        <span class="section-kicker">FILTROS</span>
-                        <h2>Personalize a análise</h2>
+                        <h2>Filtros de análise</h2>
+                        <p>Personalize os dados exibidos nos indicadores.</p>
                     </div>
-
-                    <a href="desempenho.php" class="text-link">
-                        Limpar filtros
-                    </a>
                 </div>
 
-                <div class="filters-grid">
+                <form method="GET" action="desempenho.php" class="filtros-form">
 
-                    <label>
-                        Turma
-                        <select
-                            name="turma"
-                            id="filtroTurma"
-                            onchange="document.getElementById('filtroAluno').value=''; this.form.submit();">
-                            <option value="">Todas as turmas</option>
+                    <?php if ($temTurma): ?>
+                        <div class="filtro-campo">
+                            <label for="turma">Turma</label>
 
-                            <?php foreach ($turmasValidas as $opcaoTurma): ?>
-                                <option
-                                    value="<?= h($opcaoTurma) ?>"
-                                    <?= $turma === $opcaoTurma ? "selected" : "" ?>>
-                                    <?= h($opcaoTurma) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </label>
+                            <select name="turma" id="turma">
+                                <option value="">Todas as turmas</option>
 
-                    <label>
-                        Período
-                        <select name="periodo">
-                            <?php foreach ($periodos as $valor => $texto): ?>
-                                <option
-                                    value="<?= h($valor) ?>"
-                                    <?= $periodo === $valor ? "selected" : "" ?>>
-                                    <?= h($texto) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </label>
+                                <?php foreach ($sqlTurmas as $opcaoTurma): ?>
+                                    <option
+                                        value="<?= h($opcaoTurma) ?>"
+                                        <?= $turma === $opcaoTurma ? "selected" : "" ?>>
+                                        <?= h($opcaoTurma) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    <?php endif; ?>
 
-                    <label>
-                        Aluno
-                        <select name="aluno" id="filtroAluno">
-                            <option value="">Visão geral da turma</option>
+                    <div class="filtro-campo">
+                        <label for="aluno">Aluno</label>
+
+                        <select name="aluno" id="aluno">
+                            <option value="">Todos os alunos</option>
 
                             <?php foreach ($alunos as $aluno): ?>
                                 <option
-                                    value="<?= (int)$aluno["id"] ?>"
-                                    <?= $alunoId === (int)$aluno["id"] ? "selected" : "" ?>>
+                                    value="<?= (int) $aluno["id"] ?>"
+                                    <?= $alunoId === (int) $aluno["id"] ? "selected" : "" ?>>
                                     <?= h($aluno["nome"]) ?>
-                                    ·
-                                    <?= h($aluno["serie"] . strtoupper($aluno["turma"] ?? "")) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
-                    </label>
+                    </div>
 
-                    <button type="submit" class="btn-filter">
-                        Aplicar filtros <span>↗</span>
-                    </button>
+                    <div class="filtro-campo">
+                        <label for="jogo">Jogo</label>
 
+                        <select name="jogo" id="jogo">
+                            <option value="">Todos os jogos</option>
+
+                            <?php foreach ($jogos as $jogo): ?>
+                                <option
+                                    value="<?= (int) $jogo["id"] ?>"
+                                    <?= $jogoId === (int) $jogo["id"] ? "selected" : "" ?>>
+                                    <?= h($jogo["nome"]) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="filtro-campo">
+                        <label for="periodo">Período</label>
+
+                        <select name="periodo" id="periodo">
+                            <option value="7" <?= $periodo === "7" ? "selected" : "" ?>>
+                                Últimos 7 dias
+                            </option>
+
+                            <option value="30" <?= $periodo === "30" ? "selected" : "" ?>>
+                                Últimos 30 dias
+                            </option>
+
+                            <option value="90" <?= $periodo === "90" ? "selected" : "" ?>>
+                                Últimos 90 dias
+                            </option>
+
+                            <option value="todos" <?= $periodo === "todos" ? "selected" : "" ?>>
+                                Todo o período
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="filtro-acoes">
+                        <button type="submit" class="btn-filtrar">
+                            Aplicar filtros
+                        </button>
+
+                        <a href="desempenho.php" class="btn-limpar">
+                            Limpar
+                        </a>
+                    </div>
+
+                </form>
+
+                <p class="filtros-legenda">
+                    Período selecionado: <strong><?= h($nomePeriodo) ?></strong>
+                </p>
+
+            </section>
+
+            <!-- INDICADORES -->
+
+            <section class="metricas-grid">
+
+                <article class="metrica-card">
+                    <div class="metrica-topo">
+                        <span class="metrica-label">Alunos analisados</span>
+                        <span class="metrica-icone roxo">♙</span>
+                    </div>
+
+                    <strong class="metrica-valor">
+                        <?= formatarNumero($alunosAnalisados) ?>
+                    </strong>
+
+                    <span class="metrica-descricao">
+                        Alunos com partidas registradas
+                    </span>
+                </article>
+
+                <article class="metrica-card">
+                    <div class="metrica-topo">
+                        <span class="metrica-label">Taxa de acerto</span>
+                        <span class="metrica-icone azul">✓</span>
+                    </div>
+
+                    <strong class="metrica-valor">
+                        <?= number_format($taxaGeral, 1, ",", ".") ?>%
+                    </strong>
+
+                    <span class="metrica-descricao">
+                        Acertos em relação ao total de respostas
+                    </span>
+                </article>
+
+                <article class="metrica-card">
+                    <div class="metrica-topo">
+                        <span class="metrica-label">Partidas realizadas</span>
+                        <span class="metrica-icone rosa">▣</span>
+                    </div>
+
+                    <strong class="metrica-valor">
+                        <?= formatarNumero($partidas) ?>
+                    </strong>
+
+                    <span class="metrica-descricao">
+                        Partidas registradas no período
+                    </span>
+                </article>
+
+                <article class="metrica-card">
+                    <div class="metrica-topo">
+                        <span class="metrica-label">Pontuação média</span>
+                        <span class="metrica-icone dourado">★</span>
+                    </div>
+
+                    <strong class="metrica-valor">
+                        <?= number_format($mediaPontos, 1, ",", ".") ?>
+                    </strong>
+
+                    <span class="metrica-descricao">
+                        Média de pontos por partida
+                    </span>
+                </article>
+
+            </section>
+
+            <!-- GRÁFICO DE FASES -->
+
+            <section class="painel grafico-panel">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Desempenho por fase</h2>
+                        <p>
+                            Comparação entre acertos e erros nas fases realizadas.
+                        </p>
+                    </div>
+
+                    <span class="periodo-badge">
+                        <?= h($nomePeriodo) ?>
+                    </span>
                 </div>
-            </form>
 
-            <section class="stats-grid desempenho-stats">
+                <?php if (count($evolucao) > 0): ?>
 
-                <article class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Alunos ativos</span>
-                        <span class="stat-icon roxo">♙</span>
+                    <div class="grafico-container grafico-fases">
+                        <canvas id="graficoGeral"></canvas>
                     </div>
 
-                    <strong class="stat-number">
-                        <?= number_format((int)$resumo["alunos_ativos"], 0, ",", ".") ?>
-                    </strong>
+                <?php else: ?>
 
-                    <span class="stat-description">
-                        <?= h($serieLabel) ?> · <?= h($periodos[$periodo]) ?>
-                    </span>
-                </article>
-
-                <article class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Partidas realizadas</span>
-                        <span class="stat-icon azul">▦</span>
+                    <div class="estado-vazio">
+                        <span class="vazio-icone">▥</span>
+                        <h3>Nenhum dado encontrado</h3>
+                        <p>
+                            Não existem partidas para os filtros selecionados.
+                            Tente alterar o período ou remover algum filtro.
+                        </p>
                     </div>
 
-                    <strong class="stat-number">
-                        <?= number_format((int)$resumo["partidas"], 0, ",", ".") ?>
-                    </strong>
-
-                    <span class="stat-description">
-                        <?= h($periodos[$periodo]) ?>
-                    </span>
-                </article>
-
-                <article class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Taxa de acerto</span>
-                        <span class="stat-icon verde">✓</span>
-                    </div>
-
-                    <strong class="stat-number">
-                        <?= number_format($taxaAcerto, 1, ",", ".") ?>%
-                    </strong>
-
-                    <span class="stat-description">
-                        <?= number_format($totalAcertos, 0, ",", ".") ?> acertos registrados
-                    </span>
-                </article>
-
-                <article class="stat-card">
-                    <div class="stat-top">
-                        <span class="stat-label">Média de pontuação</span>
-                        <span class="stat-icon roxo">✦</span>
-                    </div>
-
-                    <strong class="stat-number">
-                        <?= number_format((float)$resumo["media_pontos"], 0, ",", ".") ?>
-                    </strong>
-
-                    <span class="stat-description">
-                        Pontos por partida · <?= h($periodos[$periodo]) ?>
-                    </span>
-                </article>
+                <?php endif; ?>
 
             </section>
 
-            <section class="content-grid desempenho-grid">
+            <!-- COMPARAÇÃO DOS JOGOS -->
 
-                <article class="panel performance-panel">
-                    <div class="panel-heading">
-                        <div>
-                            <h2>Acertos por fase</h2>
-                            <p>Quantidade total de respostas corretas registradas em cada fase.</p>
-                        </div>
+            <section class="painel comparacao-panel">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Comparação entre jogos</h2>
+                        <p>
+                            Veja a taxa de acerto dos alunos em cada experiência.
+                        </p>
+                    </div>
+                </div>
+
+                <?php if (count($comparacaoJogos) > 0): ?>
+
+                    <div class="grafico-container grafico-comparacao">
+                        <canvas id="graficoJogos"></canvas>
                     </div>
 
-                    <?php if (empty($evolucao)): ?>
-                        <div class="empty-state">
-                            <span>⌁</span>
-                            <p>Não há partidas registradas neste período.</p>
-                        </div>
-                    <?php else: ?>
-                        <div class="chart-wrap">
-                            <canvas id="graficoGeral"></canvas>
-                        </div>
-                    <?php endif; ?>
-                </article>
+                    <div class="jogos-resumo-grid">
 
-                <article class="panel game-panel">
-                    <div class="panel-heading">
-                        <div>
-                            <h2>Desempenho por jogo</h2>
-                            <p>Comparação dos resultados registrados.</p>
-                        </div>
-                    </div>
+                        <?php foreach ($comparacaoJogos as $jogo): ?>
 
-                    <?php if (empty($comparativoJogos)): ?>
-                        <div class="empty-state">
-                            <span>▦</span>
-                            <p>Não há partidas para comparar.</p>
-                        </div>
-                    <?php else: ?>
-
-                        <?php foreach ($comparativoJogos as $jogo):
-                            $totalJogo = (int)$jogo["acertos"] + (int)$jogo["erros"];
-                            $taxaJogo = percentual($jogo["acertos"], $totalJogo);
-                        ?>
-
-                            <div class="game-result">
-                                <div class="game-result-head">
-                                    <div class="game-title">
-                                        <strong><?= h($jogo["nome"]) ?></strong>
-                                        <small><?= (int)$jogo["partidas"] ?> partidas</small>
-                                    </div>
-
-                                    <strong class="game-percent">
-                                        <?= number_format($taxaJogo, 1, ",", ".") ?>%
-                                    </strong>
-                                </div>
-
-                                <div class="progress-track">
-                                    <div
-                                        class="progress-correct"
-                                        style="width: <?= min(100, max(0, $taxaJogo)) ?>%"></div>
-                                </div>
-
-                                <div class="game-meta">
-                                    <span><?= (int)$jogo["acertos"] ?> acertos</span>
-                                    <span><?= (int)$jogo["erros"] ?> erros</span>
-                                </div>
-                            </div>
-
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </article>
-
-            </section>
-
-            <?php if ($alunoId > 0 && $alunoSelecionado): ?>
-
-                <section class="panel individual-panel">
-
-                    <div class="panel-heading">
-                        <div>
-                            <h2><?= h($alunoSelecionado["nome"]) ?></h2>
-                            <p>
-                                Acompanhamento individual · turma
-                                <?= h($alunoSelecionado["serie"] . strtoupper($alunoSelecionado["turma"] ?? "")) ?>
-                            </p>
-                        </div>
-                    </div>
-
-                    <?php if (empty($evolucaoAluno)): ?>
-                        <div class="empty-state">
-                            <p>Este aluno não possui partidas no período selecionado.</p>
-                        </div>
-                    <?php else: ?>
-                        <div class="chart-wrap individual-chart">
-                            <canvas id="graficoAluno"></canvas>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (!empty($jogosAluno)): ?>
-                        <div class="individual-game-grid">
-
-                            <?php foreach ($jogosAluno as $jogo):
-                                $total = (int)$jogo["acertos"] + (int)$jogo["erros"];
+                            <?php
+                            $taxaJogo = percentual(
+                                $jogo["acertos"],
+                                $jogo["erros"]
+                            );
                             ?>
 
-                                <div class="mini-stat">
-                                    <span><?= h($jogo["nome"]) ?></span>
+                            <article class="jogo-resumo-card">
 
-                                    <strong>
-                                        <?= number_format(percentual($jogo["acertos"], $total), 1, ",", ".") ?>%
-                                    </strong>
+                                <div class="jogo-resumo-topo">
+                                    <h3><?= h($jogo["nome"]) ?></h3>
 
-                                    <small>
-                                        <?= (int)$jogo["partidas"] ?> partidas ·
-                                        <?= (int)$jogo["acertos"] ?> acertos ·
-                                        <?= (int)$jogo["erros"] ?> erros
-                                    </small>
+                                    <span class="taxa-jogo">
+                                        <?= number_format($taxaJogo, 1, ",", ".") ?>%
+                                    </span>
                                 </div>
 
-                            <?php endforeach; ?>
+                                <div class="barra-progresso">
+                                    <div
+                                        class="barra-progresso-preenchida"
+                                        style="width: <?= min(100, max(0, $taxaJogo)) ?>%;"></div>
+                                </div>
 
+                                <div class="jogo-resumo-detalhes">
+                                    <span>
+                                        <?= formatarNumero($jogo["partidas"]) ?>
+                                        partidas
+                                    </span>
+
+                                    <span>
+                                        <?= formatarNumero($jogo["pontos"]) ?>
+                                        pontos
+                                    </span>
+                                </div>
+
+                            </article>
+
+                        <?php endforeach; ?>
+
+                    </div>
+
+                <?php else: ?>
+
+                    <div class="estado-vazio">
+                        <h3>Sem dados para comparar</h3>
+                        <p>Os resultados aparecerão quando houver partidas registradas.</p>
+                    </div>
+
+                <?php endif; ?>
+
+            </section>
+
+            <!-- ANÁLISE INDIVIDUAL -->
+
+            <section class="painel individual-panel">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Análise individual</h2>
+                        <p>
+                            Consulte a evolução de um aluno específico.
+                        </p>
+                    </div>
+                </div>
+
+                <?php if ($alunoSelecionado): ?>
+
+                    <div class="aluno-destaque">
+
+                        <div class="avatar-aluno">
+                            <?= h(mb_strtoupper(mb_substr($alunoSelecionado["nome"], 0, 1, "UTF-8"), "UTF-8")) ?>
                         </div>
+
+                        <div class="aluno-dados">
+                            <h3><?= h($alunoSelecionado["nome"]) ?></h3>
+                            <p><?= h($alunoSelecionado["email"]) ?></p>
+                        </div>
+
+                        <a
+                            class="btn-trocar-aluno"
+                            href="desempenho.php?periodo=<?= h($periodo) ?><?= $turma !== "" ? "&turma=" . urlencode($turma) : "" ?>">
+                            Ver todos os alunos
+                        </a>
+
+                    </div>
+
+                    <div class="individual-metricas">
+
+                        <div class="individual-metrica">
+                            <span>Taxa de acerto</span>
+                            <strong>
+                                <?= number_format($taxaAluno, 1, ",", ".") ?>%
+                            </strong>
+                        </div>
+
+                        <div class="individual-metrica">
+                            <span>Partidas realizadas</span>
+                            <strong><?= formatarNumero($partidasAluno) ?></strong>
+                        </div>
+
+                        <div class="individual-metrica">
+                            <span>Pontuação acumulada</span>
+                            <strong><?= formatarNumero($pontosAluno) ?></strong>
+                        </div>
+
+                    </div>
+
+                    <div class="subsecao-titulo">
+                        <h3>Evolução ao longo do tempo</h3>
+                        <p>Taxa de acerto diária do aluno selecionado.</p>
+                    </div>
+
+                    <?php if (count($evolucaoAluno) > 0): ?>
+
+                        <div class="grafico-container grafico-aluno">
+                            <canvas id="graficoAluno"></canvas>
+                        </div>
+
+                    <?php else: ?>
+
+                        <div class="estado-vazio">
+                            <h3>Este aluno ainda não possui partidas</h3>
+                            <p>
+                                Quando o aluno jogar, a evolução aparecerá aqui.
+                            </p>
+                        </div>
+
                     <?php endif; ?>
 
-                </section>
+                    <div class="subsecao-titulo">
+                        <h3>Resultados por jogo</h3>
+                        <p>Resumo individual de cada jogo disponível.</p>
+                    </div>
 
-            <?php endif; ?>
+                    <div class="tabela-responsiva">
 
-            <div class="method-note">
-                <strong>Como interpretar:</strong>
-                os gráficos mostram a taxa de acerto agregada por dia.
-                O sistema não compara a primeira e a última tentativa da mesma
-                questão, porque essa sequência não é registrada explicitamente
-                no banco de dados.
-            </div>
+                        <table class="tabela-desempenho">
 
-            <footer class="admin-footer">
-                MathRun · Painel administrativo · Dados do histórico registrado.
+                            <thead>
+                                <tr>
+                                    <th>Jogo</th>
+                                    <th>Partidas</th>
+                                    <th>Acertos</th>
+                                    <th>Erros</th>
+                                    <th>Taxa de acerto</th>
+                                    <th>Pontos</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <?php foreach ($resumoAlunoJogos as $jogoAluno): ?>
+
+                                    <?php
+                                    $taxaIndividualJogo = percentual(
+                                        $jogoAluno["acertos"],
+                                        $jogoAluno["erros"]
+                                    );
+                                    ?>
+
+                                    <tr>
+                                        <td><?= h($jogoAluno["nome"]) ?></td>
+
+                                        <td>
+                                            <?= formatarNumero($jogoAluno["partidas"]) ?>
+                                        </td>
+
+                                        <td class="valor-acerto">
+                                            <?= formatarNumero($jogoAluno["acertos"]) ?>
+                                        </td>
+
+                                        <td class="valor-erro">
+                                            <?= formatarNumero($jogoAluno["erros"]) ?>
+                                        </td>
+
+                                        <td>
+                                            <span class="taxa-tabela">
+                                                <?= number_format($taxaIndividualJogo, 1, ",", ".") ?>%
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <?= formatarNumero($jogoAluno["pontos"]) ?>
+                                        </td>
+                                    </tr>
+
+                                <?php endforeach; ?>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                <?php else: ?>
+
+                    <div class="estado-vazio estado-individual">
+                        <span class="vazio-icone">♙</span>
+                        <h3>Selecione um aluno nos filtros</h3>
+                        <p>
+                            A análise individual mostrará a taxa de acerto,
+                            a pontuação, as partidas e a evolução diária.
+                        </p>
+                    </div>
+
+                <?php endif; ?>
+
+            </section>
+
+            <footer class="desempenho-footer">
+                <span>MathRun</span>
+                <span>Área administrativa · Desempenho dos alunos</span>
             </footer>
 
         </main>
+
     </div>
 
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- DADOS DOS GRÁFICOS -->
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const dadosFases = <?= json_encode(
-                                    $evolucao,
-                                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-                                ) ?>;
+        const labelsFases = <?= json_encode(
+                                $labelsFases,
+                                JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+                            ) ?>;
 
-            const canvas = document.getElementById("graficoGeral");
+        const dadosAcertosFases = <?= json_encode($dadosAcertosFases) ?>;
+        const dadosErrosFases = <?= json_encode($dadosErrosFases) ?>;
 
-            if (!canvas) {
-                console.error("Canvas graficoGeral não encontrado.");
-                return;
-            }
+        const labelsJogos = <?= json_encode(
+                                $labelsJogos,
+                                JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+                            ) ?>;
 
-            if (typeof Chart === "undefined") {
-                console.error("Chart.js não foi carregado.");
-                canvas.parentElement.innerHTML =
-                    "<p class='chart-error'>Não foi possível carregar a biblioteca do gráfico. Verifique sua conexão.</p>";
-                return;
-            }
+        const dadosTaxaJogos = <?= json_encode($dadosTaxaJogos) ?>;
 
-            if (!Array.isArray(dadosFases) || dadosFases.length === 0) {
-                canvas.parentElement.innerHTML =
-                    "<p class='chart-error'>Não há acertos registrados nas fases para os filtros selecionados.</p>";
-                return;
-            }
+        const labelsAluno = <?= json_encode(
+                                $labelsAluno,
+                                JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+                            ) ?>;
 
+        const dadosTaxaAluno = <?= json_encode($dadosTaxaAluno) ?>;
 
-            new Chart(canvas, {
+        /*
+        |--------------------------------------------------------------------------
+        | CONFIGURAÇÃO VISUAL DOS GRÁFICOS
+        |--------------------------------------------------------------------------
+        */
+
+        Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+        Chart.defaults.color = "#9ca3af";
+
+        /*
+        |--------------------------------------------------------------------------
+        | GRÁFICO DE DESEMPENHO POR FASE
+        |--------------------------------------------------------------------------
+        */
+
+        const canvasGeral = document.getElementById("graficoGeral");
+
+        if (canvasGeral) {
+            new Chart(canvasGeral, {
+                type: "bar",
+
+                data: {
+                    labels: labelsFases,
+
+                    datasets: [{
+                            label: "Acertos",
+                            data: dadosAcertosFases,
+                            backgroundColor: "#8b7cf6",
+                            borderRadius: 6,
+                            borderSkipped: false
+                        },
+                        {
+                            label: "Erros",
+                            data: dadosErrosFases,
+                            backgroundColor: "#e879a9",
+                            borderRadius: 6,
+                            borderSkipped: false
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    interaction: {
+                        intersect: false,
+                        mode: "index"
+                    },
+
+                    plugins: {
+                        legend: {
+                            position: "top",
+                            align: "end",
+
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: "circle",
+                                boxWidth: 8,
+                                padding: 18
+                            }
+                        },
+
+                        tooltip: {
+                            backgroundColor: "#171a2b",
+                            titleColor: "#ffffff",
+                            bodyColor: "#d1d5db",
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    },
+
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+
+                            ticks: {
+                                maxRotation: 35,
+                                minRotation: 0
+                            },
+
+                            border: {
+                                display: false
+                            }
+                        },
+
+                        y: {
+                            beginAtZero: true,
+
+                            ticks: {
+                                precision: 0
+                            },
+
+                            grid: {
+                                color: "rgba(148, 163, 184, 0.10)"
+                            },
+
+                            border: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | GRÁFICO DE COMPARAÇÃO DOS JOGOS
+        |--------------------------------------------------------------------------
+        */
+
+        const canvasJogos = document.getElementById("graficoJogos");
+
+        if (canvasJogos) {
+            new Chart(canvasJogos, {
+                type: "bar",
+
+                data: {
+                    labels: labelsJogos,
+
+                    datasets: [{
+                        label: "Taxa de acerto",
+                        data: dadosTaxaJogos,
+                        backgroundColor: ["#8b7cf6", "#62b5f9"],
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        maxBarThickness: 70
+                    }]
+                },
+
+                options: {
+                    indexAxis: "y",
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return " " + context.parsed.x + "% de acertos";
+                                }
+                            }
+                        }
+                    },
+
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+
+                            ticks: {
+                                callback: function(value) {
+                                    return value + "%";
+                                }
+                            },
+
+                            grid: {
+                                color: "rgba(148, 163, 184, 0.10)"
+                            },
+
+                            border: {
+                                display: false
+                            }
+                        },
+
+                        y: {
+                            grid: {
+                                display: false
+                            },
+
+                            border: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | GRÁFICO INDIVIDUAL
+        |--------------------------------------------------------------------------
+        */
+
+        const canvasAluno = document.getElementById("graficoAluno");
+
+        if (canvasAluno) {
+            new Chart(canvasAluno, {
                 type: "line",
 
                 data: {
-                    labels: dadosFases.map(item => item.fase),
+                    labels: labelsAluno,
 
                     datasets: [{
-                        label: "Acertos por fase",
-                        data: dadosFases.map(item => Number(item.acertos) || 0),
-
-                        borderColor: "#8b7bff",
-                        backgroundColor: "rgba(139, 123, 255, 0.15)",
-
-                        borderWidth: 3,
-                        pointRadius: 5,
-                        pointHoverRadius: 8,
-                        pointBackgroundColor: "#a99cff",
-                        pointBorderColor: "#151825",
-                        pointBorderWidth: 2,
-
-                        tension: 0.3,
-                        fill: true
+                        label: "Taxa de acerto",
+                        data: dadosTaxaAluno,
+                        borderColor: "#8b7cf6",
+                        backgroundColor: "rgba(139, 124, 246, 0.13)",
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: "#8b7cf6"
                     }]
                 },
 
@@ -779,64 +1304,52 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
 
                     plugins: {
                         legend: {
-                            labels: {
-                                color: "#c5c9dc"
-                            }
+                            display: false
                         },
 
                         tooltip: {
                             callbacks: {
-                                afterLabel: function(context) {
-                                    const fase = dadosFases[context.dataIndex];
-
-                                    return [
-                                        "Erros: " + fase.erros,
-                                        "Partidas: " + fase.partidas
-                                    ];
+                                label: function(context) {
+                                    return " Taxa de acerto: " + context.parsed.y + "%";
                                 }
                             }
                         }
                     },
 
                     scales: {
-                        y: {
-                            beginAtZero: true,
-
-                            ticks: {
-                                precision: 0,
-                                color: "#9297ab"
-                            },
-
+                        x: {
                             grid: {
-                                color: "rgba(143, 151, 190, 0.12)"
+                                display: false
                             },
 
-                            title: {
-                                display: true,
-                                text: "Quantidade de acertos",
-                                color: "#9297ab"
+                            border: {
+                                display: false
                             }
                         },
 
-                        x: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+
                             ticks: {
-                                color: "#9297ab",
-                                autoSkip: false,
-                                maxRotation: 45,
-                                minRotation: 0
+                                callback: function(value) {
+                                    return value + "%";
+                                }
                             },
 
                             grid: {
+                                color: "rgba(148, 163, 184, 0.10)"
+                            },
+
+                            border: {
                                 display: false
                             }
                         }
                     }
                 }
             });
-
-        });
+        }
     </script>
-
 
 </body>
 
