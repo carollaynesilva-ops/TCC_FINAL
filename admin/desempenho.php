@@ -157,18 +157,35 @@ try {
         $totalAcertos + $totalErros
     );
 
+
     /*
-     * Evolução diária da taxa de acerto.
-     */
+ * Desempenho por fase.
+ * Cada fase aparece separadamente, mesmo que o aluno
+ * tenha jogado várias fases no mesmo dia.
+ */
     $sql = "SELECT
-                DATE(hp.data_partida) AS dia,
-                SUM(hp.acertos) AS acertos,
-                SUM(hp.erros) AS erros
-            FROM historico_partidas hp
-            INNER JOIN usuarios u ON u.id = hp.usuario_id
-            WHERE $whereUsuarios $whereData
-            GROUP BY DATE(hp.data_partida)
-            ORDER BY dia";
+            f.id AS fase_id,
+            f.nome AS fase_nome,
+            f.numero AS fase_numero,
+            f.serie AS fase_serie,
+            j.nome AS jogo_nome,
+            COALESCE(SUM(hp.acertos), 0) AS acertos,
+            COALESCE(SUM(hp.erros), 0) AS erros,
+            COUNT(hp.id) AS partidas
+        FROM historico_partidas hp
+        INNER JOIN usuarios u ON u.id = hp.usuario_id
+        INNER JOIN fases f ON f.id = hp.fase_id
+        INNER JOIN jogos j ON j.id = hp.jogo_id
+        WHERE $whereUsuarios $whereData";
+
+    if ($alunoId > 0) {
+        $sql .= " AND hp.usuario_id = :aluno_grafico";
+    }
+
+    $sql .= " GROUP BY
+            f.id, f.nome, f.numero, f.serie, j.nome
+          ORDER BY
+            j.id, f.serie, f.numero";
 
     $stmt = $pdo->prepare($sql);
 
@@ -176,16 +193,33 @@ try {
         $stmt->bindValue($chave, $valor, PDO::PARAM_STR);
     }
 
+    if ($alunoId > 0) {
+        $stmt->bindValue(":aluno_grafico", $alunoId, PDO::PARAM_INT);
+    }
+
     $stmt->execute();
 
+    $evolucao = [];
+
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $linha) {
-        $total = (int)$linha["acertos"] + (int)$linha["erros"];
+        $nomeFase = $linha["jogo_nome"]
+            . " · Fase "
+            . $linha["fase_numero"]
+            . ": "
+            . $linha["fase_nome"];
+
+        if (!empty($linha["fase_serie"])) {
+            $nomeFase .= " (" . $linha["fase_serie"] . "º ano)";
+        }
 
         $evolucao[] = [
-            "dia" => date("d/m", strtotime($linha["dia"])),
-            "taxa" => percentual($linha["acertos"], $total)
+            "fase" => $nomeFase,
+            "acertos" => (int)$linha["acertos"],
+            "erros" => (int)$linha["erros"],
+            "partidas" => (int)$linha["partidas"]
         ];
     }
+
 
     /*
      * Comparação entre MathChef e MathSpace.
@@ -425,7 +459,10 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
 
                     <label>
                         Turma
-                        <select name="turma">
+                        <select
+                            name="turma"
+                            id="filtroTurma"
+                            onchange="document.getElementById('filtroAluno').value=''; this.form.submit();">
                             <option value="">Todas as turmas</option>
 
                             <?php foreach ($turmasValidas as $opcaoTurma): ?>
@@ -453,7 +490,7 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
 
                     <label>
                         Aluno
-                        <select name="aluno">
+                        <select name="aluno" id="filtroAluno">
                             <option value="">Visão geral da turma</option>
 
                             <?php foreach ($alunos as $aluno): ?>
@@ -544,10 +581,8 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
                 <article class="panel performance-panel">
                     <div class="panel-heading">
                         <div>
-                            <h2>Taxa de acerto ao longo do tempo</h2>
-                            <p>
-                                Percentual diário das partidas registradas.
-                            </p>
+                            <h2>Acertos por fase</h2>
+                            <p>Quantidade total de respostas corretas registradas em cada fase.</p>
                         </div>
                     </div>
 
@@ -686,7 +721,17 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
         const dadosGeral = <?= json_encode($evolucao, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
         const dadosAluno = <?= json_encode($evolucaoAluno, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 
-        function criarGrafico(id, dados, cor, fundo) {
+        const dadosGeral = <?= json_encode(
+                                $evolucao,
+                                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                            ) ?>;
+
+        const dadosAluno = <?= json_encode(
+                                $evolucaoAluno,
+                                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                            ) ?>;
+
+        function criarGraficoFases(id, dados) {
             const canvas = document.getElementById(id);
 
             if (!canvas || typeof Chart === "undefined") {
@@ -694,21 +739,18 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
             }
 
             new Chart(canvas, {
-                type: "line",
+                type: "bar",
 
                 data: {
-                    labels: dados.map(item => item.dia),
+                    labels: dados.map(item => item.fase),
 
                     datasets: [{
-                        label: "Taxa de acerto",
-                        data: dados.map(item => item.taxa),
-                        borderColor: cor,
-                        backgroundColor: fundo,
-                        fill: true,
-                        tension: 0.32,
-                        borderWidth: 3,
-                        pointRadius: 3,
-                        pointHoverRadius: 6
+                        label: "Acertos",
+                        data: dados.map(item => item.acertos),
+                        backgroundColor: "rgba(139, 123, 255, 0.8)",
+                        borderColor: "#8b7bff",
+                        borderWidth: 1,
+                        borderRadius: 6
                     }]
                 },
 
@@ -718,13 +760,21 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
 
                     plugins: {
                         legend: {
-                            display: false
+                            display: true,
+                            labels: {
+                                color: "#c5c9dc"
+                            }
                         },
 
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    return context.parsed.y + "% de acertos";
+                                afterLabel: function(context) {
+                                    const fase = dados[context.dataIndex];
+
+                                    return [
+                                        "Erros: " + fase.erros,
+                                        "Partidas: " + fase.partidas
+                                    ];
                                 }
                             }
                         }
@@ -732,12 +782,11 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
 
                     scales: {
                         y: {
-                            min: 0,
-                            max: 100,
+                            beginAtZero: true,
 
                             ticks: {
-                                color: "#9297ab",
-                                callback: value => value + "%"
+                                precision: 0,
+                                color: "#9297ab"
                             },
 
                             grid: {
@@ -748,9 +797,9 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
                         x: {
                             ticks: {
                                 color: "#9297ab",
-                                maxRotation: 0,
-                                autoSkip: true,
-                                maxTicksLimit: 8
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 0
                             },
 
                             grid: {
@@ -762,19 +811,7 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
             });
         }
 
-        criarGrafico(
-            "graficoGeral",
-            dadosGeral,
-            "#8b7bff",
-            "rgba(139, 123, 255, 0.14)"
-        );
-
-        criarGrafico(
-            "graficoAluno",
-            dadosAluno,
-            "#39b8ff",
-            "rgba(57, 184, 255, 0.13)"
-        );
+        criarGraficoFases("graficoGeral", dadosGeral);
     </script>
 
 </body>
