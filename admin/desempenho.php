@@ -1,5 +1,5 @@
 <?php
-require_once "proteger_admin.php";
+
 require_once "../config/config.php";
 
 /*
