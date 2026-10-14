@@ -528,7 +528,7 @@ $nomePeriodo = [
         name="viewport"
         content="width=device-width, initial-scale=1.0">
 
-    <title>Desempenho | MathRun</title>
+    <title>Desempenho | MathRun</title> 
 
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/desempenho.css">
