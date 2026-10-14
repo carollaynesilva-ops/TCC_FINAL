@@ -717,36 +717,44 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
         </main>
     </div>
 
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-        const dadosGeral = <?= json_encode($evolucao, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
-        const dadosAluno = <?= json_encode($evolucaoAluno, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+        document.addEventListener("DOMContentLoaded", function() {
+            const dadosFases = <?= json_encode(
+                                    $evolucao,
+                                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                                ) ?>;
 
-        const dadosGeral = <?= json_encode(
-                                $evolucao,
-                                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-                            ) ?>;
+            const canvas = document.getElementById("graficoGeral");
 
-        const dadosAluno = <?= json_encode(
-                                $evolucaoAluno,
-                                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-                            ) ?>;
+            if (!canvas) {
+                console.error("Canvas graficoGeral não encontrado.");
+                return;
+            }
 
-        function criarGraficoFases(id, dados) {
-            const canvas = document.getElementById(id);
+            if (typeof Chart === "undefined") {
+                console.error("Chart.js não foi carregado.");
+                canvas.parentElement.innerHTML =
+                    "<p class='chart-error'>Não foi possível carregar a biblioteca do gráfico. Verifique sua conexão.</p>";
+                return;
+            }
 
-            if (!canvas || typeof Chart === "undefined") {
+            if (!Array.isArray(dadosFases) || dadosFases.length === 0) {
+                canvas.parentElement.innerHTML =
+                    "<p class='chart-error'>Não há acertos registrados nas fases para os filtros selecionados.</p>";
                 return;
             }
 
             new Chart(canvas, {
                 type: "bar",
-
                 data: {
-                    labels: dados.map(item => item.fase),
+                    labels: dadosFases.map(item => item.fase),
 
                     datasets: [{
-                        label: "Acertos",
-                        data: dados.map(item => item.acertos),
+                        label: "Acertos por fase",
+                        data: dadosFases.map(item => Number(item.acertos) || 0),
                         backgroundColor: "rgba(139, 123, 255, 0.8)",
                         borderColor: "#8b7bff",
                         borderWidth: 1,
@@ -760,7 +768,6 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
 
                     plugins: {
                         legend: {
-                            display: true,
                             labels: {
                                 color: "#c5c9dc"
                             }
@@ -769,7 +776,7 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
                         tooltip: {
                             callbacks: {
                                 afterLabel: function(context) {
-                                    const fase = dados[context.dataIndex];
+                                    const fase = dadosFases[context.dataIndex];
 
                                     return [
                                         "Erros: " + fase.erros,
@@ -783,12 +790,10 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
                     scales: {
                         y: {
                             beginAtZero: true,
-
                             ticks: {
                                 precision: 0,
                                 color: "#9297ab"
                             },
-
                             grid: {
                                 color: "rgba(143, 151, 190, 0.12)"
                             }
@@ -801,7 +806,6 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
                                 maxRotation: 45,
                                 minRotation: 0
                             },
-
                             grid: {
                                 display: false
                             }
@@ -809,10 +813,9 @@ $serieLabel = $turma !== "" ? $turma : "Todas as turmas";
                     }
                 }
             });
-        }
-
-        criarGraficoFases("graficoGeral", dadosGeral);
+        });
     </script>
+
 
 </body>
 
