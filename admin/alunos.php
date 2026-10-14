@@ -703,7 +703,14 @@ $saudacao = $hora < 12
                                                         class="acao-icone copiar-email"
                                                         title="Copiar e-mail"
                                                         aria-label="Copiar e-mail de <?= alunoEsc($aluno["nome"]) ?>"
-                                                        data-email="<?= alunoEsc($aluno["email"]) ?>">⧉</button>
+                                                        data-email="<?= alunoEsc($aluno["email"]) ?>">⧉
+                                                    </button>
+
+                                                    <a class="botao-secundario"
+                                                        href="relatorio_aluno.php?id=<?= (int)$aluno["id"] ?>">
+                                                        📄 Relatório escolar
+                                                    </a>
+
                                                 </div>
                                             </td>
                                         </tr>
@@ -768,15 +775,29 @@ $saudacao = $hora < 12
                                         </div>
                                     </div>
 
+
                                     <div class="card-acoes">
-                                        <a class="botao-secundario" href="mailto:<?= alunoEsc($aluno["email"]) ?>">✉ E-mail</a>
-                                        <button type="button" class="botao-primario editar-aluno"
+                                        <a class="botao-secundario"
+                                            href="mailto:<?= alunoEsc($aluno["email"]) ?>">
+                                            ✉ E-mail
+                                        </a>
+
+                                        <a class="botao-secundario"
+                                            href="relatorio_aluno.php?id=<?= (int)$aluno["id"] ?>">
+                                            📄 Relatório escolar
+                                        </a>
+
+                                        <button type="button"
+                                            class="botao-primario editar-aluno"
                                             data-id="<?= (int)$aluno["id"] ?>"
                                             data-nome="<?= alunoEsc($aluno["nome"]) ?>"
                                             data-email="<?= alunoEsc($aluno["email"]) ?>"
                                             data-serie="<?= alunoEsc($serie) ?>"
-                                            data-turma="<?= alunoEsc($turma) ?>">Editar cadastro</button>
+                                            data-turma="<?= alunoEsc($turma) ?>">
+                                            Editar cadastro
+                                        </button>
                                     </div>
+
                                 </article>
                             <?php endforeach; ?>
                         </div>
