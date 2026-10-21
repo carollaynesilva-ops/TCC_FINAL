@@ -117,13 +117,25 @@ foreach ($fasesPorSerie as $serie => &$listaFases) {
 }
 unset($listaFases);
 
+// O aluno só pode visualizar o mapa da própria série.
 $seriesDisponiveis = ['6', '7', '8', '9'];
 
-if (!isset($fasesPorSerie[$serieUsuario])) {
-    $serieInicial = isset($fasesPorSerie['6']) ? '6' : (array_key_first($fasesPorSerie) ?? '6');
+if (in_array((string) $serieUsuario, $seriesDisponiveis, true)) {
+    $serieInicial = (string) $serieUsuario;
 } else {
-    $serieInicial = $serieUsuario;
+    $serieInicial = '';
 }
+
+// Nunca disponibiliza mapas de outras séries.
+$seriesDisponiveis = $serieInicial !== ''
+    ? [$serieInicial]
+    : [];
+
+$totalConcluidas = 0;
+$totalFases = count($fasesPorSerie[$serieInicial] ?? []);
+
+// O XP será calculado quando as partidas reais estiverem integradas.
+$melhorPontuacao = 0;
 
 $totalConcluidas = count($fasesConcluidas);
 $totalFases = 0;
@@ -201,18 +213,16 @@ $cssPath = '../css/mathspace.css';
 
         <section class="map-toolbar" aria-label="Controles do mapa">
             <div class="series-picker">
-                <span class="toolbar-label">SETOR DE ENSINO</span>
-                <div class="series-buttons" role="group" aria-label="Selecionar série">
-                    <?php foreach ($seriesDisponiveis as $serie): ?>
-                        <button
-                            type="button"
-                            class="series-button <?= $serie === (string) $serieInicial ? 'active' : '' ?>"
-                            data-serie="<?= $serie ?>"
-                            aria-pressed="<?= $serie === (string) $serieInicial ? 'true' : 'false' ?>"
-                        ><?= $serie ?>º ano</button>
-                    <?php endforeach; ?>
-                </div>
-            </div>
+    <span class="toolbar-label">SETOR DE ENSINO</span>
+
+    <div class="series-buttons">
+        <span class="series-button active">
+            <?= $serieInicial !== ''
+                ? htmlspecialchars($serieInicial, ENT_QUOTES, 'UTF-8') . 'º ano'
+                : 'Série não identificada' ?>
+        </span>
+    </div>
+</div>
 
             <div class="map-legend" aria-label="Legenda das missões">
                 <span><i class="legend-dot available"></i> Disponível</span>
@@ -371,27 +381,6 @@ $cssPath = '../css/mathspace.css';
     });
     applyTheme('dark');
 
-    // Troca de série sem recarregar a página.
-    const seriesButtons = [...document.querySelectorAll('[data-serie]')];
-    const seriesMaps = [...document.querySelectorAll('[data-serie-map]')];
-
-    seriesButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const serie = button.dataset.serie;
-
-            seriesButtons.forEach(item => {
-                const selected = item === button;
-                item.classList.toggle('active', selected);
-                item.setAttribute('aria-pressed', String(selected));
-            });
-
-            seriesMaps.forEach(map => {
-                const selected = map.dataset.serieMap === serie;
-                map.hidden = !selected;
-                map.classList.toggle('active', selected);
-            });
-        });
-    });
 
     // Acessibilidade: movimento reduzido e texto ampliado.
     const motionToggle = document.getElementById('accessibility-toggle');
