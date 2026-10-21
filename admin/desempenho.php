@@ -528,7 +528,7 @@ $nomePeriodo = [
         name="viewport"
         content="width=device-width, initial-scale=1.0">
 
-    <title>Desempenho | MathRun</title> 
+    <title>Desempenho | MathRun</title>
 
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/desempenho.css">
@@ -540,57 +540,60 @@ $nomePeriodo = [
 
     <div class="admin-layout">
 
-        <!-- MENU LATERAL -->
-
         <aside class="sidebar">
+            <a href="admin.php" class="admin-brand">
+                <span class="brand-icon">M</span>
+                <span>
+                    Math<span class="brand-highlight">Run</span>
+                    <small>PAINEL ADMINISTRATIVO</small>
+                </span>
+            </a>
 
-            <div class="logo">
-                <span class="logo-icon">M</span>
-                <span>MathRun</span>
-            </div>
+            <div class="sidebar-label">MENU PRINCIPAL</div>
 
-            <p class="menu-label">MENU PRINCIPAL</p>
-
-            <nav class="menu">
-
-                <a href="admin.php" class="menu-link">
-                    <span class="menu-icon">⌂</span>
-                    <span>Início</span>
+            <nav class="sidebar-nav">
+                <a href="admin.php" class="nav-link">
+                    <span class="nav-icon">⌂</span>
+                    <span>Visão geral</span>
                 </a>
 
-                <a href="alunos.php" class="menu-link">
-                    <span class="menu-icon">♙</span>
+                <a href="alunos.php" class="nav-link ativo">
+                    <span class="nav-icon">♙</span>
                     <span>Alunos</span>
                 </a>
 
-                <a
-                    href="desempenho.php"
-                    class="menu-link active"
-                    aria-current="page">
-                    <span class="menu-icon">▥</span>
+                <a href="desempenho.php" class="nav-link">
+                    <span class="nav-icon">▥</span>
                     <span>Desempenho</span>
                 </a>
 
-                <a href="questoes.php" class="menu-link">
-                    <span class="menu-icon">☷</span>
+                <a href="questoes.php" class="nav-link">
+                    <span class="nav-icon">✎</span>
                     <span>Questões</span>
                 </a>
 
-                <a href="fases.php" class="menu-link">
-                    <span class="menu-icon">⚑</span>
+                <a href="fases.php" class="nav-link">
+                    <span class="nav-icon">⚑</span>
                     <span>Fases</span>
                 </a>
-
             </nav>
 
             <div class="sidebar-bottom">
-                <a href="../logout.php" class="menu-link logout-link">
-                    <span class="menu-icon">↪</span>
-                    <span>Sair</span>
+                <div class="admin-profile">
+                    <div class="admin-avatar">A</div>
+                    <div class="admin-profile-info">
+                        <strong>Administrador</strong>
+                        <span>MathRun</span>
+                    </div>
+                </div>
+
+                <a href="../index.php" class="nav-link sair-link">
+                    <span class="nav-icon">↗</span>
+                    <span>Voltar ao site</span>
                 </a>
             </div>
-
         </aside>
+
 
         <!-- CONTEÚDO PRINCIPAL -->
 
