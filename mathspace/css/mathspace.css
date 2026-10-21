@@ -1088,3 +1088,105 @@ body.space-fullscreen .ship-window {
         transition-duration: .01ms !important;
     }
 }
+/* ===== CORREÇÃO DE ROLAGEM E LARGURA DO MAPA ===== */
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+}
+
+.space-game-page {
+    min-height: 100vh;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+.cockpit {
+    width: 100%;
+    max-width: 1700px;
+    min-height: 0;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+.cockpit-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: stretch;
+    width: 100%;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+.universe-column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    height: auto !important;
+}
+
+.ship-window {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    height: auto !important;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.universe-viewport {
+    position: relative;
+    display: block;
+    flex: none;
+    width: 100% !important;
+    height: clamp(350px, 60vh, 650px);
+    min-width: 0;
+    min-height: 350px;
+    overflow: hidden;
+}
+
+#universe-game {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0;
+}
+
+#universe-game canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.ship-console {
+    width: 100%;
+    min-width: 0;
+    height: auto !important;
+    overflow: visible;
+}
+
+.cockpit-footer {
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+/* Em telas menores, o mapa continua ocupando toda a largura. */
+@media (max-width: 800px) {
+    .universe-viewport {
+        height: 55vh;
+        min-height: 320px;
+    }
+
+    .ship-console {
+        display: flex;
+        flex-direction: column;
+    }
+}
