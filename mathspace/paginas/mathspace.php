@@ -132,7 +132,7 @@ foreach ($fasesPorSerie as $lista) {
     $totalFases += count($lista);
 }
 
-$cssPath = 'css/mathspace.css';
+$cssPath = '../css/mathspace.css';
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
