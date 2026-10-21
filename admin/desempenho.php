@@ -395,23 +395,35 @@ if ($alunoId > 0) {
         );
 
         /*
-        |------------------------------------------------------------------
-        | Evolução diária do aluno
-        |------------------------------------------------------------------
-        */
+|--------------------------------------------------------------------------
+| EVOLUÇÃO INDIVIDUAL POR FASE
+|--------------------------------------------------------------------------
+*/
 
         $sqlEvolucaoAluno = "
-            SELECT
-                DATE(hp.data_partida) AS data,
-                SUM(hp.acertos) AS acertos,
-                SUM(hp.erros) AS erros
-            FROM historico_partidas hp
-            WHERE hp.usuario_id = :aluno
-            $whereData
-            $whereJogoAluno
-            GROUP BY DATE(hp.data_partida)
-            ORDER BY DATE(hp.data_partida)
-        ";
+    SELECT
+        f.id AS fase_id,
+        f.nome AS fase,
+        f.numero AS numero_fase,
+        j.nome AS jogo,
+        COALESCE(SUM(hp.acertos), 0) AS acertos,
+        COALESCE(SUM(hp.erros), 0) AS erros,
+        COUNT(hp.id) AS partidas
+    FROM historico_partidas hp
+    INNER JOIN fases f ON f.id = hp.fase_id
+    INNER JOIN jogos j ON j.id = hp.jogo_id
+    WHERE hp.usuario_id = :aluno
+    $whereData
+    $whereJogoAluno
+    GROUP BY
+        f.id,
+        f.nome,
+        f.numero,
+        j.nome
+    ORDER BY
+        j.nome,
+        f.numero
+";
 
         $consultaEvolucaoAluno = $pdo->prepare($sqlEvolucaoAluno);
         $consultaEvolucaoAluno->execute($paramsResumoAluno);
@@ -498,16 +510,14 @@ foreach ($comparacaoJogos as $jogo) {
 }
 
 $labelsAluno = [];
-$dadosTaxaAluno = [];
+$dadosAcertosAluno = [];
+$dadosErrosAluno = [];
 
-foreach ($evolucaoAluno as $dia) {
-    $dataFormatada = date(
-        "d/m",
-        strtotime($dia["data"])
-    );
+foreach ($evolucaoAluno as $faseAluno) {
+    $labelsAluno[] = $faseAluno["jogo"] . " - " . $faseAluno["fase"];
 
-    $labelsAluno[] = $dataFormatada;
-    $dadosTaxaAluno[] = (float) $dia["taxa"];
+    $dadosAcertosAluno[] = (int) $faseAluno["acertos"];
+    $dadosErrosAluno[] = (int) $faseAluno["erros"];
 }
 
 $nomePeriodo = [
@@ -952,8 +962,8 @@ $nomePeriodo = [
                     </div>
 
                     <div class="subsecao-titulo">
-                        <h3>Evolução ao longo do tempo</h3>
-                        <p>Taxa de acerto diária do aluno selecionado.</p>
+                        <h3>Desempenho por fase</h3>
+                        <p>Compare a quantidade de acertos e erros do aluno em cada fase.</p>
                     </div>
 
                     <?php if (count($evolucaoAluno) > 0): ?>
@@ -1085,7 +1095,8 @@ $nomePeriodo = [
                                 JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
                             ) ?>;
 
-        const dadosTaxaAluno = <?= json_encode($dadosTaxaAluno) ?>;
+        const dadosAcertosAluno = <?= json_encode($dadosAcertosAluno) ?>;
+        const dadosErrosAluno = <?= json_encode($dadosErrosAluno) ?>;
 
         /*
         |--------------------------------------------------------------------------
@@ -1279,79 +1290,75 @@ $nomePeriodo = [
         |--------------------------------------------------------------------------
         */
 
-        const canvasAluno = document.getElementById("graficoAluno");
+        const ctxAluno = document.getElementById("graficoAluno");
 
-        if (canvasAluno) {
-            new Chart(canvasAluno, {
-                type: "line",
-
-                data: {
-                    labels: labelsAluno,
-
-                    datasets: [{
-                        label: "Taxa de acerto",
-                        data: dadosTaxaAluno,
+        new Chart(ctxAluno, {
+            type: "line",
+            data: {
+                labels: <?= json_encode($labelsAluno) ?>,
+                datasets: [{
+                        label: "Acertos",
+                        data: <?= json_encode($dadosAcertosAluno) ?>,
                         borderColor: "#8b7cf6",
-                        backgroundColor: "rgba(139, 124, 246, 0.13)",
-                        fill: true,
+                        backgroundColor: "rgba(139, 124, 246, 0.15)",
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
                         tension: 0.35,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: "#8b7cf6"
-                    }]
+                        fill: false
+                    },
+                    {
+                        label: "Erros",
+                        data: <?= json_encode($dadosErrosAluno) ?>,
+                        borderColor: "#e879a9",
+                        backgroundColor: "rgba(232, 121, 169, 0.15)",
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        tension: 0.35,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: "index",
+                    intersect: false
                 },
-
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-
-                    plugins: {
-                        legend: {
-                            display: false
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: "#e5e7eb",
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: "#aeb4c5"
                         },
-
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return " Taxa de acerto: " + context.parsed.y + "%";
-                                }
-                            }
+                        grid: {
+                            color: "rgba(255, 255, 255, 0.05)"
                         }
                     },
-
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false
-                            },
-
-                            border: {
-                                display: false
-                            }
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: "#aeb4c5",
+                            precision: 0
                         },
-
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-
-                            ticks: {
-                                callback: function(value) {
-                                    return value + "%";
-                                }
-                            },
-
-                            grid: {
-                                color: "rgba(148, 163, 184, 0.10)"
-                            },
-
-                            border: {
-                                display: false
-                            }
+                        grid: {
+                            color: "rgba(255, 255, 255, 0.07)"
                         }
                     }
                 }
-            });
-        }
+            }
+        });
     </script>
 
 </body>
