@@ -116,7 +116,7 @@ if ($proximaFase) {
     if ($proximaFase["jogo_nome"] === "MathChef") {
         $linkProximaFase = "mathchef/jogar_mathchef.php";
     } else {
-        $linkProximaFase = "mathspace/jogar_mathspace.php";
+        $linkProximaFase = "mathspace/paginas/jogar_mathspace.php";
     }
 }
 
@@ -447,7 +447,7 @@ if ($hora < 12) {
                     ?>
 
                     <a
-                        href="<?= $isChef ? 'mathchef/mathchef.php' : 'mathspace/mathspace.php' ?>"
+                        href="<?= $isChef ? 'mathchef/mathchef.php' : 'mathspace/paginas/mathspace.php' ?>"
                         class="world-card <?= $isChef ? 'chef' : 'space' ?>">
 
                         <div class="world-background">
