@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Teste Phaser | MathSpace</title>
+
+    <!-- Biblioteca Phaser -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #080b24;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #d9c5ff;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        p {
+            color: #c9cce8;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #jogo {
+            width: 100%;
+            max-width: 1000px;
+            overflow: hidden;
+            border: 2px solid #8d75ff;
+            border-radius: 12px;
+            box-shadow: 0 0 35px #6655ff40;
+        }
+
+        #jogo canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .aviso {
+            margin-top: 15px;
+            font-size: 13px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🚀 MathSpace</h1>
+
+    <p>Meu primeiro teste com Phaser</p>
+
+    <div id="jogo"></div>
+
+    <div class="aviso">
+        Use as setas do teclado para mover a nave e clique nos planetas.
+    </div>
+
+    <!-- Código do nosso jogo -->
+    <script src="jogo.js"></script>
+
+</body>
+</html>
