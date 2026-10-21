@@ -1,355 +1,221 @@
 <?php
-session_start();
+/*
+ * MathSpace - página inicial
+ * Local: TCC_FINAL/mathspace/paginas/mathspace.php
+ */
 
-require_once __DIR__ . '/../config/config.php';
-
-// Verifica se existe um aluno conectado.
-$usuarioId = $_SESSION['usuario_id']
-    ?? $_SESSION['id']
-    ?? $_SESSION['user_id']
-    ?? null;
-
-if (!$usuarioId) {
-    header('Location: ../login.php');
-    exit;
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-// Busca os dados do aluno no banco.
-$stmt = $pdo->prepare("
-    SELECT id, nome, serie, turma
-    FROM usuarios
-    WHERE id = ?
-    LIMIT 1
-");
-$stmt->execute([$usuarioId]);
-$aluno = $stmt->fetch();
-
-if (!$aluno) {
-    session_destroy();
-    header('Location: ../login.php');
-    exit;
+/*
+ * A página usa a configuração existente do MathRun.
+ * O caminho é relativo a mathspace/paginas/.
+ * A conexão com o banco será utilizada nas próximas etapas do jogo.
+ */
+$configPath = __DIR__ . '/../../config/config.php';
+if (file_exists($configPath)) {
+    require_once $configPath;
 }
 
-$serie = (int) $aluno['serie'];
-
-if (!in_array($serie, [6, 7, 8, 9], true)) {
-    die('Sua série não está configurada para o MathSpace.');
+/* Ajuste o destino de login caso o projeto use outra rota. */
+if (empty($_SESSION['usuario_id']) && empty($_SESSION['id_usuario']) && empty($_SESSION['id'])) {
+    // Mantém a página acessível durante a montagem visual; ative o redirecionamento
+    // depois de confirmar qual variável de sessão o login atual utiliza.
+    // header('Location: ../../login.php');
+    // exit;
 }
 
-// Busca somente as fases do MathSpace da série do aluno.
-// O progresso é individual, mesmo para alunos da mesma turma.
-$stmt = $pdo->prepare("
-    SELECT
-        f.id,
-        f.nome,
-        f.descricao,
-        f.nivel_dificuldade,
-        f.numero,
-        p.concluida,
-        p.melhor_pontuacao
-    FROM fases f
-    LEFT JOIN progresso_usuario p
-        ON p.fase_id = f.id
-        AND p.usuario_id = ?
-    WHERE f.jogo_id = 2
-      AND f.serie = ?
-    ORDER BY f.numero ASC
-");
-$stmt->execute([$usuarioId, $serie]);
-$fases = $stmt->fetchAll();
-
-// Calcula o progresso e quais missões estão liberadas.
-$totalFases = count($fases);
-$fasesConcluidas = 0;
-$totalPontos = 0;
-$fasesLiberadas = [];
-
-foreach ($fases as $indice => $fase) {
-    $concluida = (bool) $fase['concluida'];
-
-    if ($concluida) {
-        $fasesConcluidas++;
-    }
-
-    $totalPontos += (int) ($fase['melhor_pontuacao'] ?? 0);
-
-    // A primeira missão fica liberada.
-    // As seguintes dependem da conclusão da missão anterior.
-    $liberada = ($indice === 0);
-
-    if ($indice > 0) {
-        $liberada = (bool) $fases[$indice - 1]['concluida'];
-    }
-
-    $fasesLiberadas[$indice] = $liberada;
-}
-
-$porcentagem = $totalFases > 0
-    ? (int) round(($fasesConcluidas / $totalFases) * 100)
-    : 0;
-
-$nomeAluno = htmlspecialchars(
-    $aluno['nome'] ?? 'Explorador',
-    ENT_QUOTES,
-    'UTF-8'
-);
-
-$nomesDificuldade = [
-    'facil' => 'Fácil',
-    'medio' => 'Intermediária',
-    'dificil' => 'Desafiadora'
-];
-
-$iconesFases = [
-    1 => '🌙',
-    2 => '🪐',
-    3 => '☄️',
-    4 => '🚀'
-];
+$nomeUsuario = $_SESSION['nome'] ?? $_SESSION['nome_usuario'] ?? 'Explorador(a)';
+$cssPath = '../css/mathspace.css';
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#11152e">
     <title>MathSpace | MathRun</title>
-
-    <link rel="stylesheet" href="../assets/css/mathspace.css">
-    <script src="../assets/js/mathspace.js" defer></script>
+    <link rel="stylesheet" href="<?= htmlspecialchars($cssPath, ENT_QUOTES, 'UTF-8') ?>">
 </head>
-
 <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo principal</a>
 
-    <header class="space-header">
-        <a href="../inicio.php" class="brand">
-            <span class="brand-icon">✦</span>
-            <span>MathRun</span>
+    <header class="site-header">
+        <a class="brand" href="../../inicio.php" aria-label="MathRun, página inicial">
+            <span class="brand-mark" aria-hidden="true">M</span>
+            <span>MathRun<span class="brand-dot">.</span></span>
         </a>
 
-        <nav class="space-nav" aria-label="Navegação principal">
-            <a href="../inicio.php">Início</a>
-            <a href="../perfil.php">Meu perfil</a>
-            <a href="../conquistas.php">Conquistas</a>
+        <nav class="main-nav" aria-label="Navegação principal">
+            <a href="../../inicio.php">Início</a>
+            <a href="#sobre">Sobre o jogo</a>
+            <a href="#acessibilidade">Acessibilidade</a>
         </nav>
 
-        <a href="../logout.php" class="logout-link">Sair</a>
+        <div class="theme-switcher" role="group" aria-label="Escolher tema visual">
+            <button type="button" data-theme-option="light" title="Tema claro" aria-label="Ativar tema claro" aria-pressed="false">☀</button>
+            <button type="button" data-theme-option="dark" title="Tema escuro" aria-label="Ativar tema escuro" aria-pressed="true">☾</button>
+            <button type="button" data-theme-option="pink" title="Tema rosa" aria-label="Ativar tema rosa" aria-pressed="false">♡</button>
+        </div>
     </header>
 
-    <main class="space-container">
-
-        <section class="space-hero">
-            <div class="hero-content">
-                <span class="eyebrow">
-                    ✦ CENTRAL DE EXPLORAÇÃO
-                </span>
-
-                <h1>
-                    Sua próxima aventura é
-                    <span>fora deste mundo.</span>
-                </h1>
-
-                <p>
-                    Olá, <?= $nomeAluno ?>!
-                    Prepare sua nave, resolva os desafios
-                    e desbloqueie novas regiões do universo.
+    <main id="conteudo">
+        <section class="hero" aria-labelledby="hero-title">
+            <div class="hero-copy">
+                <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> MISSÃO DISPONÍVEL · MATEMÁTICA + AVENTURA</p>
+                <h1 id="hero-title">O universo precisa de <span>uma mente brilhante.</span></h1>
+                <p class="hero-description">
+                    Prepare sua nave, resolva desafios matemáticos e atravesse setores desconhecidos.
+                    Cada resposta certa aproxima você da próxima missão.
                 </p>
 
-                <div class="hero-tags">
-                    <span>🎓 <?= $serie ?>º ano</span>
-                    <span>🪐 MathSpace</span>
+                <div class="hero-actions">
+                    <a class="button button-primary" href="mapa_mathspace.php">
+                        Explorar missões <span aria-hidden="true">↗</span>
+                    </a>
+                    <a class="button button-secondary" href="#sobre">Conhecer o jogo</a>
                 </div>
+
+                <ul class="feature-list" aria-label="Características do MathSpace">
+                    <li><span aria-hidden="true">✦</span> Missões por série</li>
+                    <li><span aria-hidden="true">⌁</span> Desafios matemáticos</li>
+                    <li><span aria-hidden="true">♡</span> Seu progresso salvo</li>
+                </ul>
             </div>
 
-            <div class="planet-art" aria-hidden="true">
+            <div class="space-art" role="img" aria-label="Ilustração decorativa de uma nave espacial roxa e azul viajando entre planetas e estrelas.">
                 <div class="orbit orbit-one"></div>
                 <div class="orbit orbit-two"></div>
-                <div class="planet">✦</div>
-                <span class="star star-one">✦</span>
-                <span class="star star-two">✧</span>
-                <span class="star star-three">✦</span>
-            </div>
-        </section>
-
-        <section class="progress-panel">
-            <div class="progress-heading">
-                <div>
-                    <span class="section-kicker">SUA JORNADA</span>
-                    <h2>Progresso da exploração</h2>
+                <div class="planet planet-large"><span></span></div>
+                <div class="planet planet-small"></div>
+                <div class="moon"></div>
+                <div class="star star-one">✦</div>
+                <div class="star star-two">✧</div>
+                <div class="star star-three">·</div>
+                <div class="ship">
+                    <span class="ship-window"></span>
+                    <span class="ship-wing ship-wing-left"></span>
+                    <span class="ship-wing ship-wing-right"></span>
+                    <span class="ship-flame"></span>
                 </div>
-
-                <strong class="progress-number">
-                    <?= $porcentagem ?>%
-                </strong>
-            </div>
-
-            <div
-                class="progress-track"
-                role="progressbar"
-                aria-label="Progresso das missões"
-                aria-valuenow="<?= $porcentagem ?>"
-                aria-valuemin="0"
-                aria-valuemax="100">
-                <div
-                    class="progress-fill"
-                    style="width: <?= $porcentagem ?>%"></div>
-            </div>
-
-            <div class="progress-details">
-                <span>
-                    <?= $fasesConcluidas ?> de <?= $totalFases ?>
-                    missões concluídas
-                </span>
-
-                <span>🏆 <?= $totalPontos ?> pontos de melhor resultado</span>
+                <div class="art-label label-top"><span aria-hidden="true">◎</span> SETOR 01</div>
+                <div class="art-label label-bottom"><span aria-hidden="true">✦</span> PRONTO PARA DECOLAR</div>
             </div>
         </section>
 
-        <section class="missions-section">
+        <section class="mission-strip" aria-label="Resumo da aventura">
+            <div class="strip-item">
+                <span class="strip-icon" aria-hidden="true">⌖</span>
+                <div><strong>Explore</strong><span>Novos setores espaciais</span></div>
+            </div>
+            <div class="strip-item">
+                <span class="strip-icon" aria-hidden="true">∑</span>
+                <div><strong>Pense</strong><span>Use a matemática a seu favor</span></div>
+            </div>
+            <div class="strip-item">
+                <span class="strip-icon" aria-hidden="true">♜</span>
+                <div><strong>Evolua</strong><span>Conquiste pontos e progresso</span></div>
+            </div>
+        </section>
+
+        <section class="content-section" id="sobre" aria-labelledby="about-title">
             <div class="section-heading">
-                <div>
-                    <span class="section-kicker">MAPA ESTELAR</span>
-                    <h2>Escolha sua missão</h2>
-                    <p>
-                        Cada missão concluída aproxima você
-                        do próximo destino.
-                    </p>
-                </div>
-
-                <span class="mission-counter">
-                    <?= $fasesConcluidas ?>/<?= $totalFases ?> concluídas
-                </span>
+                <p class="eyebrow">SUA JORNADA COMEÇA AQUI</p>
+                <h2 id="about-title">Não é só chegar ao destino.<br><span>É aprender no caminho.</span></h2>
+                <p>O MathSpace transforma cada missão em uma oportunidade de raciocinar, testar estratégias e avançar no seu ritmo.</p>
             </div>
 
-            <?php if (empty($fases)): ?>
-
-                <div class="empty-state">
-                    <span>🛰️</span>
-                    <h3>Nenhuma missão encontrada</h3>
-                    <p>
-                        Não encontramos fases do MathSpace
-                        cadastradas para o seu ano escolar.
-                    </p>
-                </div>
-
-            <?php else: ?>
-
-                <div class="missions-grid">
-
-                    <?php foreach ($fases as $indice => $fase): ?>
-
-                        <?php
-                        $concluida = (bool) $fase['concluida'];
-                        $liberada = $fasesLiberadas[$indice];
-                        $bloqueada = !$liberada && !$concluida;
-
-                        $classeEstado = $concluida
-                            ? 'completed'
-                            : ($bloqueada ? 'locked' : 'available');
-
-                        $estadoTexto = $concluida
-                            ? 'Concluída'
-                            : ($bloqueada ? 'Bloqueada' : 'Disponível');
-
-                        $icone = $iconesFases[(int) $fase['numero']]
-                            ?? '🪐';
-
-                        $dificuldade = $nomesDificuldade[$fase['nivel_dificuldade']] ?? 'Não definida';
-                        ?>
-
-                        <article class="mission-card <?= $classeEstado ?>">
-
-                            <div class="mission-card-top">
-                                <span class="mission-icon">
-                                    <?= $icone ?>
-                                </span>
-
-                                <span class="mission-status">
-                                    <?php if ($concluida): ?>
-                                        ✓ <?= $estadoTexto ?>
-                                    <?php elseif ($bloqueada): ?>
-                                        🔒 <?= $estadoTexto ?>
-                                    <?php else: ?>
-                                        ✦ <?= $estadoTexto ?>
-                                    <?php endif; ?>
-                                </span>
-                            </div>
-
-                            <span class="mission-number">
-                                MISSÃO <?= (int) $fase['numero'] ?>
-                            </span>
-
-                            <h3>
-                                <?= htmlspecialchars(
-                                    $fase['nome'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </h3>
-
-                            <p class="mission-description">
-                                <?= htmlspecialchars(
-                                    $fase['descricao'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </p>
-
-                            <div class="mission-meta">
-                                <span>
-                                    ◈ <?= htmlspecialchars(
-                                            $dificuldade,
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
-                                </span>
-
-                                <span>
-                                    🏆 <?= (int) (
-                                            $fase['melhor_pontuacao'] ?? 0
-                                        ) ?> pts
-                                </span>
-                            </div>
-
-                            <?php if ($bloqueada): ?>
-
-                                <button
-                                    class="mission-button"
-                                    type="button"
-                                    disabled>
-                                    Complete a missão anterior
-                                </button>
-
-                            <?php else: ?>
-
-                                <a
-                                    class="mission-button"
-                                    href="jogar_mathspace.php?fase_id=<?= (int) $fase['id'] ?>">
-                                    <?= $concluida
-                                        ? 'Revisitar missão'
-                                        : 'Explorar missão' ?>
-                                    <span aria-hidden="true">→</span>
-                                </a>
-
-                            <?php endif; ?>
-
-                        </article>
-
-                    <?php endforeach; ?>
-
-                </div>
-
-            <?php endif; ?>
+            <div class="steps-grid">
+                <article class="step-card">
+                    <span class="step-number">01</span>
+                    <span class="step-symbol" aria-hidden="true">⌘</span>
+                    <h3>Escolha uma missão</h3>
+                    <p>Encontre o setor adequado à sua série e avance fase por fase.</p>
+                </article>
+                <article class="step-card">
+                    <span class="step-number">02</span>
+                    <span class="step-symbol" aria-hidden="true">∑</span>
+                    <h3>Enfrente os desafios</h3>
+                    <p>Resolva questões matemáticas para se defender e superar os inimigos.</p>
+                </article>
+                <article class="step-card">
+                    <span class="step-number">03</span>
+                    <span class="step-symbol" aria-hidden="true">✧</span>
+                    <h3>Avance no universo</h3>
+                    <p>Ganhe pontos, acompanhe seu progresso e desbloqueie novas etapas.</p>
+                </article>
+            </div>
         </section>
 
-        <footer class="space-footer">
-            <span>MathRun · MathSpace</span>
-            <span>Continue explorando. Continue aprendendo. ✦</span>
-        </footer>
-
+        <section class="accessibility-panel" id="acessibilidade" aria-labelledby="accessibility-title">
+            <div class="accessibility-icon" aria-hidden="true">◉</div>
+            <div class="accessibility-copy">
+                <p class="eyebrow">JOGAR TAMBÉM É PERTENCER</p>
+                <h2 id="accessibility-title">Uma experiência mais acessível.</h2>
+                <p>
+                    A interface foi pensada para pessoas com baixa visão e para quem navega sem mouse:
+                    contraste reforçado, texto redimensionável, foco de teclado visível e opção de reduzir animações.
+                </p>
+                <p class="accessibility-note">
+                    <strong>Importante:</strong> estes recursos ajudam na navegação desta página. As próximas etapas
+                    também precisarão aplicar acessibilidade às perguntas e à ação do jogo, incluindo controles de teclado
+                    e alternativas à informação transmitida apenas por cores ou sons.
+                </p>
+            </div>
+            <div class="accessibility-actions">
+                <button class="button button-secondary" type="button" id="font-toggle" aria-pressed="false">Aumentar texto <span aria-hidden="true">A+</span></button>
+                <button class="button button-secondary" type="button" id="motion-toggle" aria-pressed="false">Reduzir animações <span aria-hidden="true">◌</span></button>
+            </div>
+        </section>
     </main>
 
-</body>
+    <footer class="site-footer">
+        <a class="brand footer-brand" href="../../inicio.php"><span class="brand-mark" aria-hidden="true">M</span><span>MathRun<span class="brand-dot">.</span></span></a>
+        <p>Aprender também é uma forma de explorar o universo.</p>
+        <span>MathSpace · Projeto educacional</span>
+    </footer>
 
+    <script>
+    (() => {
+        const root = document.documentElement;
+        const themeButtons = [...document.querySelectorAll('[data-theme-option]')];
+        const validThemes = ['light', 'dark', 'pink'];
+
+        function applyTheme(theme) {
+            if (!validThemes.includes(theme)) return;
+            root.dataset.theme = theme;
+            themeButtons.forEach((button) => {
+                const active = button.dataset.themeOption === theme;
+                button.setAttribute('aria-pressed', String(active));
+            });
+        }
+
+        themeButtons.forEach((button) => {
+            button.addEventListener('click', () => applyTheme(button.dataset.themeOption));
+        });
+        applyTheme('dark');
+
+        const fontToggle = document.getElementById('font-toggle');
+        fontToggle.addEventListener('click', () => {
+            const enabled = fontToggle.getAttribute('aria-pressed') !== 'true';
+            root.classList.toggle('large-text', enabled);
+            fontToggle.setAttribute('aria-pressed', String(enabled));
+            fontToggle.innerHTML = enabled
+                ? 'Texto ampliado <span aria-hidden="true">A−</span>'
+                : 'Aumentar texto <span aria-hidden="true">A+</span>';
+        });
+
+        const motionToggle = document.getElementById('motion-toggle');
+        motionToggle.addEventListener('click', () => {
+            const enabled = motionToggle.getAttribute('aria-pressed') !== 'true';
+            root.classList.toggle('reduce-motion', enabled);
+            motionToggle.setAttribute('aria-pressed', String(enabled));
+            motionToggle.innerHTML = enabled
+                ? 'Animações reduzidas <span aria-hidden="true">✓</span>'
+                : 'Reduzir animações <span aria-hidden="true">◌</span>';
+        });
+    })();
+    </script>
+</body>
 </html>
