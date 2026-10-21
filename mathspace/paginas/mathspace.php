@@ -1195,6 +1195,7 @@ if ($fasesJson === false) {
 
     motionToggle.addEventListener('click', () => {
         reduzirMovimento = !reduzirMovimento;
+        root.classList.toggle('reduce-motion', reduzirMovimento);
 
         motionToggle.setAttribute(
             'aria-pressed',
