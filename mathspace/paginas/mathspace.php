@@ -1,3 +1,4 @@
+    
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -15,124 +16,131 @@ if (!$usuarioId) {
     exit;
 }
 
-$nomeUsuario = $_SESSION['nome'] ?? 'Comandante';
+$nomeUsuario = $_SESSION['nome'] ?? 'Explorador';
 $serieUsuario = '';
 $turmaUsuario = '';
 $fases = [];
-$fasesConcluidas = 0;
-$xpTotal = 0;
+$totalFases = 0;
+$totalConcluidas = 0;
+$totalXP = 0;
 $erroBanco = false;
 
 try {
+    // Dados do jogador.
     $stmt = $pdo->prepare(
         'SELECT id, nome, serie, turma
          FROM usuarios
          WHERE id = :id
          LIMIT 1'
     );
+
     $stmt->execute(['id' => $usuarioId]);
     $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($usuario) {
-        $nomeUsuario = $usuario['nome'] ?: $nomeUsuario;
-        $serieUsuario = preg_replace(
-            '/\D/',
-            '',
-            (string) ($usuario['serie'] ?? '')
-        );
-        $turmaUsuario = $usuario['turma'] ?? '';
+    if (!$usuario) {
+        session_destroy();
+        header('Location: ../../login.php');
+        exit;
     }
 
+    $nomeUsuario = $usuario['nome'] ?: 'Explorador';
+    $serieUsuario = preg_replace(
+        '/\D/',
+        '',
+        (string) ($usuario['serie'] ?? '')
+    );
+    $turmaUsuario = $usuario['turma'] ?? '';
+
+    // O jogador vê somente as fases da própria série.
     if (!in_array($serieUsuario, ['6', '7', '8', '9'], true)) {
         $serieUsuario = '';
     }
 
     if ($serieUsuario !== '') {
         $stmt = $pdo->prepare(
-            'SELECT id, nome, descricao, nivel_dificuldade, numero, serie
-             FROM fases
-             WHERE jogo_id = 2 AND serie = :serie
-             ORDER BY numero ASC, id ASC'
+            'SELECT
+                f.id,
+                f.nome,
+                f.descricao,
+                f.nivel_dificuldade,
+                f.numero,
+                COALESCE(pu.concluida, 0) AS concluida,
+                COALESCE(pu.melhor_pontuacao, 0) AS pontuacao,
+                COALESCE(pu.xp_conquistado, 0) AS xp
+             FROM fases f
+             LEFT JOIN progresso_usuario pu
+                ON pu.fase_id = f.id
+                AND pu.usuario_id = :usuario_id
+             WHERE f.jogo_id = 2
+                AND CAST(f.serie AS CHAR) = :serie
+             ORDER BY f.numero ASC, f.id ASC'
         );
-        $stmt->execute(['serie' => (int) $serieUsuario]);
-        $fasesBanco = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $stmt = $pdo->prepare(
-            'SELECT pu.fase_id, pu.concluida,
-                    pu.pontuacao, pu.xp_conquistado
-             FROM progresso_usuario pu
-             INNER JOIN fases f ON f.id = pu.fase_id
-             WHERE pu.usuario_id = :usuario
-               AND f.jogo_id = 2
-               AND f.serie = :serie'
-        );
         $stmt->execute([
-            'usuario' => $usuarioId,
-            'serie' => (int) $serieUsuario
+            'usuario_id' => $usuarioId,
+            'serie' => $serieUsuario
         ]);
 
-        $progresso = [];
+        $fases = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $registro) {
-            $idFase = (int) $registro['fase_id'];
-
-            if (
-                !isset($progresso[$idFase]) ||
-                (int) $registro['pontuacao'] >
-                (int) $progresso[$idFase]['pontuacao']
-            ) {
-                $progresso[$idFase] = $registro;
-            }
-        }
-
+        // A primeira fase fica liberada.
+        // As próximas dependem da conclusão da anterior.
         $faseAnteriorConcluida = true;
 
-        foreach ($fasesBanco as $fase) {
-            $idFase = (int) $fase['id'];
-            $registro = $progresso[$idFase] ?? [];
-
-            $concluida = !empty($registro['concluida']);
-            $desbloqueada = $faseAnteriorConcluida;
-
-            $fase['id'] = $idFase;
+        foreach ($fases as &$fase) {
+            $fase['id'] = (int) $fase['id'];
             $fase['numero'] = (int) $fase['numero'];
-            $fase['concluida'] = $concluida;
-            $fase['desbloqueada'] = $desbloqueada;
-            $fase['pontuacao'] = (int) ($registro['pontuacao'] ?? 0);
-            $fase['xp'] = (int) ($registro['xp_conquistado'] ?? 0);
+            $fase['concluida'] = (bool) $fase['concluida'];
+            $fase['pontuacao'] = (int) $fase['pontuacao'];
+            $fase['xp'] = (int) $fase['xp'];
+            $fase['desbloqueada'] = $faseAnteriorConcluida;
 
-            $fases[] = $fase;
-
-            if ($concluida) {
-                $fasesConcluidas++;
+            if ($fase['concluida']) {
+                $totalConcluidas++;
             }
 
-            $xpTotal += $fase['xp'];
-            $faseAnteriorConcluida = $concluida;
+            $totalXP += $fase['xp'];
+
+            $faseAnteriorConcluida = $fase['concluida'];
         }
+
+        unset($fase);
     }
+
+    $totalFases = count($fases);
+
 } catch (Throwable $e) {
     $erroBanco = true;
-    error_log('Erro MathSpace: ' . $e->getMessage());
+
+    // O erro técnico não é exibido ao jogador.
+    error_log('Erro no MathSpace: ' . $e->getMessage());
 }
 
-$totalFases = count($fases);
 $percentual = $totalFases > 0
-    ? (int) round(($fasesConcluidas / $totalFases) * 100)
+    ? (int) round(($totalConcluidas / $totalFases) * 100)
     : 0;
 
-$fasesJson = json_encode(
-    $fases,
-    JSON_UNESCAPED_UNICODE |
-    JSON_UNESCAPED_SLASHES |
-    JSON_HEX_TAG |
-    JSON_HEX_APOS |
-    JSON_HEX_QUOT |
-    JSON_HEX_AMP
+$configJogo = [
+    'fases' => $fases,
+    'serie' => $serieUsuario,
+    'totalFases' => $totalFases,
+    'fasesConcluidas' => $totalConcluidas,
+    'xp' => $totalXP,
+    'totalEstrelas' => 180
+];
+
+$configJson = json_encode(
+    $configJogo,
+    JSON_HEX_TAG
+    | JSON_HEX_APOS
+    | JSON_HEX_QUOT
+    | JSON_HEX_AMP
+    | JSON_UNESCAPED_UNICODE
+    | JSON_UNESCAPED_SLASHES
 );
 
-if ($fasesJson === false) {
-    $fasesJson = '[]';
+if ($configJson === false) {
+    $configJson = '{"fases":[],"serie":"","totalFases":0,"fasesConcluidas":0,"xp":0,"totalEstrelas":180}';
 }
 ?>
 <!DOCTYPE html>
@@ -140,88 +148,139 @@ if ($fasesJson === false) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#080b19">
-    <title>MathSpace | Central de Comando</title>
+    <meta name="theme-color" content="#070b18">
+
+    <title>MathSpace | Exploração Galáctica</title>
 
     <link rel="stylesheet" href="../css/mathspace.css">
+
+    <script>
+        window.MATHSPACE_CONFIG = <?= $configJson ?>;
+    </script>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"
+        defer>
+    </script>
+
+    <script src="../js/mathspace.js" defer></script>
 </head>
 
-<body>
-<div class="cockpit" id="cockpit">
+<body class="space-game-page">
 
+<div class="cockpit">
+
+    <!-- HUD superior: informações integradas à nave -->
     <header class="topbar">
-        <a class="brand" href="../../inicio.php" title="Voltar ao MathRun">
-            <span class="brand-mark">M<span>✦</span></span>
-            <span class="brand-name">MATH<span>SPACE</span></span>
+
+        <a class="brand" href="../../inicio.php" aria-label="Voltar ao MathRun">
+            <span class="brand-mark" aria-hidden="true">M<span>✦</span></span>
+
+            <span class="brand-name">
+                MATH<span>SPACE</span>
+            </span>
         </a>
 
         <div class="flight-status">
             <span class="status-light"></span>
-            <span>SISTEMAS ONLINE</span>
+            SISTEMAS ONLINE
             <span class="status-divider"></span>
             <span class="flight-sector">
-                SETOR <?= $serieUsuario !== '' ? htmlspecialchars($serieUsuario) : '--' ?>
+                SETOR <?= htmlspecialchars($serieUsuario ?: '--', ENT_QUOTES, 'UTF-8') ?>
             </span>
         </div>
 
         <div class="pilot">
-            <div class="pilot-avatar" aria-hidden="true">
-                <?= htmlspecialchars(mb_strtoupper(mb_substr($nomeUsuario, 0, 1))) ?>
-            </div>
+
+            <span class="pilot-avatar" aria-hidden="true">✦</span>
+
             <div class="pilot-details">
                 <small>COMANDANTE</small>
-                <strong><?= htmlspecialchars($nomeUsuario) ?></strong>
+                <strong>
+                    <?= htmlspecialchars($nomeUsuario, ENT_QUOTES, 'UTF-8') ?>
+                </strong>
             </div>
+
         </div>
+
     </header>
 
     <main class="cockpit-main">
+
+        <!-- Painel compacto de missão -->
         <section class="mission-heading">
+
             <div>
                 <div class="micro-label">
                     <span class="micro-line"></span>
-                    CENTRAL DE EXPLORAÇÃO
+                    CENTRAL DE NAVEGAÇÃO
                 </div>
-                <h1>Explore o <span>desconhecido.</span></h1>
-                <p>Selecione um planeta para iniciar sua missão.</p>
+
+                <h1>EXPLORE O <span>UNIVERSO</span></h1>
+
+                <p>
+                    <?= $serieUsuario !== ''
+                        ? 'Selecione um planeta para iniciar sua missão.'
+                        : 'Série não identificada. Verifique seu cadastro.' ?>
+                </p>
             </div>
 
             <div class="expedition-progress">
+
                 <div class="progress-copy">
-                    <span>EXPEDIÇÃO</span>
+                    <span>PROGRESSO</span>
                     <strong><?= $percentual ?>%</strong>
                 </div>
-                <div class="progress-track">
+
+                <div
+                    class="progress-track"
+                    role="progressbar"
+                    aria-label="Progresso das missões"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="<?= $percentual ?>"
+                >
                     <span style="width: <?= $percentual ?>%"></span>
                 </div>
+
                 <div class="progress-meta">
-                    <span><?= $fasesConcluidas ?> / <?= $totalFases ?> missões</span>
-                    <span>✦ <?= number_format($xpTotal, 0, ',', '.') ?> XP</span>
+                    <span><?= $totalConcluidas ?>/<?= $totalFases ?> destinos</span>
+                    <span>✦ <?= number_format($totalXP, 0, ',', '.') ?> XP</span>
                 </div>
+
             </div>
+
         </section>
 
         <?php if ($erroBanco): ?>
-            <div class="system-alert">
+            <div class="system-alert" role="alert">
                 <span>!</span>
-                Não foi possível carregar os dados da nave. Verifique a conexão com o banco.
+                <div>Falha nos sistemas de navegação. Tente novamente mais tarde.</div>
             </div>
         <?php elseif ($serieUsuario === ''): ?>
-            <div class="system-alert">
+            <div class="system-alert" role="alert">
                 <span>!</span>
-                Sua série não foi identificada. Confira o cadastro do seu perfil.
+                <div>Não foi possível identificar sua série no cadastro.</div>
             </div>
         <?php elseif ($totalFases === 0): ?>
-            <div class="system-alert">
-                <span>!</span>
-                Nenhuma missão foi encontrada para o seu ano escolar.
+            <div class="system-alert" role="status">
+                <span>i</span>
+                <div>Nenhum planeta cadastrado para este setor ainda.</div>
             </div>
         <?php endif; ?>
 
-        <section class="ship-window" aria-label="Painel de navegação espacial">
+        <!-- O universo ocupa o centro da tela -->
+        <section
+            class="ship-window"
+            id="mapa-principal"
+            aria-label="Painel de exploração espacial"
+        >
+
             <div class="window-top">
+
                 <div class="window-title">
-                    <span class="window-icon">⌖</span>
+                    <span class="window-icon" aria-hidden="true">⌖</span>
+
                     <div>
                         <strong>HOLOMAPA</strong>
                         <small>MAPEAMENTO GALÁCTICO</small>
@@ -229,137 +288,226 @@ if ($fasesJson === false) {
                 </div>
 
                 <div class="window-readouts">
-                    <span><i class="readout-dot"></i> AO VIVO</span>
-                    <span id="star-count">ESTRELAS: --</span>
-                    <span id="zoom-level">ZOOM 100%</span>
+                    <span>
+                        <i class="readout-dot"></i>
+                        NAVEGAÇÃO ATIVA
+                    </span>
+
+                    <span>
+                        SETOR <?= htmlspecialchars($serieUsuario ?: '--', ENT_QUOTES, 'UTF-8') ?>
+                    </span>
                 </div>
+
             </div>
 
             <div class="universe-viewport" id="universe-viewport">
-                <div class="universe-backdrop"></div>
-                <div class="viewport-vignette"></div>
-                <div class="viewport-grid"></div>
+
+                <div class="universe-backdrop" aria-hidden="true"></div>
+                <div class="viewport-grid" aria-hidden="true"></div>
+                <div class="viewport-vignette" aria-hidden="true"></div>
+
+                <div class="map-coordinates coordinates-top" aria-hidden="true">
+                    GALAXY MAP / MS-<?= htmlspecialchars($serieUsuario ?: '00', ENT_QUOTES, 'UTF-8') ?>
+                </div>
+
+                <div class="map-legend" aria-label="Status das fases">
+                    <span><i class="legend-available"></i> DISPONÍVEL</span>
+                    <span><i class="legend-completed"></i> CONCLUÍDA</span>
+                    <span><i class="legend-locked"></i> BLOQUEADA</span>
+                </div>
+
+                <div class="map-crosshair crosshair-one" aria-hidden="true"></div>
+                <div class="map-crosshair crosshair-two" aria-hidden="true"></div>
+
+                <!-- O Phaser desenha o universo dentro deste elemento -->
+                <div
+                    id="universe-game"
+                    role="application"
+                    aria-label="Mapa interativo. Selecione um planeta para ver sua missão."
+                ></div>
 
                 <div class="universe-loading" id="universe-loading">
-                    <div class="loading-orbit"></div>
+                    <span class="loading-orbit" aria-hidden="true"></span>
                     <span>INICIALIZANDO HOLOMAPA</span>
                 </div>
 
-                <div id="universe-game" aria-label="Universo interativo com planetas">
+                <div class="map-coordinates coordinates-bottom" aria-hidden="true">
+                    MATHSPACE EXPLORATION SYSTEM
                 </div>
 
-                <div class="map-crosshair crosshair-one"></div>
-                <div class="map-crosshair crosshair-two"></div>
-
-                <div class="map-coordinates coordinates-top">
-                    <span>GALAXIA // MR-04</span>
-                    <span>COORD. 08.42 / 19.07</span>
-                </div>
-
-                <div class="map-coordinates coordinates-bottom">
-                    <span>ARRASTE PARA EXPLORAR</span>
-                    <span>◆ NAVEGAÇÃO ATIVA</span>
-                </div>
-
-                <div class="map-legend">
-                    <span><i class="legend-available"></i> DISPONÍVEL</span>
-                    <span><i class="legend-completed"></i> CONCLUÍDO</span>
-                    <span><i class="legend-locked"></i> BLOQUEADO</span>
-                </div>
             </div>
 
             <div class="window-bottom">
+
                 <div class="bottom-system">
                     <span class="bottom-pulse"></span>
-                    <span>UNIDADE DE NAVEGAÇÃO</span>
+                    SISTEMA ESTÁVEL
                 </div>
-                <div class="bottom-center">MATHSPACE EXPLORATION SYSTEM <span>v1.0</span></div>
+
+                <div class="bottom-center">
+                    DESTINOS DESCOBERTOS:
+                    <span><?= $totalConcluidas ?> / <?= $totalFases ?></span>
+                </div>
+
                 <div class="bottom-grade">
-                    <?= $serieUsuario !== ''
-                        ? htmlspecialchars($serieUsuario . 'º ANO')
-                        : 'SÉRIE --' ?>
+                    MS-<?= htmlspecialchars($serieUsuario ?: '--', ENT_QUOTES, 'UTF-8') ?>
                 </div>
+
             </div>
+
         </section>
 
-        <section class="ship-console" aria-label="Painel de comandos da nave">
+        <!-- Console de comandos da nave -->
+        <section class="ship-console" aria-label="Console da nave">
+
             <div class="console-label">
                 <span class="console-label-line"></span>
-                PAINEL DE COMANDO
+                CONSOLE DE BORDO
             </div>
 
             <div class="console-layout">
+
+                <!-- Comandos funcionais -->
                 <div class="command-cluster">
-                    <button class="command-button" id="center-map" type="button"
-                            title="Centralizar universo" aria-label="Centralizar universo">
-                        <span class="command-icon">⌖</span>
+
+                    <button
+                        class="command-button"
+                        type="button"
+                        id="center-map"
+                        title="Centralizar o universo"
+                    >
+                        <span class="command-icon" aria-hidden="true">⌖</span>
                         <span class="command-name">CENTRALIZAR</span>
                     </button>
 
-                    <button class="command-button" id="toggle-effects" type="button"
-                            title="Ativar ou desativar efeitos" aria-label="Alternar efeitos visuais"
-                            aria-pressed="true">
-                        <span class="command-icon">✧</span>
-                        <span class="command-name">EFEITOS</span>
+                    <button
+                        class="command-button"
+                        type="button"
+                        id="toggle-effects"
+                        aria-pressed="true"
+                        title="Ativar ou reduzir animações"
+                    >
+                        <span class="command-icon" aria-hidden="true">✧</span>
+                        <span class="command-name">ANIMAÇÃO</span>
                     </button>
 
-                    <button class="command-button" id="toggle-fullscreen" type="button"
-                            title="Alternar tela cheia" aria-label="Alternar tela cheia">
-                        <span class="command-icon">⛶</span>
+                    <button
+                        class="command-button"
+                        type="button"
+                        id="toggle-fullscreen"
+                        title="Alternar tela cheia"
+                    >
+                        <span class="command-icon" aria-hidden="true">⛶</span>
                         <span class="command-name">TELA CHEIA</span>
                     </button>
-                </div>
 
-                <div class="selected-mission" id="selected-mission" aria-live="polite">
-                    <div class="selected-planet-icon" id="selected-planet-icon">✦</div>
-                    <div class="selected-mission-copy">
-                        <small id="mission-kicker">DESTINO SELECIONADO</small>
-                        <strong id="mission-name">Nenhum planeta selecionado</strong>
-                        <span id="mission-description">Selecione um planeta no holomapa.</span>
-                    </div>
-                    <div class="mission-status" id="mission-status">AGUARDANDO</div>
-                    <a class="launch-button is-disabled" id="launch-mission"
-                       href="#" aria-disabled="true">
-                        <span>INICIAR</span>
-                        <span class="launch-arrow">↗</span>
+                    <a
+                        class="command-button"
+                        href="../../inicio.php"
+                        title="Voltar ao MathRun"
+                    >
+                        <span class="command-icon" aria-hidden="true">↩</span>
+                        <span class="command-name">RETORNAR</span>
                     </a>
+
                 </div>
 
-                <div class="theme-cluster">
-                    <span class="theme-cluster-label">INTERFACE</span>
-                    <div class="theme-switcher" role="group" aria-label="Tema da interface">
-                        <button type="button" data-theme-option="light"
-                                title="Tema claro" aria-label="Ativar tema claro"
-                                aria-pressed="false">☼</button>
-                        <button type="button" data-theme-option="dark"
-                                title="Tema escuro" aria-label="Ativar tema escuro"
-                                aria-pressed="true">◐</button>
-                        <button type="button" data-theme-option="pink"
-                                title="Tema rosa" aria-label="Ativar tema rosa"
-                                aria-pressed="false">♡</button>
+                <!-- Painel da missão selecionada -->
+                <div class="selected-mission" aria-live="polite">
+
+                    <div
+                        class="selected-planet-icon"
+                        id="selected-planet-icon"
+                        aria-hidden="true"
+                    >✦</div>
+
+                    <div class="selected-mission-copy">
+
+                        <small id="mission-kicker">DESTINO SELECIONADO</small>
+
+                        <strong id="mission-name">
+                            Selecione um planeta
+                        </strong>
+
+                        <span id="mission-description">
+                            O universo aguarda sua exploração.
+                        </span>
+
                     </div>
-                    <span class="theme-current" id="theme-current">TEMA ESCURO</span>
+
+                    <span class="mission-status" id="mission-status">
+                        AGUARDANDO
+                    </span>
+
+                    <a
+                        class="launch-button is-disabled"
+                        id="launch-mission"
+                        href="#"
+                        aria-disabled="true"
+                    >
+                        <span>INICIAR</span>
+                        <span class="launch-arrow" aria-hidden="true">↗</span>
+                    </a>
+
                 </div>
+
+                <!-- Temas tratados como controles da nave -->
+                <div class="theme-cluster">
+
+                    <span class="theme-cluster-label">INTERFACE</span>
+
+                    <div class="theme-switcher" role="group" aria-label="Tema da nave">
+
+                        <button
+                            type="button"
+                            data-theme-option="light"
+                            title="Tema claro"
+                            aria-label="Ativar tema claro"
+                            aria-pressed="false"
+                        >☀</button>
+
+                        <button
+                            type="button"
+                            data-theme-option="dark"
+                            title="Tema escuro"
+                            aria-label="Ativar tema escuro"
+                            aria-pressed="true"
+                        >☾</button>
+
+                        <button
+                            type="button"
+                            data-theme-option="pink"
+                            title="Tema rosa"
+                            aria-label="Ativar tema rosa"
+                            aria-pressed="false"
+                        >♡</button>
+
+                    </div>
+
+                    <span class="theme-current" id="theme-current">TEMA ESCURO</span>
+
+                </div>
+
             </div>
+
         </section>
 
-        <footer class="cockpit-footer">
-            <a href="../../inicio.php">↖ VOLTAR AO MATHRUN</a>
-            <span>FEITO PARA EXPLORAR. DESENVOLVIDO PARA APRENDER.</span>
-            <a href="../../perfil.php">PERFIL DO PILOTO ↗</a>
-        </footer>
     </main>
+
+    <footer class="cockpit-footer">
+
+        <a href="../../inicio.php">← MATHRUN</a>
+
+        <span>FLIGHT SYSTEM · MATHSPACE</span>
+
+        <span>
+            ZONA DE EXPLORAÇÃO:
+            <?= htmlspecialchars($serieUsuario ? $serieUsuario . 'º ANO' : '--', ENT_QUOTES, 'UTF-8') ?>
+        </span>
+
+    </footer>
+
 </div>
 
-<script>
-window.MATHSPACE_CONFIG = {
-    fases: <?= $fasesJson ?>,
-    serie: <?= json_encode($serieUsuario, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>,
-    totalEstrelas: 180
-};
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-<script src="../js/mathspace.js"></script>
 </body>
 </html>
