@@ -57,6 +57,7 @@
 
         if ($serieUsuario !== '') {
 
+
             $stmt = $pdo->prepare(
                 'SELECT
         f.id,
@@ -86,13 +87,6 @@
 
             $fases = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-            $stmt->execute([
-                'usuario_id' => $usuarioId,
-                'serie' => $serieUsuario
-            ]);
-
-            $fases = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // A primeira fase fica liberada.
             // As próximas dependem da conclusão da anterior.
