@@ -3285,3 +3285,344 @@ GROUP BY f.serie, f.numero, f.nome ORDER BY f.serie, f.numero;
 SELECT f.serie, COUNT(q.id) AS total_questoes, SUM((SELECT COUNT(*) FROM alternativas a WHERE a.questao_id = q.id)) AS total_alternativas
 FROM fases f JOIN questoes q ON q.fase_id = f.id
 WHERE f.jogo_id = 2 AND f.serie BETWEEN 6 AND 9 GROUP BY f.serie ORDER BY f.serie;
+
+
+-- MathSpace: adiciona o 6º item (desafio especial) às 16 fases, sem apagar dados existentes.
+-- Execute depois do script de cadastro de fases e das 5 questões básicas.
+SET NAMES utf8mb4;
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Geometria', 'DESAFIO ESPECIAL: Um retângulo mede 8 cm de comprimento e 3 cm de largura. Qual é seu perímetro?', '22 cm', 'O perímetro é a soma dos quatro lados: 8 + 3 + 8 + 3 = 22 cm.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Um retângulo mede 8 cm de comprimento e 3 cm de largura. Qual é seu perímetro?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '11 cm', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: Um retângulo mede 8 cm de comprimento e 3 cm de largura. Qual é seu perímetro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='11 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '16 cm', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: Um retângulo mede 8 cm de comprimento e 3 cm de largura. Qual é seu perímetro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='16 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '22 cm', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: Um retângulo mede 8 cm de comprimento e 3 cm de largura. Qual é seu perímetro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='22 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '24 cm', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: Um retângulo mede 8 cm de comprimento e 3 cm de largura. Qual é seu perímetro?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='24 cm');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Frações e medidas', 'DESAFIO ESPECIAL: Uma garrafa tem 2 litros de água. Foram usados 3/4 de litro. Quanto restou?', '1,25 litro', '2 - 0,75 = 1,25 litro.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Uma garrafa tem 2 litros de água. Foram usados 3/4 de litro. Quanto restou?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '0,75 litro', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Uma garrafa tem 2 litros de água. Foram usados 3/4 de litro. Quanto restou?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='0,75 litro');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1 litro', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Uma garrafa tem 2 litros de água. Foram usados 3/4 de litro. Quanto restou?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='1 litro');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1,25 litro', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Uma garrafa tem 2 litros de água. Foram usados 3/4 de litro. Quanto restou?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='1,25 litro');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '1,5 litro', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Uma garrafa tem 2 litros de água. Foram usados 3/4 de litro. Quanto restou?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='1,5 litro');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Padrões numéricos', 'DESAFIO ESPECIAL: A sequência é 4, 8, 12, 16, ... Qual é o próximo número?', '20', 'A sequência aumenta de 4 em 4. Portanto, 16 + 4 = 20.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: A sequência é 4, 8, 12, 16, ... Qual é o próximo número?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '18', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: A sequência é 4, 8, 12, 16, ... Qual é o próximo número?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='18');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '20', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: A sequência é 4, 8, 12, 16, ... Qual é o próximo número?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='20');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '22', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: A sequência é 4, 8, 12, 16, ... Qual é o próximo número?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='22');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '24', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: A sequência é 4, 8, 12, 16, ... Qual é o próximo número?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='24');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Área e dados', 'DESAFIO ESPECIAL: Um quadrado tem lado de 6 cm. Qual é sua área?', '36 cm²', 'A área do quadrado é lado × lado: 6 × 6 = 36 cm².', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Um quadrado tem lado de 6 cm. Qual é sua área?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12 cm²', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Um quadrado tem lado de 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='12 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '24 cm²', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Um quadrado tem lado de 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='24 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '30 cm²', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Um quadrado tem lado de 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='30 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '36 cm²', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=6 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Um quadrado tem lado de 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='36 cm²');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Números inteiros', 'DESAFIO ESPECIAL: A temperatura era -3 °C e subiu 9 °C. Qual é a temperatura final?', '6 °C', 'Calculamos -3 + 9 = 6 °C.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: A temperatura era -3 °C e subiu 9 °C. Qual é a temperatura final?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '-12 °C', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: A temperatura era -3 °C e subiu 9 °C. Qual é a temperatura final?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='-12 °C');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '-6 °C', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: A temperatura era -3 °C e subiu 9 °C. Qual é a temperatura final?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='-6 °C');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '6 °C', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: A temperatura era -3 °C e subiu 9 °C. Qual é a temperatura final?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='6 °C');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12 °C', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: A temperatura era -3 °C e subiu 9 °C. Qual é a temperatura final?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='12 °C');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Proporção', 'DESAFIO ESPECIAL: Quatro cadernos custam R$ 28. Quanto custam 7 cadernos pelo mesmo preço unitário?', 'R$ 49', 'Cada caderno custa 28 ÷ 4 = 7 reais. Então 7 cadernos custam 7 × 7 = 49 reais.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Quatro cadernos custam R$ 28. Quanto custam 7 cadernos pelo mesmo preço unitário?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 35', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Quatro cadernos custam R$ 28. Quanto custam 7 cadernos pelo mesmo preço unitário?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='R$ 35');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 42', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Quatro cadernos custam R$ 28. Quanto custam 7 cadernos pelo mesmo preço unitário?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='R$ 42');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 49', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Quatro cadernos custam R$ 28. Quanto custam 7 cadernos pelo mesmo preço unitário?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='R$ 49');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 56', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Quatro cadernos custam R$ 28. Quanto custam 7 cadernos pelo mesmo preço unitário?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='R$ 56');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Equações', 'DESAFIO ESPECIAL: Resolva 3x + 5 = 20. Qual é x?', '5', 'Subtraímos 5: 3x = 15. Dividimos por 3: x = 5.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Resolva 3x + 5 = 20. Qual é x?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '3', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: Resolva 3x + 5 = 20. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='3');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '4', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: Resolva 3x + 5 = 20. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '5', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: Resolva 3x + 5 = 20. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: Resolva 3x + 5 = 20. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='8');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Área', 'DESAFIO ESPECIAL: Um triângulo tem base de 10 cm e altura de 6 cm. Qual é sua área?', '30 cm²', 'Área do triângulo = base × altura ÷ 2 = 10 × 6 ÷ 2 = 30 cm².', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Um triângulo tem base de 10 cm e altura de 6 cm. Qual é sua área?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '16 cm²', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Um triângulo tem base de 10 cm e altura de 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='16 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '30 cm²', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Um triângulo tem base de 10 cm e altura de 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='30 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '60 cm²', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Um triângulo tem base de 10 cm e altura de 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='60 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '80 cm²', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=7 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Um triângulo tem base de 10 cm e altura de 6 cm. Qual é sua área?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='80 cm²');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Potenciação e geometria', 'DESAFIO ESPECIAL: Quanto vale 2⁴?', '16', '2⁴ significa 2 × 2 × 2 × 2 = 16.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Quanto vale 2⁴?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '8', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: Quanto vale 2⁴?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='8');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: Quanto vale 2⁴?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='12');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '16', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: Quanto vale 2⁴?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='16');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '24', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: Quanto vale 2⁴?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='24');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Porcentagem', 'DESAFIO ESPECIAL: Um produto custa R$ 120 e recebe desconto de 25%. Qual é o preço final?', 'R$ 90', '25% de 120 é 30. Subtraindo o desconto: 120 - 30 = 90 reais.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Um produto custa R$ 120 e recebe desconto de 25%. Qual é o preço final?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 80', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Um produto custa R$ 120 e recebe desconto de 25%. Qual é o preço final?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='R$ 80');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 85', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Um produto custa R$ 120 e recebe desconto de 25%. Qual é o preço final?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='R$ 85');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 90', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Um produto custa R$ 120 e recebe desconto de 25%. Qual é o preço final?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='R$ 90');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'R$ 95', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Um produto custa R$ 120 e recebe desconto de 25%. Qual é o preço final?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='R$ 95');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Álgebra', 'DESAFIO ESPECIAL: Desenvolva (x + 3)(x + 2).', 'x² + 5x + 6', 'Multiplicamos os termos: x² + 2x + 3x + 6 = x² + 5x + 6.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Desenvolva (x + 3)(x + 2).');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'x² + 6', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: Desenvolva (x + 3)(x + 2).'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='x² + 6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'x² + 5x + 6', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: Desenvolva (x + 3)(x + 2).'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='x² + 5x + 6');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, 'x² + 6x + 5', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: Desenvolva (x + 3)(x + 2).'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='x² + 6x + 5');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '2x + 5', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: Desenvolva (x + 3)(x + 2).'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='2x + 5');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Sistemas e volume', 'DESAFIO ESPECIAL: Um prisma tem área da base de 12 cm² e altura de 5 cm. Qual é seu volume?', '60 cm³', 'O volume do prisma é área da base × altura: 12 × 5 = 60 cm³.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Um prisma tem área da base de 12 cm² e altura de 5 cm. Qual é seu volume?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '17 cm³', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Um prisma tem área da base de 12 cm² e altura de 5 cm. Qual é seu volume?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='17 cm³');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '30 cm³', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Um prisma tem área da base de 12 cm² e altura de 5 cm. Qual é seu volume?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='30 cm³');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '60 cm³', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Um prisma tem área da base de 12 cm² e altura de 5 cm. Qual é seu volume?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='60 cm³');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '120 cm³', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=8 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Um prisma tem área da base de 12 cm² e altura de 5 cm. Qual é seu volume?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='120 cm³');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Números reais', 'DESAFIO ESPECIAL: Um triângulo retângulo tem catetos 6 cm e 8 cm. Qual é a hipotenusa?', '10 cm', 'Pelo Teorema de Pitágoras: 6² + 8² = 36 + 64 = 100. A raiz de 100 é 10.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=1
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Um triângulo retângulo tem catetos 6 cm e 8 cm. Qual é a hipotenusa?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '9 cm', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: Um triângulo retângulo tem catetos 6 cm e 8 cm. Qual é a hipotenusa?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='9 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10 cm', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: Um triângulo retângulo tem catetos 6 cm e 8 cm. Qual é a hipotenusa?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='10 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12 cm', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: Um triângulo retângulo tem catetos 6 cm e 8 cm. Qual é a hipotenusa?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='12 cm');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '14 cm', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=1 AND q.pergunta='DESAFIO ESPECIAL: Um triângulo retângulo tem catetos 6 cm e 8 cm. Qual é a hipotenusa?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='14 cm');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Funções', 'DESAFIO ESPECIAL: Se f(x) = 3x - 4, quanto vale f(6)?', '14', 'Substituímos x por 6: f(6) = 3 × 6 - 4 = 18 - 4 = 14.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=2
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Se f(x) = 3x - 4, quanto vale f(6)?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Se f(x) = 3x - 4, quanto vale f(6)?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='10');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '12', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Se f(x) = 3x - 4, quanto vale f(6)?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='12');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '14', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Se f(x) = 3x - 4, quanto vale f(6)?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='14');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '18', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=2 AND q.pergunta='DESAFIO ESPECIAL: Se f(x) = 3x - 4, quanto vale f(6)?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='18');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Equações', 'DESAFIO ESPECIAL: Resolva 2(x - 3) = 14. Qual é x?', '10', 'Dividimos por 2: x - 3 = 7. Somamos 3: x = 10.', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=3
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Resolva 2(x - 3) = 14. Qual é x?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '4', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: Resolva 2(x - 3) = 14. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='4');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '7', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: Resolva 2(x - 3) = 14. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='7');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '10', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: Resolva 2(x - 3) = 14. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='10');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '14', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=3 AND q.pergunta='DESAFIO ESPECIAL: Resolva 2(x - 3) = 14. Qual é x?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='14');
+
+INSERT INTO questoes (fase_id, materia, pergunta, resposta_correta, explicacao, pontuacao)
+SELECT f.id, 'Geometria e probabilidade', 'DESAFIO ESPECIAL: Uma circunferência tem raio de 4 cm. Usando π = 3,14, qual é sua área aproximada?', '50,24 cm²', 'Área = πr² = 3,14 × 4² = 3,14 × 16 = 50,24 cm².', 200 FROM fases f
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=4
+AND NOT EXISTS (SELECT 1 FROM questoes q WHERE q.fase_id=f.id AND q.pergunta='DESAFIO ESPECIAL: Uma circunferência tem raio de 4 cm. Usando π = 3,14, qual é sua área aproximada?');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '25,12 cm²', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Uma circunferência tem raio de 4 cm. Usando π = 3,14, qual é sua área aproximada?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='25,12 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '32 cm²', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Uma circunferência tem raio de 4 cm. Usando π = 3,14, qual é sua área aproximada?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='32 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '50,24 cm²', TRUE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Uma circunferência tem raio de 4 cm. Usando π = 3,14, qual é sua área aproximada?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='50,24 cm²');
+INSERT INTO alternativas (questao_id, texto, correta)
+SELECT q.id, '100,48 cm²', FALSE FROM questoes q JOIN fases f ON f.id=q.fase_id
+WHERE f.jogo_id=2 AND f.serie=9 AND f.numero=4 AND q.pergunta='DESAFIO ESPECIAL: Uma circunferência tem raio de 4 cm. Usando π = 3,14, qual é sua área aproximada?'
+AND NOT EXISTS (SELECT 1 FROM alternativas a WHERE a.questao_id=q.id AND a.texto='100,48 cm²');
