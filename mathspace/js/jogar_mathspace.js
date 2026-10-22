@@ -16,18 +16,19 @@
     const $ = (selector) => document.querySelector(selector);
 
     const ui = {
-        score: $("#score"),
+        score: $("#score-value"),
         lives: $("#lives"),
         shieldFill: $("#shield-fill"),
         shieldValue: $("#shield-value"),
-        phaseName: $("#phase-name"),
-        phaseDescription: $("#phase-description"),
+        phaseName: null,
+        phaseDescription: null,
 
         questionPanel: $("#question-panel"),
         questionText: $("#question-text"),
-        questionOptions: $("#answer-list"), questionTimer: $("#timer-value"),
-        timerProgress: $("#timer-progress"),
-        questionFeedback: $("#question-feedback"),
+        questionOptions: $("#answer-list"),
+        questionTimer: $("#timer-value"),
+        timerProgress: $("#timer-fill"),
+        questionFeedback: $("#answer-feedback"),
 
         pauseOverlay: $("#pause-overlay"),
         resultOverlay: $("#result-overlay"),
@@ -38,8 +39,8 @@
         startButton: $("#start-button"),
         pauseButton: $("#pause-button"),
         resumeButton: $("#resume-button"),
-        restartButton: $("#restart-button"),
-        backButton: $("#back-button")
+        restartButton: $("#retry-button"),
+        backButton: $("#exit-button")
     };
 
     // =========================================================
