@@ -252,19 +252,39 @@
             }
         }
 
+
         if (ui.launchButton) {
-            ui.launchButton.disabled = !phase.desbloqueada;
+            const faseDisponivel =
+                phase.desbloqueada === true && Number.isInteger(phase.id) && phase.id > 0;
+
+            // Atualiza o endereço da fase selecionada.
+            ui.launchButton.href = faseDisponivel
+                ? `jogar_mathspace.php?fase=${encodeURIComponent(phase.id)}`
+                : "#";
+
+            // Atualiza o estado visual e acessível do botão.
+            ui.launchButton.classList.toggle(
+                "is-disabled",
+                !faseDisponivel
+            );
+
+            ui.launchButton.setAttribute(
+                "aria-disabled",
+                String(!faseDisponivel)
+            );
+
             ui.launchButton.setAttribute(
                 "aria-label",
-                phase.desbloqueada
+                faseDisponivel
                     ? `Iniciar fase ${phase.nome}`
                     : `Fase bloqueada: ${phase.nome}`
             );
 
-            ui.launchButton.innerHTML = phase.desbloqueada
-                ? '<span>▶</span> Iniciar missão'
-                : '<span>🔒</span> Missão bloqueada';
+            ui.launchButton.innerHTML = faseDisponivel
+                ? '<span>INICIAR MISSÃO</span><span class="launch-arrow">↗</span>'
+                : '<span>FASE BLOQUEADA</span><span class="launch-arrow">🔒</span>';
         }
+
 
         planetObjects.forEach((planet, planetIndex) => {
             const selected = planetIndex === index;
@@ -1322,4 +1342,28 @@
             resizeObserver = null;
         }
     });
+
+    if (ui.launchButton) {
+        ui.launchButton.addEventListener("click", function (event) {
+            const fase = state.selectedPhase;
+
+            // Impede que o link "#" faça a página pular.
+            if (
+                !fase ||
+                fase.desbloqueada !== true ||
+                !Number.isInteger(fase.id) ||
+                fase.id <= 0
+            ) {
+                event.preventDefault();
+                return;
+            }
+
+            // Garante que o endereço corresponda ao planeta selecionado.
+            this.href =
+                `jogar_mathspace.php?fase=${encodeURIComponent(fase.id)}`;
+        });
+    }
+
 })();
+
+
