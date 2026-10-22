@@ -269,19 +269,17 @@ try {
             ], 400);
         }
 
-        // Evita iniciar outra partida enquanto há uma ativa.
+        // Se uma missão anterior ficou presa na sessão,
+        // permite iniciar uma nova missão para este usuário.
         $partidaAtual = $_SESSION['mathspace_run'] ?? null;
 
         if (
             is_array($partidaAtual) &&
-            empty($partidaAtual['finished']) &&
             (int) ($partidaAtual['user'] ?? 0) === $usuarioId
         ) {
-            responder([
-                'ok' => false,
-                'message' => 'Já existe uma missão ativa. Recarregue a página para reiniciar.'
-            ], 409);
+            unset($_SESSION['mathspace_run']);
         }
+
 
         $fase = consultarUm(
             $db,
