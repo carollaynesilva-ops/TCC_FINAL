@@ -240,11 +240,27 @@ try {
     // 1. INICIAR A MISSÃO
     // =====================================================
 
+
+
     if ($acao === 'start') {
+        $faseInformada = $body['fase']
+            ?? $body['fase_id']
+            ?? $body['faseId']
+            ?? null;
+
         $faseId = filter_var(
-            $body['fase'] ?? null,
+            $faseInformada,
             FILTER_VALIDATE_INT
         );
+
+        if ($faseId === false || $faseId === null || $faseId < 1) {
+            responder([
+                'ok' => false,
+                'message' => 'Identificador de fase inválido.'
+            ], 400);
+        }
+
+
 
         if (!$faseId || $faseId < 1) {
             responder([
