@@ -210,11 +210,15 @@ $porcentagemProgresso = $totalFases > 0
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
     <title>MathChef | MathRun</title>
 
-    <link rel="stylesheet" href="../assets/css/mathchef.css">
+    <link
+        rel="stylesheet"
+        href="../assets/css/mathchef.css">
 
 
 </head>
@@ -255,43 +259,52 @@ $porcentagemProgresso = $totalFases > 0
 
             <a href="../inicio.php" class="brand">
                 MathRun
-            </a>
-
-            <nav class="main-nav">
-
-                <a href="../inicio.php">
-                    Início
                 </a>
 
-                <a href="../conquistas.php">
-                    Conquistas
-                </a>
+                <nav class="main-nav">
 
-                <a href="../ranking.php">
-                    Ranking
-                </a>
+                    <a href="../inicio.php">
+                        Início
+                    </a>
 
-                <a href="../perfil/perfil.php">
-                    Perfil
-                </a>
+                    <a href="../conquistas.php">
+                        Conquistas
+                    </a>
 
-            </nav>
+                    <a href="../ranking.php">
+                        Ranking
+                    </a>
 
-            <div class="theme-switcher">
+                    <a href="../perfil/perfil.php">
+                        Perfil
+                    </a>
 
-                <button type="button" data-theme-option="light" title="Tema claro">
-                    ☀
-                </button>
+                </nav>
 
-                <button type="button" data-theme-option="dark" title="Tema escuro">
-                    ☾
-                </button>
+                <div class="theme-switcher">
 
-                <button type="button" data-theme-option="pink" title="Tema rosa">
-                    ♡
-                </button>
+                    <button
+                        type="button"
+                        data-theme-option="light"
+                        title="Tema claro">
+                        ☀
+                    </button>
 
-            </div>
+                    <button
+                        type="button"
+                        data-theme-option="dark"
+                        title="Tema escuro">
+                        ☾
+                    </button>
+
+                    <button
+                        type="button"
+                        data-theme-option="pink"
+                        title="Tema rosa">
+                        ♡
+                    </button>
+
+                </div>
 
         </div>
 
@@ -430,101 +443,93 @@ $porcentagemProgresso = $totalFases > 0
 
             <div class="progress-bar">
 
-                <div class="progress-fill" style="width: <?= $porcentagemProgresso ?>%;"></div>
+                <div
+                    class="progress-fill"
+                    style="width: <?= $porcentagemProgresso ?>%;"></div>
 
             </div>
 
         </section>
 
-        <!-- ======================================
-         FASES
-    ======================================= -->
-
+        <!-- LIVRO DE RECEITAS SOBRE A BANCADA -->
         <section class="phases-section recipe-room">
-            <div class="section-heading recipe-room-heading">
+            <div class="section-heading recipe-heading">
                 <div>
-                    <span>O LIVRO DE RECEITAS DA CHEF</span>
+                    <span>O LIVRO DA CHEF</span>
                     <h2>Escolha sua próxima receita</h2>
-                    <p>Abra uma página do caderno para conhecer o desafio antes de começar.</p>
+                    <p>Abra uma página, descubra o doce e resolva os desafios para prepará-lo.</p>
                 </div>
-                <div class="book-stamp" aria-hidden="true">✿<small>feito com<br>matemática</small></div>
+                <div class="book-stamp" aria-hidden="true">♡<small>feito com<br>matemática</small></div>
             </div>
 
-            <?php if (empty($fases)): ?>
-                <div class="empty-state">
-                    <div class="empty-icon">📖</div>
-                    <h3>Este caderno ainda está vazio</h3>
-                    <p>Nenhuma receita foi encontrada para sua série.</p>
-                </div>
-            <?php else: ?>
-                <div class="recipe-book-shell">
-                    <div class="recipe-book-spine" aria-hidden="true"><span>MATHCHEF · RECEITAS</span></div>
-                    <div class="recipe-book-pages">
-                        <?php foreach ($fases as $indice => $fase): ?>
+            <div class="recipe-book" aria-label="Livro de receitas do MathChef">
+                <div class="book-spine" aria-hidden="true"></div>
+                <div class="recipe-pages">
+                    <?php if (empty($fases)): ?>
+                        <div class="empty-state"><div class="empty-icon">🍰</div><h3>O livro ainda está vazio</h3><p>Nenhuma fase foi encontrada para sua série.</p></div>
+                    <?php else: ?>
+                        <?php foreach ($fases as $fase): ?>
                             <?php
-                            $desbloqueada = (bool) $fase["desbloqueada"];
-                            $concluida = (bool) $fase["concluida"];
-                            $xpConquistado = (int) $fase["xp_conquistado"];
-                            $classeCard = !$desbloqueada ? "locked" : ($concluida ? "completed" : "available");
-                            $imagensReceita = ["../assets/img/chef_fracoes.jpg", "../assets/img/sem_derrubar.jpg", "../assets/img/primeira_receita.jpg", "../assets/img/mestre_cozinha.jpg"];
-                            $imagemReceita = $imagensReceita[$indice % count($imagensReceita)];
-                            $legendaReceita = trim((string) $fase["descricao"]);
-                            if ($legendaReceita === "")
-                                $legendaReceita = "Prepare os ingredientes, use a matemática e complete este desafio culinário.";
+                                $desbloqueada = $fase["desbloqueada"];
+                                $concluida = $fase["concluida"];
+                                $xpConquistado = (int) $fase["xp_conquistado"];
+                                $classeReceita = !$desbloqueada ? "recipe-locked" : ($concluida ? "recipe-completed" : "recipe-available");
+                                $receitas = [
+                                    1 => ["Bolo de chocolate", "🍰", "Um clássico fofinho para começar sua jornada. Acerte os desafios matemáticos e separe cada ingrediente na medida certa."],
+                                    2 => ["Brownie de chocolate", "🍫", "Um brownie merece proporções perfeitas. Use seu raciocínio para ajustar quantidades e deixar tudo no ponto."],
+                                    3 => ["Cupcakes de morango", "🧁", "Pequenos, delicados e cheios de detalhes. Resolva os desafios para calcular porções e preparar cada cupcake."],
+                                    4 => ["Bolo de festa", "🎂", "A receita final da coleção! Combine seus conhecimentos para superar desafios mais elaborados e montar um bolo especial."]
+                                ];
+                                $receita = $receitas[(int)$fase["numero"]] ?? ["Doce surpresa", "🍪", "Uma nova receita espera por você. Resolva os desafios matemáticos para descobrir o resultado."];
+                                $urlJogo = "jogar_mathchef.php?fase=" . (int)$fase["id"];
                             ?>
-                            <button type="button" class="recipe-page <?= $classeCard ?>" data-recipe-open
-                                data-recipe-id="<?= (int) $fase["id"] ?>"
-                                data-recipe-name="<?= htmlspecialchars($fase["nome"], ENT_QUOTES, 'UTF-8') ?>"
-                                data-recipe-description="<?= htmlspecialchars($legendaReceita, ENT_QUOTES, 'UTF-8') ?>"
-                                data-recipe-image="<?= htmlspecialchars($imagemReceita, ENT_QUOTES, 'UTF-8') ?>"
-                                data-recipe-number="<?= (int) $fase["numero"] ?>"
-                                data-recipe-difficulty="<?= htmlspecialchars(nomeDificuldade($fase["nivel_dificuldade"]), ENT_QUOTES, 'UTF-8') ?>"
-                                data-recipe-xp="<?= $xpConquistado ?>" data-recipe-required="<?= $xpParaProximaFase ?>"
-                                data-recipe-unlocked="<?= $desbloqueada ? '1' : '0' ?>"
-                                data-recipe-completed="<?= $concluida ? '1' : '0' ?>"
-                                data-recipe-score="<?= (int) $fase["melhor_pontuacao"] ?>"
-                                aria-label="<?= $desbloqueada ? 'Abrir receita ' . htmlspecialchars($fase["nome"], ENT_QUOTES, 'UTF-8') : 'Receita bloqueada: ' . htmlspecialchars($fase["nome"], ENT_QUOTES, 'UTF-8') ?>">
-                                <span
-                                    class="recipe-page-number"><?= !$desbloqueada ? '🔒' : ($concluida ? '✓' : sprintf('%02d', (int) $fase["numero"])) ?></span>
-                                <span class="recipe-photo-wrap"><img
-                                        src="<?= htmlspecialchars($imagemReceita, ENT_QUOTES, 'UTF-8') ?>"
-                                        alt="Ilustração culinária da receita" loading="lazy"><span
-                                        class="recipe-photo-label">RECEITA
-                                        <?= sprintf('%02d', (int) $fase["numero"]) ?></span></span>
-                                <span
-                                    class="recipe-page-title"><?= htmlspecialchars($fase["nome"], ENT_QUOTES, 'UTF-8') ?></span>
-                                <span
-                                    class="recipe-page-meta"><span><?= nomeDificuldade($fase["nivel_dificuldade"]) ?></span><span><?= !$desbloqueada ? 'Bloqueada' : ($concluida ? 'Concluída ✓' : 'Pronta para fazer') ?></span></span>
-                                <?php if ($desbloqueada): ?><span class="recipe-page-xp">✦ <?= $xpConquistado ?>
-                                        XP</span><?php else: ?><span class="recipe-page-xp locked-hint">🔒 <?= $xpParaProximaFase ?>
-                                        XP na fase anterior</span><?php endif; ?>
-                                <span class="recipe-open-hint"><?= $desbloqueada ? 'Abrir receita ↗' : 'Ver bloqueio' ?></span>
+                            <button
+                                type="button"
+                                class="recipe-page <?= $classeReceita ?>"
+                                <?= $desbloqueada ? '' : 'disabled' ?>
+                                data-recipe-title="<?= htmlspecialchars($receita[0], ENT_QUOTES, 'UTF-8') ?>"
+                                data-recipe-emoji="<?= htmlspecialchars($receita[1], ENT_QUOTES, 'UTF-8') ?>"
+                                data-recipe-description="<?= htmlspecialchars($receita[2], ENT_QUOTES, 'UTF-8') ?>"
+                                data-phase-description="<?= htmlspecialchars($fase["descricao"], ENT_QUOTES, 'UTF-8') ?>"
+                                data-phase-number="<?= (int)$fase["numero"] ?>"
+                                data-difficulty="<?= htmlspecialchars(nomeDificuldade($fase["nivel_dificuldade"]), ENT_QUOTES, 'UTF-8') ?>"
+                                data-xp="<?= $xpConquistado ?>"
+                                data-xp-needed="<?= $xpParaProximaFase ?>"
+                                data-score="<?= (int)$fase["melhor_pontuacao"] ?>"
+                                data-completed="<?= $concluida ? '1' : '0' ?>"
+                                data-url="<?= htmlspecialchars($urlJogo, ENT_QUOTES, 'UTF-8') ?>"
+                                aria-label="<?= htmlspecialchars($receita[0], ENT_QUOTES, 'UTF-8') ?>">
+                                <span class="recipe-page-top"><span>RECEITA Nº <?= (int)$fase["numero"] ?></span>
+                                    <?php if (!$desbloqueada): ?><span class="recipe-lock">🔒</span><?php elseif ($concluida): ?><span class="recipe-check">✓</span><?php else: ?><span class="recipe-open-dot">✦</span><?php endif; ?>
+                                </span>
+                                <span class="recipe-art" aria-hidden="true"><span class="recipe-art-plate"></span><span class="recipe-emoji"><?= $receita[1] ?></span>
+                                    <?php if (!$desbloqueada): ?><span class="recipe-art-lock">🔒</span><?php endif; ?>
+                                </span>
+                                <span class="recipe-name"><?= htmlspecialchars($receita[0]) ?></span>
+                                <span class="recipe-subtitle"><?= htmlspecialchars($fase["nome"]) ?></span>
+                                <span class="recipe-page-bottom"><span><?= htmlspecialchars(nomeDificuldade($fase["nivel_dificuldade"])) ?></span><span><?= $concluida ? '✓ concluída' : ($desbloqueada ? 'abrir receita ↗' : 'bloqueada') ?></span></span>
                             </button>
                         <?php endforeach; ?>
-                    </div>
-                    <div class="book-bottom-note">✧ UMA PITADA DE MATEMÁTICA, UMA RECEITA DE CADA VEZ ✧</div>
+                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
+                <div class="book-bottom-note"><span>✦</span> Cada desafio é um ingrediente para sua próxima conquista <span>✦</span></div>
+            </div>
         </section>
 
-        <div class="recipe-modal" id="recipeModal" aria-hidden="true" role="dialog" aria-modal="true"
-            aria-labelledby="recipeModalTitle">
-            <button type="button" class="recipe-modal-backdrop" data-recipe-close aria-label="Fechar receita"></button>
-            <section class="recipe-modal-card">
-                <button type="button" class="recipe-modal-close" data-recipe-close aria-label="Fechar">×</button>
-                <div class="recipe-modal-image-wrap"><img id="recipeModalImage" src="../assets/img/chef_fracoes.jpg"
-                        alt="Imagem da receita"><span class="modal-recipe-number" id="recipeModalNumber">RECEITA
-                        01</span></div>
-                <div class="recipe-modal-copy">
-                    <span class="modal-eyebrow">DO CADERNO PARA A BANCADA</span>
-                    <h2 id="recipeModalTitle">Nome da receita</h2>
-                    <p id="recipeModalDescription">Descrição da receita.</p>
-                    <div class="recipe-modal-facts"><span>◷ Desafio matemático</span><span
-                            id="recipeModalDifficulty">Dificuldade</span><span id="recipeModalProgress">0 XP</span>
-                    </div>
-                    <p class="recipe-modal-locked" id="recipeModalLocked" hidden>Esta receita ainda está fechada.
-                        Conquiste o XP necessário na fase anterior para abrir esta página do caderno.</p>
-                    <a class="recipe-modal-start" id="recipeModalStart" href="#">Começar a cozinhar <span>→</span></a>
+        <!-- QUADRO DE DETALHES DA RECEITA -->
+        <div class="recipe-modal" id="recipeModal" aria-hidden="true">
+            <button type="button" class="recipe-modal-backdrop" data-close-recipe aria-label="Fechar receita"></button>
+            <section class="recipe-detail" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+                <button type="button" class="recipe-close" data-close-recipe aria-label="Fechar">×</button>
+                <div class="detail-art" aria-hidden="true"><span class="detail-spark spark-one">✦</span><span id="detailEmoji">🍰</span><span class="detail-spark spark-two">✧</span></div>
+                <div class="detail-copy">
+                    <span class="detail-eyebrow" id="detailNumber">RECEITA Nº 01</span>
+                    <h2 id="detailTitle">Bolo de chocolate</h2>
+                    <p class="detail-description" id="detailDescription"></p>
+                    <div class="detail-math"><span class="detail-math-icon">🧮</span><div><strong>Seu desafio matemático</strong><p id="detailPhaseDescription"></p></div></div>
+                    <div class="detail-meta"><span id="detailDifficulty">Fácil</span><span id="detailProgress">⭐ 0 / 60 XP</span><span id="detailScore" hidden></span></div>
+                    <p class="detail-status" id="detailStatus"></p>
+                    <a href="#" class="detail-start" id="detailStart">Começar a cozinhar <span>→</span></a>
                 </div>
             </section>
         </div>
@@ -535,7 +540,9 @@ $porcentagemProgresso = $totalFases > 0
 
         <div class="back-area">
 
-            <a href="../inicio.php" class="back-link">
+            <a
+                href="../inicio.php"
+                class="back-link">
                 ← Voltar para o início
             </a>
 
@@ -543,54 +550,55 @@ $porcentagemProgresso = $totalFases > 0
 
     </main>
 
-    <script>
-        (() => {
-            const modal = document.getElementById('recipeModal');
-            if (!modal) return;
-            const title = document.getElementById('recipeModalTitle');
-            const description = document.getElementById('recipeModalDescription');
-            const image = document.getElementById('recipeModalImage');
-            const number = document.getElementById('recipeModalNumber');
-            const difficulty = document.getElementById('recipeModalDifficulty');
-            const progress = document.getElementById('recipeModalProgress');
-            const lockedMessage = document.getElementById('recipeModalLocked');
-            const start = document.getElementById('recipeModalStart');
-            let lastTrigger = null;
-
-            document.querySelectorAll('[data-recipe-open]').forEach((button) => {
-                button.addEventListener('click', () => {
-                    lastTrigger = button;
-                    title.textContent = button.dataset.recipeName || 'Receita';
-                    description.textContent = button.dataset.recipeDescription || 'Um novo desafio culinário espera por você.';
-                    image.src = button.dataset.recipeImage || '../assets/img/chef_fracoes.jpg';
-                    image.alt = 'Ilustração da receita ' + title.textContent;
-                    number.textContent = 'RECEITA ' + String(button.dataset.recipeNumber || '1').padStart(2, '0');
-                    difficulty.textContent = 'Dificuldade: ' + (button.dataset.recipeDifficulty || 'Nível');
-                    const unlocked = button.dataset.recipeUnlocked === '1';
-                    const completed = button.dataset.recipeCompleted === '1';
-                    progress.textContent = unlocked ? (button.dataset.recipeXp || '0') + ' XP conquistados' : 'Receita bloqueada';
-                    lockedMessage.hidden = unlocked;
-                    start.hidden = !unlocked;
-                    start.href = 'jogar_mathchef.php?fase=' + encodeURIComponent(button.dataset.recipeId || '');
-                    start.innerHTML = (completed ? 'Preparar novamente' : 'Começar a cozinhar') + ' <span>→</span>';
-                    modal.classList.add('is-open');
-                    modal.setAttribute('aria-hidden', 'false');
-                    document.body.classList.add('recipe-modal-open');
-                    modal.querySelector('.recipe-modal-close').focus();
-                });
-            });
-            const closeModal = () => {
-                modal.classList.remove('is-open');
-                modal.setAttribute('aria-hidden', 'true');
-                document.body.classList.remove('recipe-modal-open');
-                if (lastTrigger) lastTrigger.focus();
-            };
-            modal.querySelectorAll('[data-recipe-close]').forEach((button) => button.addEventListener('click', closeModal));
-            document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && modal.classList.contains('is-open')) closeModal(); });
-        })();
-    </script>
-
     <script src="../assets/js/tema.js"></script>
+    <script>
+    (() => {
+        const modal = document.getElementById('recipeModal');
+        if (!modal) return;
+        const title = document.getElementById('detailTitle');
+        const emoji = document.getElementById('detailEmoji');
+        const description = document.getElementById('detailDescription');
+        const phaseDescription = document.getElementById('detailPhaseDescription');
+        const number = document.getElementById('detailNumber');
+        const difficulty = document.getElementById('detailDifficulty');
+        const progress = document.getElementById('detailProgress');
+        const score = document.getElementById('detailScore');
+        const status = document.getElementById('detailStatus');
+        const start = document.getElementById('detailStart');
+        let previousFocus = null;
+        document.querySelectorAll('.recipe-page:not(:disabled)').forEach(page => {
+            page.addEventListener('click', () => {
+                previousFocus = page;
+                title.textContent = page.dataset.recipeTitle;
+                emoji.textContent = page.dataset.recipeEmoji;
+                description.textContent = page.dataset.recipeDescription;
+                phaseDescription.textContent = page.dataset.phaseDescription;
+                number.textContent = `RECEITA Nº ${String(page.dataset.phaseNumber).padStart(2, '0')}`;
+                difficulty.textContent = `Dificuldade: ${page.dataset.difficulty}`;
+                progress.textContent = `⭐ ${page.dataset.xp} / ${page.dataset.xpNeeded} XP`;
+                if (Number(page.dataset.score) > 0) {
+                    score.hidden = false;
+                    score.textContent = `🏆 ${page.dataset.score} pontos`;
+                } else { score.hidden = true; }
+                status.textContent = page.dataset.completed === '1' ? 'Receita concluída! Você pode prepará-la novamente para melhorar sua pontuação.' : 'Prepare os ingredientes resolvendo os desafios desta fase.';
+                start.href = page.dataset.url;
+                start.innerHTML = page.dataset.completed === '1' ? 'Preparar novamente <span>→</span>' : 'Começar a cozinhar <span>→</span>';
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('recipe-modal-open');
+                modal.querySelector('.recipe-close').focus();
+            });
+        });
+        const closeModal = () => {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('recipe-modal-open');
+            if (previousFocus) previousFocus.focus();
+        };
+        modal.querySelectorAll('[data-close-recipe]').forEach(button => button.addEventListener('click', closeModal));
+        document.addEventListener('keydown', event => { if (event.key === 'Escape' && modal.classList.contains('is-open')) closeModal(); });
+    })();
+    </script>
 
 
 </body>
