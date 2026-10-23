@@ -240,27 +240,11 @@ try {
     // 1. INICIAR A MISSÃO
     // =====================================================
 
-
-
     if ($acao === 'start') {
-        $faseInformada = $body['fase']
-            ?? $body['fase_id']
-            ?? $body['faseId']
-            ?? null;
-
         $faseId = filter_var(
-            $faseInformada,
+            $body['fase'] ?? null,
             FILTER_VALIDATE_INT
         );
-
-        if ($faseId === false || $faseId === null || $faseId < 1) {
-            responder([
-                'ok' => false,
-                'message' => 'Identificador de fase inválido.'
-            ], 400);
-        }
-
-
 
         if (!$faseId || $faseId < 1) {
             responder([
@@ -269,17 +253,19 @@ try {
             ], 400);
         }
 
-        // Se uma missão anterior ficou presa na sessão,
-        // permite iniciar uma nova missão para este usuário.
+        // Evita iniciar outra partida enquanto há uma ativa.
         $partidaAtual = $_SESSION['mathspace_run'] ?? null;
 
         if (
             is_array($partidaAtual) &&
+            empty($partidaAtual['finished']) &&
             (int) ($partidaAtual['user'] ?? 0) === $usuarioId
         ) {
-            unset($_SESSION['mathspace_run']);
+            responder([
+                'ok' => false,
+                'message' => 'Já existe uma missão ativa. Recarregue a página para reiniciar.'
+            ], 409);
         }
-
 
         $fase = consultarUm(
             $db,
@@ -544,8 +530,19 @@ try {
     // =====================================================
 
     if ($acao === 'answer') {
-        $questaoId = (int) ($body['questao'] ?? 0);
-        $alternativaId = (int) ($body['alternativa'] ?? 0);
+        $questaoId = (int) (
+            $body['questao_id']
+            ?? $body['question_id']
+            ?? $body['questao']
+            ?? 0
+        );
+
+        $alternativaId = (int) (
+            $body['alternativa_id']
+            ?? $body['alternative_id']
+            ?? $body['alternativa']
+            ?? 0
+        );
 
         $questao = obterQuestao(
             $db,
@@ -658,7 +655,12 @@ try {
     // =====================================================
 
     if ($acao === 'timeout') {
-        $questaoId = (int) ($body['questao'] ?? 0);
+        $questaoId = (int) (
+            $body['questao_id']
+            ?? $body['question_id']
+            ?? $body['questao']
+            ?? 0
+        );
 
         $questao = obterQuestao(
             $db,
