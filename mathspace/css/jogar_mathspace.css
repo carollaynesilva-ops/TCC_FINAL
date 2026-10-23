@@ -322,6 +322,34 @@ body {
     color: #c7b8ff
 }
 
+.question-timer {
+    color: #ffffff;
+    background: #ffffff12;
+    border: 1px solid #ffffff25;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 12px;
+    letter-spacing: .04em;
+    white-space: nowrap;
+}
+
+.question-timer.is-urgent {
+    color: #ff8ba8;
+    border-color: #ff527d99;
+    background: #ff527d18;
+    animation: timer-pulse .7s ease-in-out infinite alternate;
+}
+
+@keyframes timer-pulse {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.06);
+    }
+}
+
 .question-progress {
     height: 4px;
     border-radius: 9px;

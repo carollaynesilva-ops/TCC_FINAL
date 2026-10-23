@@ -115,7 +115,8 @@ $payload = [
             </div>
         </section>
         <section class="question-panel" id="question-panel" aria-live="polite" hidden>
-            <div class="question-top"><span id="question-step">QUESTÃO 1/6</span><span id="question-type"
+            <div class="question-top"><span id="question-step">QUESTÃO 1/6</span><span id="question-timer"
+                    class="question-timer" role="timer" aria-live="off">20s</span><span id="question-type"
                     class="question-type">TRANSMISSÃO</span></div>
             <div class="question-progress"><span id="question-progress-fill"></span></div>
             <h2 id="question-text">Estabelecendo conexão com a base...</h2>

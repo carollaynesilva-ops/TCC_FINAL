@@ -3,8 +3,8 @@
     const cfg = window.MATHSPACE_GAME;
     if (!cfg) return;
     const $ = id => document.getElementById(id);
-    const ui = { shell: $('game-shell'), canvas: $('space-canvas'), integrity: $('integrity-fill'), integrityLabel: $('integrity-label'), intro: $('mission-intro'), start: $('start-button'), question: $('question-panel'), step: $('question-step'), type: $('question-type'), progress: $('question-progress-fill'), text: $('question-text'), answers: $('answer-list'), feedback: $('answer-feedback'), next: $('continue-button'), score: $('score-value'), lives: $('lives'), pause: $('pause-button'), pauseOverlay: $('pause-overlay'), resume: $('resume-button'), exit: $('exit-button'), pauseExit: $('pause-exit-button'), result: $('result-overlay'), resultSymbol: $('result-symbol'), resultEyebrow: $('result-eyebrow'), resultTitle: $('result-title'), resultMessage: $('result-message'), resultScore: $('result-score'), resultCorrect: $('result-correct'), resultXp: $('result-xp'), retry: $('retry-button'), alert: $('mission-alert'), tip: $('flight-tip') };
-    const state = { phase: null, question: null, queuedQuestion: null, index: 0, total: 6, score: 0, lives: 3, integrity: 100, correct: 0, locked: false, paused: false, questionOpen: false, started: false, finished: false, game: null, scene: null, pendingFinish: false };
+    const ui = { shell: $('game-shell'), canvas: $('space-canvas'), integrity: $('integrity-fill'), integrityLabel: $('integrity-label'), intro: $('mission-intro'), start: $('start-button'), question: $('question-panel'), step: $('question-step'), type: $('question-type'), timer: $('question-timer'), progress: $('question-progress-fill'), text: $('question-text'), answers: $('answer-list'), feedback: $('answer-feedback'), next: $('continue-button'), score: $('score-value'), lives: $('lives'), pause: $('pause-button'), pauseOverlay: $('pause-overlay'), resume: $('resume-button'), exit: $('exit-button'), pauseExit: $('pause-exit-button'), result: $('result-overlay'), resultSymbol: $('result-symbol'), resultEyebrow: $('result-eyebrow'), resultTitle: $('result-title'), resultMessage: $('result-message'), resultScore: $('result-score'), resultCorrect: $('result-correct'), resultXp: $('result-xp'), retry: $('retry-button'), alert: $('mission-alert'), tip: $('flight-tip') };
+    const state = { phase: null, question: null, queuedQuestion: null, index: 0, total: 6, score: 0, lives: 3, integrity: 100, correct: 0, locked: false, paused: false, questionOpen: false, started: false, finished: false, game: null, scene: null, pendingFinish: false, timerInterval: null, timeLeft: 20, lastAlienPosition: null };
     const api = async (action, extra = {}) => { const response = await fetch(cfg.api, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin', body: JSON.stringify({ action, csrf: cfg.csrf, fase: cfg.faseId, ...extra }) }); const data = await response.json().catch(() => ({ ok: false, message: 'O servidor retornou uma resposta inválida.' })); if (!response.ok || !data.ok) throw new Error(data.message || 'Não foi possível concluir esta ação.'); return data; };
     function toast(message) { ui.alert.textContent = message; ui.alert.classList.add('visible'); clearTimeout(toast.timer); toast.timer = setTimeout(() => ui.alert.classList.remove('visible'), 2600) }
     function renderLives() { [...ui.lives.children].forEach((heart, i) => heart.classList.toggle('is-lost', i >= state.lives)); ui.lives.setAttribute('aria-label', `${state.lives} vidas restantes`) }
@@ -81,7 +81,8 @@
                             laser.destroy(); this.bullets.splice(j, 1); alien.hp--;
                             alien.setAlpha(.45); this.time.delayedCall(70, () => { if (alien.active) alien.setAlpha(1); });
                             if (alien.hp <= 0) {
-                                // Na etapa 3, este ponto abrirá a questão ligada ao alien atingido.
+                                // A questão só abre quando o laser derrota um alien.
+                                state.lastAlienPosition = { x: alien.x, y: alien.y };
                                 alien.destroy(); this.aliens.splice(i, 1); destroyed = true;
                                 this.events.emit('alien-defeated', { x: alien.x, y: alien.y });
                                 openQuestionForAlien();
@@ -132,7 +133,57 @@
         }
         state.game = new Phaser.Game({ type: Phaser.AUTO, parent: ui.canvas, width: '100%', height: '100%', backgroundColor: '#080b20', transparent: true, render: { antialias: true, roundPixels: true }, scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH }, input: { activePointers: 2, touch: { capture: true } }, scene: [SpaceScene] });
     }
-    function showQuestion(q, index) { state.question = q; state.index = index; state.locked = false; ui.question.hidden = false; ui.step.textContent = index === 5 ? 'DESAFIO ESPECIAL · 6/6' : `QUESTÃO ${index + 1}/6`; ui.type.textContent = index === 5 ? 'CHEFE DE SETOR' : 'TRANSMISSÃO'; ui.progress.style.width = `${((index + 1) / 6) * 100}%`; ui.text.textContent = q.pergunta; ui.answers.innerHTML = ''; ui.feedback.textContent = ''; ui.feedback.className = 'answer-feedback'; ui.next.hidden = true; q.alternativas.forEach((a, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'answer-button'; b.textContent = `${String.fromCharCode(65 + i)}. ${a.texto}`; b.addEventListener('click', () => answer(a.id, b)); ui.answers.appendChild(b) }); }
+    function stopQuestionTimer() {
+        if (state.timerInterval) clearInterval(state.timerInterval);
+        state.timerInterval = null;
+    }
+    function startQuestionTimer() {
+        stopQuestionTimer();
+        state.timeLeft = 20;
+        ui.timer.textContent = '20s';
+        ui.timer.classList.remove('is-urgent');
+        state.timerInterval = setInterval(() => {
+            if (!state.questionOpen || state.paused || state.finished || state.locked) return;
+            state.timeLeft -= 1;
+            ui.timer.textContent = `${state.timeLeft}s`;
+            if (state.timeLeft <= 5) ui.timer.classList.add('is-urgent');
+            if (state.timeLeft <= 0) {
+                stopQuestionTimer();
+                answer(null, null, true);
+            }
+        }, 1000);
+    }
+    function showQuestion(q, index) {
+        state.question = q; state.index = index; state.locked = false; state.questionOpen = true;
+        ui.question.hidden = false;
+        ui.step.textContent = index === 5 ? 'DESAFIO ESPECIAL · 6/6' : `QUESTÃO ${index + 1}/6`;
+        ui.type.textContent = index === 5 ? 'CHEFE DE SETOR' : 'TRANSMISSÃO';
+        ui.progress.style.width = `${((index + 1) / 6) * 100}%`;
+        ui.text.textContent = q.pergunta; ui.answers.innerHTML = ''; ui.feedback.textContent = ''; ui.feedback.className = 'answer-feedback'; ui.next.hidden = true;
+        q.alternativas.forEach((a, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'answer-button'; b.textContent = `${String.fromCharCode(65 + i)}. ${a.texto}`; b.addEventListener('click', () => answer(a.id, b, false)); ui.answers.appendChild(b); });
+        startQuestionTimer();
+    }
+    function showAlienAttack() {
+        const scene = state.scene;
+        if (!scene || !scene.ship || !scene.ship.active) return;
+        const source = scene.aliens.length ? scene.aliens[0] : null;
+        const lastHit = state.lastAlienPosition;
+        const startX = lastHit ? lastHit.x : (source ? source.x : scene.ship.x);
+        const startY = lastHit ? lastHit.y : (source ? source.y : 65);
+        const projectile = scene.add.ellipse(startX, startY, 13, 18, 0xff527d, 1).setStrokeStyle(2, 0xffb4d0, .95).setDepth(5);
+        scene.tweens.add({ targets: projectile, x: scene.ship.x, y: scene.ship.y - 20, alpha: 0, duration: 360, ease: 'Cubic.easeIn', onComplete: () => projectile.destroy() });
+    }
+    function handleAlienAttack(lives) {
+        showAlienAttack();
+        state.lives = lives;
+        renderScore();
+        if (state.lives <= 0) {
+            toast('O alien contra-atacou. Você ficou sem vidas!');
+            state.pendingFinish = true;
+        } else {
+            toast(`O alien contra-atacou! Restam ${state.lives} vidas.`);
+        }
+    }
     async function openQuestionForAlien() {
         if (state.questionOpen || state.finished || state.paused) return;
         state.questionOpen = true;
@@ -152,19 +203,19 @@
             toast(e.message || 'Não foi possível carregar a questão.');
         }
     }
-    async function answer(alternativeId, button) {
+    async function answer(alternativeId, button, timedOut = false) {
         if (state.locked || !state.question || !state.questionOpen) return;
-        state.locked = true;
+        state.locked = true; stopQuestionTimer();
         const buttons = [...ui.answers.querySelectorAll('button')];
         buttons.forEach(b => b.disabled = true);
         try {
-            const data = await api('answer', { questao: state.question.id, alternativa: alternativeId });
+            const data = await api('answer', { questao: state.question.id, alternativa: alternativeId, tempo_esgotado: timedOut });
             state.score = data.score; state.lives = data.lives; state.correct = data.correctCount;
             renderScore();
-            button.classList.add(data.correct ? 'correct' : 'incorrect');
+            if (button) button.classList.add(data.correct ? 'correct' : 'incorrect');
             ui.feedback.classList.add(data.correct ? 'good' : 'bad');
-            ui.feedback.textContent = (data.correct ? 'ACERTOU! ' : 'NÃO FOI DESSA VEZ. ') + (data.explanation || '');
-            if (!data.correct) toast(state.lives ? `Resposta incorreta. Restam ${state.lives} vidas.` : 'Você ficou sem vidas!');
+            ui.feedback.textContent = timedOut ? `TEMPO ESGOTADO. ${data.explanation || ''}` : (data.correct ? 'ACERTOU! ' : 'NÃO FOI DESSA VEZ. ') + (data.explanation || '');
+            if (!data.correct) handleAlienAttack(data.lives);
             state.pendingFinish = Boolean(data.finished) || state.lives <= 0;
             // A questão fecha após uma resposta. O combate só retoma se a missão ainda estiver ativa.
             ui.question.hidden = true;
@@ -177,14 +228,17 @@
                 toast(data.correct ? 'Alien derrotado! O combate continua.' : 'O combate continua. Fique atento!');
             }
         } catch (e) {
+            stopQuestionTimer();
             state.locked = false;
             buttons.forEach(b => b.disabled = false);
+            state.timeLeft = Math.max(5, state.timeLeft);
+            startQuestionTimer();
             toast(e.message);
         }
     }
     async function finishRun() { state.finished = true; try { const data = await api('finish'), r = data.result; ui.question.hidden = true; ui.result.hidden = false; ui.resultSymbol.textContent = r.success ? '✦' : '↻'; ui.resultEyebrow.textContent = r.success ? 'MISSÃO CONCLUÍDA' : 'MISSÃO INTERROMPIDA'; ui.resultTitle.textContent = r.success ? 'Setor explorado!' : 'A nave precisa de reparos'; ui.resultMessage.textContent = r.success ? 'Você concluiu os seis desafios. Seu progresso foi registrado.' : 'Suas vidas acabaram antes de concluir a missão. Você pode tentar novamente.'; ui.resultScore.textContent = String(r.score); ui.resultCorrect.textContent = `${r.correct}/6`; ui.resultXp.textContent = String(r.xp); ui.retry.hidden = false; ui.retry.textContent = 'TENTAR NOVAMENTE'; } catch (e) { state.finished = false; toast(e.message) } }
-    async function begin() { ui.start.disabled = true; try { const data = await api('start'); state.phase = data.phase; state.score = 0; state.lives = 3; state.integrity = 100; state.correct = 0; state.index = 0; state.started = true; state.finished = false; state.paused = false; state.questionOpen = false; state.pendingFinish = false; state.queuedQuestion = data.question; state.queuedIndex = data.index ?? 0; ui.question.hidden = true; renderScore(); ui.intro.hidden = true; startScene(); enterFullscreen(); ui.tip.style.opacity = '1'; setTimeout(() => { if (ui.tip) ui.tip.style.opacity = '.65' }, 5000) } catch (e) { toast(e.message); ui.start.disabled = false } }
-    function pause() { if (!state.started || state.finished) return; state.paused = true; ui.pauseOverlay.hidden = false; if (state.game) state.game.scene.pause('space') }
+    async function begin() { ui.start.disabled = true; try { const data = await api('start'); state.phase = data.phase; state.score = 0; state.lives = 3; state.integrity = 100; state.correct = 0; state.index = 0; state.started = true; state.finished = false; state.paused = false; state.questionOpen = false; state.pendingFinish = false; state.answering = false; stopQuestionTimer(); state.queuedQuestion = data.question; state.queuedIndex = data.index ?? 0; ui.question.hidden = true; renderScore(); ui.intro.hidden = true; startScene(); enterFullscreen(); ui.tip.style.opacity = '1'; setTimeout(() => { if (ui.tip) ui.tip.style.opacity = '.65' }, 5000) } catch (e) { toast(e.message); ui.start.disabled = false } }
+    function pause() { if (!state.started || state.finished || state.paused) return; state.paused = true; ui.pauseOverlay.hidden = false; if (state.game) state.game.scene.pause('space') }
     function resume() { state.paused = false; ui.pauseOverlay.hidden = true; if (state.game) state.game.scene.resume('space') }
     function exitToMap() { if (document.fullscreenElement) document.exitFullscreen().catch(() => { }); window.location.href = cfg.mapa || 'mathspace.php' }
     ui.start.addEventListener('click', begin); ui.pause.addEventListener('click', pause); ui.resume.addEventListener('click', resume); ui.exit.addEventListener('click', pause); ui.pauseExit.addEventListener('click', exitToMap); ui.retry.addEventListener('click', () => window.location.reload()); document.addEventListener('pointermove', e => { if (state.scene && state.started && !state.finished && !state.paused) { const rect = ui.canvas.getBoundingClientRect(); state.scene.pointerTarget = e.clientX - rect.left } }); document.addEventListener('pointerdown', e => { if (state.scene && state.started && !state.finished && !state.paused) { const rect = ui.canvas.getBoundingClientRect(); state.scene.pointerTarget = e.clientX - rect.left } }); document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.started && !state.finished) { if (state.paused) resume(); else pause() } }); document.addEventListener('fullscreenchange', () => { if (state.game) state.game.scale.refresh() });

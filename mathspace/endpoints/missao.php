@@ -173,27 +173,33 @@ try {
         if (!empty($run['finished']))
             out(['ok' => false, 'message' => 'Esta partida já terminou.'], 409);
         $questionId = (int) ($body['questao'] ?? 0);
+        $timedOut = !empty($body['tempo_esgotado']);
         $alternativeId = (int) ($body['alternativa'] ?? 0);
         $q = queryOne($db, 'SELECT id,pergunta,resposta_correta,explicacao,pontuacao FROM questoes WHERE id=? AND fase_id=?', [$questionId, (int) $run['phase']]);
         if (!$q)
             out(['ok' => false, 'message' => 'Questão inválida para esta missão.'], 400);
         if (in_array($questionId, $run['answers'], true))
             out(['ok' => false, 'message' => 'Esta questão já foi respondida.'], 409);
-        $alt = queryOne($db, 'SELECT id,texto,correta FROM alternativas WHERE id=? AND questao_id=?', [$alternativeId, $questionId]);
-        if (!$alt)
-            out(['ok' => false, 'message' => 'Alternativa inválida.'], 400);
-        $correct = (int) $alt['correta'] === 1 || trim((string) $alt['texto']) === trim((string) $q['resposta_correta']);
+        $alt = false;
+        if (!$timedOut) {
+            $alt = queryOne($db, 'SELECT id,texto,correta FROM alternativas WHERE id=? AND questao_id=?', [$alternativeId, $questionId]);
+            if (!$alt)
+                out(['ok' => false, 'message' => 'Alternativa inválida.'], 400);
+        }
+        $correct = !$timedOut && ((int) $alt['correta'] === 1 || trim((string) $alt['texto']) === trim((string) $q['resposta_correta']));
         $points = $correct ? (int) $q['pontuacao'] : 0;
         if ($correct) {
             $run['score'] += $points;
             $run['correct']++;
         } else {
             $run['wrong']++;
+            // A vida é descontada no servidor uma única vez, tanto no erro quanto no tempo esgotado.
             $run['lives'] = max(0, (int) $run['lives'] - 1);
         }
         $run['answers'][] = $questionId;
         $run['question_index']++;
-        runSql($db, 'INSERT INTO respostas_usuario (usuario_id,questao_id,partida_id,resposta,correta,tempo_resposta,usou_dica) VALUES (?,?,?,?,?,?,0)', [$userId, $questionId, (int) $run['partida'], (string) $alt['texto'], $correct ? 1 : 0, max(0, time() - (int) $run['started_at'])]);
+        $answerText = $timedOut ? 'Tempo esgotado' : (string) $alt['texto'];
+        runSql($db, 'INSERT INTO respostas_usuario (usuario_id,questao_id,partida_id,resposta,correta,tempo_resposta,usou_dica) VALUES (?,?,?,?,?,?,0)', [$userId, $questionId, (int) $run['partida'], $answerText, $correct ? 1 : 0, max(0, time() - (int) $run['started_at'])]);
         $_SESSION['mathspace_run'] = $run;
         out(['ok' => true, 'correct' => $correct, 'points' => $points, 'score' => (int) $run['score'], 'lives' => (int) $run['lives'], 'correctCount' => (int) $run['correct'], 'index' => (int) $run['question_index'], 'explanation' => $q['explicacao'], 'finished' => ((int) $run['question_index'] >= 6 || (int) $run['lives'] <= 0)]);
     }
