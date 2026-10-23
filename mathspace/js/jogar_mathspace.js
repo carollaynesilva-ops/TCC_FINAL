@@ -310,7 +310,7 @@
             ui.resultSymbol.textContent = r.success ? '✦' : '↻';
             ui.resultEyebrow.textContent = r.success ? 'MISSÃO CONCLUÍDA' : 'MISSÃO INTERROMPIDA';
             ui.resultTitle.textContent = r.success ? 'Setor explorado!' : (r.lives <= 0 ? 'Nave sem energia' : 'A nave precisa de reparos');
-            ui.resultMessage.textContent = r.success ? 'Você concluiu os seis desafios. Seu progresso foi registrado.' : (r.lives <= 0 ? 'Suas vidas acabaram. O resultado da missão foi registrado e você pode tentar novamente.' : 'A missão terminou antes de concluir todos os desafios. Seu resultado foi registrado.');
+            ui.resultMessage.textContent = (r.success ? 'Você concluiu os seis desafios. Seu progresso foi registrado.' : (r.lives <= 0 ? 'Suas vidas acabaram. O resultado da missão foi registrado e você pode tentar novamente.' : 'A missão terminou antes de concluir todos os desafios. Seu resultado foi registrado.')) + (r.medal ? ` Medalha conquistada: ${r.medal}.` : '');
             ui.resultScore.textContent = String(r.score);
             ui.resultCorrect.textContent = `${r.correct}/6`;
             ui.resultXp.textContent = String(r.xp);

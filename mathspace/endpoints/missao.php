@@ -235,7 +235,27 @@ try {
         }
         if ($success)
             runSql($db, 'UPDATE usuarios SET xp=COALESCE(xp,0)+?,pontuacao_total=COALESCE(pontuacao_total,0)+? WHERE id=?', [$xp, $score, $userId]);
-        $result = ['success' => $success, 'score' => $score, 'correct' => $correct, 'wrong' => $wrong, 'xp' => $xp, 'lives' => (int) $run['lives']];
+
+        // Concede a medalha Explorador Espacial na primeira missão concluída.
+        // O nome é consultado no banco, sem depender de um ID fixo.
+        $medalAwarded = null;
+        if ($success) {
+            $phaseGame = queryOne($db, 'SELECT jogo_id FROM fases WHERE id=? LIMIT 1', [(int) $run['phase']]);
+            if ($phaseGame) {
+                $completed = queryOne($db, 'SELECT COUNT(*) AS total FROM progresso_usuario pu JOIN fases f ON f.id=pu.fase_id WHERE pu.usuario_id=? AND pu.concluida=1 AND f.jogo_id=?', [$userId, (int) $phaseGame['jogo_id']]);
+                if ($completed && (int) $completed['total'] === 1) {
+                    $medal = queryOne($db, 'SELECT id,nome FROM medalhas WHERE nome=? LIMIT 1', ['Explorador Espacial']);
+                    if ($medal) {
+                        $owned = queryOne($db, 'SELECT id FROM usuario_medalhas WHERE usuario_id=? AND medalha_id=? LIMIT 1', [$userId, (int) $medal['id']]);
+                        if (!$owned) {
+                            runSql($db, 'INSERT INTO usuario_medalhas (usuario_id,medalha_id) VALUES (?,?)', [$userId, (int) $medal['id']]);
+                            $medalAwarded = (string) $medal['nome'];
+                        }
+                    }
+                }
+            }
+        }
+        $result = ['success' => $success, 'score' => $score, 'correct' => $correct, 'wrong' => $wrong, 'xp' => $xp, 'lives' => (int) $run['lives'], 'medal' => $medalAwarded];
         $run['finished'] = true;
         $run['result'] = $result;
         $_SESSION['mathspace_run'] = $run;
