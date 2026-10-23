@@ -28,7 +28,8 @@
         if (!phase) return;
         selected = phase;
         const recipe = recipeFor(phase, index);
-        document.getElementById('recipe-emoji').remove();
+        const oldEmoji = document.getElementById('recipe-emoji');
+        if (oldEmoji) oldEmoji.remove();
         const art = document.getElementById('recipe-art');
         art.style.backgroundImage = `linear-gradient(180deg, rgba(35,20,12,.02) 45%, rgba(35,20,12,.72)), url("${recipe.image || '../assets/img/bolo.jpg'}")`;
         art.style.backgroundSize = 'cover'; art.style.backgroundPosition = 'center';
@@ -67,8 +68,12 @@
             this.paintRoom(); this.paintCounter(); this.paintBook(); this.paintDecor();
             this.scale.on('resize', () => this.redraw());
             document.getElementById('game-loading').style.display = 'none';
-            this.input.on('gameobjectdown', (pointer, obj) => { if (Number.isInteger(obj.getData('phaseIndex'))) openRecipe(obj.getData('phaseIndex')); });
-            this.input.on('pointerdown', (pointer) => { if (pointer.y > this.scale.height * .38 && pointer.y < this.scale.height * .91) { const idx = this.hitPage(pointer.x, pointer.y); if (idx >= 0) openRecipe(idx); } });
+            // Cada item da receita recebe seu próprio evento. Isso evita que o clique
+            // seja interpretado como outra página quando o livro muda de tamanho.
+            this.input.on('gameobjectdown', (pointer, obj) => {
+                const index = obj.getData('phaseIndex');
+                if (Number.isInteger(index)) openRecipe(index);
+            });
             this.events.on('destroy', () => { });
         }
         redraw() { this.children.removeAll(true); this.items = []; this.decor = []; this.paintRoom(); this.paintCounter(); this.paintBook(); this.paintDecor(); }
@@ -104,7 +109,7 @@
                 const side = i < perPage ? 0 : 1, local = i % perPage; const total = side === 0 ? perPage : count - perPage; const x = side === 0 ? leftX : rightX; const y = by + bh * .35 + (local + .5) * (bh * .52 / Math.max(total, 1));
                 const recipe = recipes[i % recipes.length]; const locked = !phase.desbloqueada; const completed = !!phase.concluida;
                 const pageW = pw * .78, pageH = Math.min(70, (bh * .48) / Math.max(total, 1) - 4); const pageX = x - pageW / 2, pageY = y - pageH / 2;
-                const page = this.add.rectangle(x, y, pageW, pageH, completed ? 0xe2edcf : (locked ? 0xe7d8bd : 0xfff4dd), 1).setStrokeStyle(1, completed ? 0x7b9d69 : (locked ? 0xb9a48b : 0xc99967), 1).setInteractive({ useHandCursor: !locked }); page.setData('phaseIndex', i); page.setDepth(4); this.items.push(page);
+                const page = this.add.rectangle(x, y, pageW, pageH, completed ? 0xe2edcf : (locked ? 0xe7d8bd : 0xfff4dd), 1).setStrokeStyle(1, completed ? 0x7b9d69 : (locked ? 0xb9a48b : 0xc99967), 1).setInteractive({ useHandCursor: true }); page.setData('phaseIndex', i); page.setDepth(4); this.items.push(page);
                 const imageKeys = ['bolo', 'brownie', 'pudim', 'lasanha'];
                 const imageKey = imageKeys[i] ? 'recipe-' + imageKeys[i] : null;
                 const thumbW = Math.min(58, pageW * .29);
@@ -119,13 +124,13 @@
                     photo.setDisplaySize(photo.width * scale, photo.height * scale);
                     photo.setCrop(0, 0, photo.width, photo.height);
                     photo.setData('phaseIndex', i);
-                    if (!locked) photo.setInteractive({ useHandCursor: true });
+                    photo.setInteractive({ useHandCursor: true });
                     this.items.push(photo);
                 } else {
                     this.add.rectangle(thumbX, thumbY, thumbW, thumbH, 0xf2e3c8, 1).setDepth(6);
                     this.add.text(thumbX, thumbY, 'SEM FOTO', { fontFamily: 'Arial', fontSize: '7px', color: '#8a6a4b' }).setOrigin(.5).setDepth(7);
                 }
-                if (!locked) thumbFrame.setInteractive({ useHandCursor: true });
+                thumbFrame.setInteractive({ useHandCursor: true });
                 this.items.push(thumbFrame);
                 if (locked) {
                     this.add.text(thumbX, thumbY + thumbH / 2 - 5, 'BLOQUEADA', { fontFamily: 'Arial', fontSize: '6px', fontStyle: 'bold', color: '#fff', backgroundColor: '#70503c', padding: { x: 2, y: 2 } }).setOrigin(.5).setDepth(8);
@@ -134,9 +139,9 @@
                 }
                 const textX = pageX + thumbW + 14;
                 const title = phase.numero + '. ' + recipe.title;
-                const label = this.add.text(textX, y - 8, title, { fontFamily: 'Georgia,serif', fontSize: `${Math.max(9, Math.min(13, w * .012))}px`, fontStyle: 'bold', color: locked ? '#a18c75' : '#70432d', wordWrap: { width: pageW * .65 }, lineSpacing: 0 }).setOrigin(0, .5).setDepth(5); label.setData('phaseIndex', i); if (!locked) label.setInteractive({ useHandCursor: true }); this.items.push(label);
+                const label = this.add.text(textX, y - 8, title, { fontFamily: 'Georgia,serif', fontSize: `${Math.max(9, Math.min(13, w * .012))}px`, fontStyle: 'bold', color: locked ? '#a18c75' : '#70432d', wordWrap: { width: pageW * .65 }, lineSpacing: 0 }).setOrigin(0, .5).setDepth(5); label.setData('phaseIndex', i); label.setInteractive({ useHandCursor: true }); this.items.push(label);
                 const status = locked ? 'BLOQUEADA' : completed ? 'CONCLUÍDA' : difficulty(phase.dificuldade).toUpperCase();
-                const sub = this.add.text(textX, y + Math.min(15, pageH * .24), status, { fontFamily: 'Arial', fontSize: '7px', fontStyle: 'bold', color: locked ? '#a18c75' : completed ? '#62865a' : '#a15e3e', letterSpacing: 1 }).setOrigin(0, .5).setDepth(5); sub.setData('phaseIndex', i); if (!locked) sub.setInteractive({ useHandCursor: true }); this.items.push(sub);
+                const sub = this.add.text(textX, y + Math.min(15, pageH * .24), status, { fontFamily: 'Arial', fontSize: '7px', fontStyle: 'bold', color: locked ? '#a18c75' : completed ? '#62865a' : '#a15e3e', letterSpacing: 1 }).setOrigin(0, .5).setDepth(5); sub.setData('phaseIndex', i); sub.setInteractive({ useHandCursor: true }); this.items.push(sub);
             });
             // spine and decorative flourishes
             g.lineStyle(2, 0xb57d54, .9); g.lineBetween(bx + bw / 2, by + 15, bx + bw / 2, by + bh - 15); this.add.text(bx + bw / 2, by + bh - 27, 'MATHCHEF', { fontFamily: 'Georgia,serif', fontSize: '9px', color: '#9a6748', letterSpacing: 2 }).setOrigin(.5).setDepth(5);
