@@ -306,7 +306,7 @@ if ($hora < 12) {
 
         <?php if ($proximaFase): ?>
 
-            <section class="mission">
+            <section class="mission <?= ($proximaFase["jogo_nome"] === "MathChef") ? "mission-chef" : "" ?>">
 
                 <div class="mission-content">
 
