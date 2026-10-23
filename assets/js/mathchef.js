@@ -125,7 +125,7 @@
             jar(w * .08, h * .69, .9, 0xf5e6c5); jar(w * .14, h * .7, .8, 0xf4d3a2); jar(w * .89, h * .69, .9, 0xe7c5a0); jar(w * .94, h * .7, .75, 0xc2d6a5);
             const bowl = (x, y, r, color) => { g.fillStyle(0x7a482f, 1); g.fillEllipse(x, y, r * 2, r * .7); g.fillStyle(color, 1); g.fillEllipse(x, y - 3, r * 1.8, r * .58); g.fillStyle(0xffe5bc, 1); g.fillEllipse(x, y - 5, r * 1.45, r * .38); };
             bowl(w * .2, h * .75, 22, 0xdca66a); bowl(w * .8, h * .75, 25, 0xd88b8a);
-            const flour = this.add.text(w * .2, h * .73, { fontSize: '25px' }).setOrigin(.5).setDepth(4); const berry = this.add.text(w * .8, h * .73, { fontSize: '25px' }).setOrigin(.5).setDepth(4);
+            const flour = this.add.text(w * .2, h * .73, '🥚', { fontSize: '25px' }).setOrigin(.5).setDepth(4); const berry = this.add.text(w * .8, h * .73, '🍓', { fontSize: '25px' }).setOrigin(.5).setDepth(4);
             this.add.text(w * .045, h * .86, 'FARINHA', { fontFamily: 'Arial', fontSize: '7px', fontStyle: 'bold', color: '#f9e6c8', letterSpacing: 1 }).setDepth(4);
             this.add.text(w * .91, h * .86, 'MORANGOS', { fontFamily: 'Arial', fontSize: '7px', fontStyle: 'bold', color: '#f9e6c8', letterSpacing: 1 }).setOrigin(.5).setDepth(4);
             this.add.text(w * .5, h * .97, '✦  ESCOLHA UMA RECEITA NO LIVRO  ✦', { fontFamily: 'Arial', fontSize: `${Math.max(8, Math.min(11, w * .009))}px`, fontStyle: 'bold', color: '#fff0d3', letterSpacing: 2 }).setOrigin(.5).setDepth(4);
