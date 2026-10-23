@@ -92,16 +92,12 @@ body {
     font-family: 'Outfit', sans-serif;
 
     background:
-        radial-gradient(
-            circle at 10% 20%,
+        radial-gradient(circle at 10% 20%,
             rgba(65, 105, 225, .08),
-            transparent 25%
-        ),
-        radial-gradient(
-            circle at 90% 50%,
+            transparent 25%),
+        radial-gradient(circle at 90% 50%,
             rgba(123, 77, 232, .08),
-            transparent 25%
-        ),
+            transparent 25%),
         var(--background);
 
     color: var(--text);
@@ -129,16 +125,12 @@ button {
 
 [data-theme="dark"] body {
     background:
-        radial-gradient(
-            circle at 10% 20%,
+        radial-gradient(circle at 10% 20%,
             rgba(96, 125, 240, .07),
-            transparent 25%
-        ),
-        radial-gradient(
-            circle at 90% 50%,
+            transparent 25%),
+        radial-gradient(circle at 90% 50%,
             rgba(149, 108, 240, .07),
-            transparent 25%
-        ),
+            transparent 25%),
         var(--background);
 }
 
@@ -149,16 +141,12 @@ button {
 
 [data-theme="pink"] body {
     background:
-        radial-gradient(
-            circle at 10% 20%,
+        radial-gradient(circle at 10% 20%,
             rgba(232, 93, 158, .13),
-            transparent 25%
-        ),
-        radial-gradient(
-            circle at 90% 50%,
+            transparent 25%),
+        radial-gradient(circle at 90% 50%,
             rgba(200, 61, 130, .10),
-            transparent 25%
-        ),
+            transparent 25%),
         var(--background);
 }
 
@@ -260,11 +248,9 @@ button {
     border-radius: 13px;
 
     background:
-        linear-gradient(
-            135deg,
+        linear-gradient(135deg,
             var(--blue),
-            var(--purple)
-        );
+            var(--purple));
 
     color: white;
 
@@ -490,11 +476,9 @@ button {
     font-weight: 800;
 
     background:
-        linear-gradient(
-            135deg,
+        linear-gradient(135deg,
             var(--blue),
-            var(--purple)
-        );
+            var(--purple));
 
     box-shadow:
         0 12px 25px rgba(91, 71, 220, .22);
@@ -537,12 +521,10 @@ button {
     color: white;
 
     background:
-        linear-gradient(
-            120deg,
+        linear-gradient(120deg,
             #3157cf,
             #4d4ed0 55%,
-            #794fe0
-        );
+            #794fe0);
 
     box-shadow: var(--mission-shadow);
 
@@ -576,12 +558,10 @@ button {
 
 [data-theme="dark"] .mission {
     background:
-        linear-gradient(
-            120deg,
+        linear-gradient(120deg,
             #253b91,
             #3f3ca5 55%,
-            #6842b9
-        );
+            #6842b9);
 }
 
 
@@ -591,12 +571,10 @@ button {
 
 [data-theme="pink"] .mission {
     background:
-        linear-gradient(
-            120deg,
+        linear-gradient(120deg,
             #d93682,
             #e94f99 55%,
-            #c83d82
-        );
+            #c83d82);
 
     color: white;
 
@@ -860,17 +838,16 @@ button {
 }
 
 @keyframes float {
+
     0%,
     100% {
         transform:
-            translate(50%, -50%)
-            translateY(0);
+            translate(50%, -50%) translateY(0);
     }
 
     50% {
         transform:
-            translate(50%, -50%)
-            translateY(-8px);
+            translate(50%, -50%) translateY(-8px);
     }
 }
 
@@ -978,11 +955,9 @@ button {
     color: #171a2b;
 
     background:
-        linear-gradient(
-            140deg,
+        linear-gradient(140deg,
             #fff9f3,
-            #f7ecff
-        );
+            #f7ecff);
 }
 
 
@@ -994,11 +969,9 @@ button {
     color: white;
 
     background:
-        linear-gradient(
-            140deg,
+        linear-gradient(140deg,
             #202d68,
-            #5142a7
-        );
+            #5142a7);
 
     border: none;
 }
@@ -1012,11 +985,9 @@ button {
     color: #171a2b;
 
     background:
-        linear-gradient(
-            140deg,
+        linear-gradient(140deg,
             #fff9f3,
-            #f0e7ff
-        );
+            #f0e7ff);
 
     border-color: #ded9ec;
 }
@@ -1028,11 +999,9 @@ button {
 
 [data-theme="dark"] .world-card.space {
     background:
-        linear-gradient(
-            140deg,
+        linear-gradient(140deg,
             #18234e,
-            #39307a
-        );
+            #39307a);
 }
 
 
@@ -1044,11 +1013,9 @@ button {
     color: #4a1730;
 
     background:
-        linear-gradient(
-            140deg,
+        linear-gradient(140deg,
             #ffe3ef,
-            #ffc9df
-        );
+            #ffc9df);
 
     border-color: #efb5cc;
 }
@@ -1062,11 +1029,9 @@ button {
     color: #4a1730;
 
     background:
-        linear-gradient(
-            140deg,
+        linear-gradient(140deg,
             #f6b6d0,
-            #e987b0
-        );
+            #e987b0);
 
     border:
         1px solid #e2a0bc;
@@ -1230,7 +1195,7 @@ button {
     margin-top: 20px;
 }
 
-.world-progress > div:first-child {
+.world-progress>div:first-child {
     display: flex;
 
     justify-content: space-between;
@@ -1274,11 +1239,9 @@ button {
     border-radius: inherit;
 
     background:
-        linear-gradient(
-            90deg,
+        linear-gradient(90deg,
             var(--blue),
-            var(--purple)
-        );
+            var(--purple));
 }
 
 
@@ -1288,11 +1251,9 @@ button {
 
 [data-theme="pink"] .progress-fill {
     background:
-        linear-gradient(
-            90deg,
+        linear-gradient(90deg,
             #e34d91,
-            #c52f78
-        );
+            #c52f78);
 }
 
 [data-theme="pink"] .space .progress-track {
@@ -1400,7 +1361,7 @@ button {
     flex: 1;
 }
 
-.status-content > span {
+.status-content>span {
     font-size: 9px;
 
     font-weight: 800;
@@ -1454,11 +1415,9 @@ button {
     border-radius: inherit;
 
     background:
-        linear-gradient(
-            90deg,
+        linear-gradient(90deg,
             var(--blue),
-            var(--purple)
-        );
+            var(--purple));
 }
 
 
@@ -1468,11 +1427,9 @@ button {
 
 [data-theme="pink"] .xp-track div {
     background:
-        linear-gradient(
-            90deg,
+        linear-gradient(90deg,
             #e34d91,
-            #c52f78
-        );
+            #c52f78);
 }
 
 
@@ -1486,7 +1443,7 @@ button {
     font-size: 11px;
 }
 
-.achievement-card > a {
+.achievement-card>a {
     font-size: 22px;
 
     color: var(--purple);
@@ -1495,7 +1452,7 @@ button {
         transform .2s ease;
 }
 
-.achievement-card > a:hover {
+.achievement-card>a:hover {
     transform: translateX(4px);
 }
 
@@ -1676,4 +1633,100 @@ button {
     .mission h2 {
         font-size: 29px;
     }
+}
+
+/* =========================================================
+   IMAGENS DE FUNDO DOS JOGOS NA PÁGINA INICIAL
+   Arquivos esperados em assets/img/mathchef.jpg e mathspace.jpg
+========================================================= */
+.world-card.chef,
+.world-card.space {
+    isolation: isolate;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.world-card.chef {
+    background-image:
+        linear-gradient(115deg, rgba(255, 248, 244, .94) 0%, rgba(255, 246, 250, .82) 48%, rgba(255, 239, 247, .38) 100%),
+        url('../img/mathchef.jpg');
+}
+
+.world-card.space {
+    color: #fff;
+    background-image:
+        linear-gradient(115deg, rgba(14, 22, 59, .90) 0%, rgba(35, 38, 100, .70) 50%, rgba(47, 32, 102, .32) 100%),
+        url('../img/mathspace.jpg');
+    border: none;
+}
+
+/* Mantém o conteúdo legível sobre as imagens. */
+.world-card .world-background {
+    z-index: -1;
+}
+
+.world-card .world-icon,
+.world-card .world-info,
+.world-card .world-progress,
+.world-card .world-arrow {
+    z-index: 1;
+}
+
+.world-card.chef .world-info,
+.world-card.chef .world-progress {
+    color: #30202a;
+}
+
+.world-card.space .world-info,
+.world-card.space .world-progress {
+    color: #fff;
+}
+
+.world-card.space .world-info p,
+.world-card.space .world-kicker {
+    color: rgba(255, 255, 255, .88);
+    opacity: 1;
+}
+
+.world-card.chef .progress-track {
+    background: rgba(120, 78, 98, .20);
+}
+
+.world-card.space .progress-track {
+    background: rgba(255, 255, 255, .25);
+}
+
+.world-card.chef .progress-fill {
+    background: #c45a89;
+}
+
+.world-card.space .progress-fill {
+    background: #c4b5fd;
+}
+
+/* As imagens continuam aplicadas em qualquer tema escolhido. */
+[data-theme="dark"] .world-card.chef {
+    background-image:
+        linear-gradient(115deg, rgba(255, 248, 244, .93) 0%, rgba(255, 246, 250, .80) 48%, rgba(255, 239, 247, .36) 100%),
+        url('../img/mathchef.jpg');
+}
+
+[data-theme="dark"] .world-card.space {
+    background-image:
+        linear-gradient(115deg, rgba(14, 22, 59, .90) 0%, rgba(35, 38, 100, .70) 50%, rgba(47, 32, 102, .32) 100%),
+        url('../img/mathspace.jpg');
+}
+
+[data-theme="pink"] .world-card.chef {
+    background-image:
+        linear-gradient(115deg, rgba(255, 239, 247, .94) 0%, rgba(255, 230, 241, .82) 48%, rgba(255, 219, 236, .38) 100%),
+        url('../img/mathchef.jpg');
+}
+
+[data-theme="pink"] .world-card.space {
+    color: #fff;
+    background-image:
+        linear-gradient(115deg, rgba(40, 25, 75, .88) 0%, rgba(91, 47, 112, .68) 50%, rgba(194, 86, 143, .30) 100%),
+        url('../img/mathspace.jpg');
 }
