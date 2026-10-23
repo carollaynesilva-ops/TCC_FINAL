@@ -1,3 +1,4 @@
+
 <?php
 
 declare(strict_types=1);
@@ -23,7 +24,7 @@ function responder(array $dados, int $status = 200): never
 
 function exigirMetodoPost(): void
 {
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
         responder([
             'ok' => false,
             'message' => 'Método não permitido.'
@@ -31,32 +32,47 @@ function exigirMetodoPost(): void
     }
 }
 
-function consultarUm(PDO $db, string $sql, array $params = []): array|false
-{
+function consultarUm(
+    PDO $db,
+    string $sql,
+    array $params = []
+): array|false {
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
 
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-function consultarTodos(PDO $db, string $sql, array $params = []): array
-{
+function consultarTodos(
+    PDO $db,
+    string $sql,
+    array $params = []
+): array {
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function executar(PDO $db, string $sql, array $params = []): int
-{
+function executar(
+    PDO $db,
+    string $sql,
+    array $params = []
+): int {
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
 
     return $stmt->rowCount();
 }
 
-function obterQuestao(PDO $db, int $faseId, int $indice): array|false
-{
+/**
+ * Busca as seis questões da fase por ordem de ID.
+ */
+function obterQuestao(
+    PDO $db,
+    int $faseId,
+    int $indice
+): array|false {
     if ($indice < 0 || $indice >= 6) {
         return false;
     }
@@ -78,6 +94,9 @@ function obterQuestao(PDO $db, int $faseId, int $indice): array|false
     return $questoes[$indice];
 }
 
+/**
+ * Monta a questão que será enviada ao JavaScript.
+ */
 function montarQuestao(PDO $db, array $questao): array
 {
     $alternativas = consultarTodos(
@@ -102,6 +121,42 @@ function montarQuestao(PDO $db, array $questao): array
     ];
 }
 
+/**
+ * Obtém o identificador da questão enviado pelo JavaScript.
+ * Aceita diferentes nomes para manter compatibilidade.
+ */
+function obterIdQuestaoEnviado(array $body): int
+{
+    $valor = $body['questao_id']
+        ?? $body['question_id']
+        ?? $body['questionId']
+        ?? $body['questaoId']
+        ?? $body['questao']
+        ?? $body['question']
+        ?? 0;
+
+    return filter_var($valor, FILTER_VALIDATE_INT) ?: 0;
+}
+
+/**
+ * Obtém o identificador da alternativa enviado pelo JavaScript.
+ */
+function obterIdAlternativaEnviado(array $body): int
+{
+    $valor = $body['alternativa_id']
+        ?? $body['alternative_id']
+        ?? $body['alternativeId']
+        ?? $body['alternativaId']
+        ?? $body['alternativa']
+        ?? $body['alternative']
+        ?? 0;
+
+    return filter_var($valor, FILTER_VALIDATE_INT) ?: 0;
+}
+
+/**
+ * Registra uma resposta e avança o índice da partida.
+ */
 function registrarResposta(
     PDO $db,
     int $usuarioId,
@@ -122,7 +177,10 @@ function registrarResposta(
             (int) $partida['partida'],
             $resposta,
             $correta ? 1 : 0,
-            max(0, time() - (int) $partida['question_started_at'])
+            max(
+                0,
+                time() - (int) ($partida['question_started_at'] ?? time())
+            )
         ]
     );
 
@@ -135,29 +193,53 @@ function registrarResposta(
     }
 
     $partida['question_index']++;
+
+    // A próxima questão será definida quando for solicitada.
+    $partida['current_question_id'] = null;
 }
 
-function buscarRespostaSeguinte(PDO $db, array $partida): array|false
-{
-    if ((int) $partida['question_index'] >= 6) {
+/**
+ * Confere se a questão enviada é a questão atualmente entregue
+ * pelo servidor. Usa o ID guardado na sessão.
+ */
+function validarQuestaoAtual(
+    PDO $db,
+    array $partida,
+    int $questaoIdEnviado
+): array|false {
+    $questaoAtualId = (int) (
+        $partida['current_question_id'] ?? 0
+    );
+
+    if ($questaoAtualId < 1 || $questaoIdEnviado < 1) {
         return false;
     }
 
-    $questao = obterQuestao(
+    if ($questaoAtualId !== $questaoIdEnviado) {
+        return false;
+    }
+
+    $questao = consultarUm(
         $db,
-        (int) $partida['phase'],
-        (int) $partida['question_index']
+        'SELECT id, pergunta, explicacao, pontuacao
+         FROM questoes
+         WHERE id = ? AND fase_id = ?
+         LIMIT 1',
+        [
+            $questaoAtualId,
+            (int) $partida['phase']
+        ]
     );
 
     if (!$questao) {
         return false;
     }
 
-    return montarQuestao($db, $questao);
+    return $questao;
 }
 
 // ---------------------------------------------------------
-// VALIDAÇÃO DA REQUISIÇÃO
+// 1. VALIDAÇÃO DA REQUISIÇÃO
 // ---------------------------------------------------------
 
 exigirMetodoPost();
@@ -178,7 +260,10 @@ $csrf = (string) ($body['csrf'] ?? '');
 
 if (
     empty($_SESSION['mathspace_csrf']) ||
-    !hash_equals($_SESSION['mathspace_csrf'], $csrf)
+    !hash_equals(
+        (string) $_SESSION['mathspace_csrf'],
+        $csrf
+    )
 ) {
     responder([
         'ok' => false,
@@ -201,6 +286,10 @@ if ($usuarioId < 1) {
     ], 401);
 }
 
+// ---------------------------------------------------------
+// 2. CONEXÃO COM O BANCO
+// ---------------------------------------------------------
+
 $configPath = __DIR__ . '/../../config/config.php';
 
 if (!is_file($configPath)) {
@@ -212,7 +301,6 @@ if (!is_file($configPath)) {
 
 require_once $configPath;
 
-// Este endpoint utiliza PDO.
 $db = null;
 
 foreach (['pdo', 'conn', 'conexao', 'conexaoPDO'] as $candidate) {
@@ -222,22 +310,29 @@ foreach (['pdo', 'conn', 'conexao', 'conexaoPDO'] as $candidate) {
     }
 }
 
-if (!$db) {
+if (!$db instanceof PDO) {
     responder([
         'ok' => false,
         'message' => 'A conexão PDO não foi encontrada no config.php.'
     ], 500);
 }
 
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+$db->setAttribute(
+    PDO::ATTR_ERRMODE,
+    PDO::ERRMODE_EXCEPTION
+);
+
+$db->setAttribute(
+    PDO::ATTR_DEFAULT_FETCH_MODE,
+    PDO::FETCH_ASSOC
+);
 
 $acao = (string) ($body['action'] ?? '');
 
 try {
 
     // =====================================================
-    // 1. INICIAR A MISSÃO
+    // 3. INICIAR A MISSÃO
     // =====================================================
 
     if ($acao === 'start') {
@@ -251,25 +346,26 @@ try {
             FILTER_VALIDATE_INT
         );
 
-        if ($faseId === false || $faseId === null || $faseId < 1) {
+        if (
+            $faseId === false ||
+            $faseId === null ||
+            $faseId < 1
+        ) {
             responder([
                 'ok' => false,
                 'message' => 'Identificador de fase inválido.'
             ], 400);
         }
 
-        // Evita iniciar outra partida enquanto há uma ativa.
+        // Descarta uma missão anterior que ficou presa na sessão.
+        // Isso não apaga o histórico que já foi registrado no banco.
         $partidaAtual = $_SESSION['mathspace_run'] ?? null;
 
         if (
             is_array($partidaAtual) &&
-            empty($partidaAtual['finished']) &&
             (int) ($partidaAtual['user'] ?? 0) === $usuarioId
         ) {
-            responder([
-                'ok' => false,
-                'message' => 'Já existe uma missão ativa. Recarregue a página para reiniciar.'
-            ], 409);
+            unset($_SESSION['mathspace_run']);
         }
 
         $fase = consultarUm(
@@ -291,7 +387,7 @@ try {
             ], 404);
         }
 
-        // Confere a série do estudante, se cadastrada.
+        // Confere a série do estudante, se a coluna existir.
         $colunasUsuario = consultarUm(
             $db,
             "SELECT COUNT(*) AS existe
@@ -304,7 +400,10 @@ try {
         if ((int) ($colunasUsuario['existe'] ?? 0) > 0) {
             $aluno = consultarUm(
                 $db,
-                'SELECT serie FROM usuarios WHERE id = ? LIMIT 1',
+                'SELECT serie
+                 FROM usuarios
+                 WHERE id = ?
+                 LIMIT 1',
                 [$usuarioId]
             );
 
@@ -343,9 +442,13 @@ try {
                     $db,
                     'SELECT concluida
                      FROM progresso_usuario
-                     WHERE usuario_id = ? AND fase_id = ?
+                     WHERE usuario_id = ?
+                       AND fase_id = ?
                      LIMIT 1',
-                    [$usuarioId, (int) $anterior['id']]
+                    [
+                        $usuarioId,
+                        (int) $anterior['id']
+                    ]
                 );
 
                 if (
@@ -360,6 +463,7 @@ try {
             }
         }
 
+        // Verifica se a fase possui seis questões.
         $questoes = consultarTodos(
             $db,
             'SELECT id
@@ -377,7 +481,7 @@ try {
             ], 422);
         }
 
-        // Todas as seis questões precisam ter alternativas.
+        // Cada questão precisa ter pelo menos duas alternativas.
         foreach ($questoes as $questao) {
             $quantidade = consultarUm(
                 $db,
@@ -387,7 +491,7 @@ try {
                 [(int) $questao['id']]
             );
 
-            if ((int) $quantidade['total'] < 2) {
+            if ((int) ($quantidade['total'] ?? 0) < 2) {
                 responder([
                     'ok' => false,
                     'message' => 'Uma das questões não possui alternativas suficientes.'
@@ -395,17 +499,27 @@ try {
             }
         }
 
+        // Busca o ID do jogo.
+        $jogo = consultarUm(
+            $db,
+            'SELECT id
+             FROM jogos
+             WHERE nome = ?
+             LIMIT 1',
+            ['MathSpace']
+        );
+
+        if (!$jogo) {
+            responder([
+                'ok' => false,
+                'message' => 'Jogo MathSpace não encontrado no banco.'
+            ], 404);
+        }
+
+        // Cria o registro da partida.
         $db->beginTransaction();
 
         try {
-            $partidaId = 0;
-
-            $jogo = consultarUm(
-                $db,
-                'SELECT id FROM jogos WHERE nome = ? LIMIT 1',
-                ['MathSpace']
-            );
-
             executar(
                 $db,
                 'INSERT INTO historico_partidas
@@ -430,12 +544,27 @@ try {
             throw $e;
         }
 
+        $primeiraQuestao = obterQuestao(
+            $db,
+            $faseId,
+            0
+        );
+
+        if (!$primeiraQuestao) {
+            responder([
+                'ok' => false,
+                'message' => 'Não foi possível carregar a primeira questão.'
+            ], 500);
+        }
+
+        // Guarda o ID exato da questão enviada ao jogo.
         $_SESSION['mathspace_run'] = [
             'user' => $usuarioId,
             'phase' => $faseId,
             'partida' => $partidaId,
 
             'question_index' => 0,
+            'current_question_id' => (int) $primeiraQuestao['id'],
             'question_started_at' => time(),
 
             'lives' => 3,
@@ -452,10 +581,6 @@ try {
             'result' => null
         ];
 
-        $partida = $_SESSION['mathspace_run'];
-
-        $primeiraQuestao = obterQuestao($db, $faseId, 0);
-
         responder([
             'ok' => true,
             'phase' => $fase,
@@ -468,7 +593,7 @@ try {
     }
 
     // =====================================================
-    // 2. VALIDAR A PARTIDA ATIVA
+    // 4. VALIDAR A PARTIDA ATIVA
     // =====================================================
 
     $partida = $_SESSION['mathspace_run'] ?? null;
@@ -483,7 +608,25 @@ try {
         ], 409);
     }
 
-    if (!empty($partida['finished']) && $acao !== 'finish') {
+    // Compatibilidade com uma sessão criada pela versão anterior.
+    if (!array_key_exists('current_question_id', $partida)) {
+        $questaoAtual = obterQuestao(
+            $db,
+            (int) $partida['phase'],
+            (int) $partida['question_index']
+        );
+
+        $partida['current_question_id'] = $questaoAtual
+            ? (int) $questaoAtual['id']
+            : null;
+
+        $_SESSION['mathspace_run'] = $partida;
+    }
+
+    if (
+        !empty($partida['finished']) &&
+        $acao !== 'finish'
+    ) {
         responder([
             'ok' => false,
             'message' => 'Esta partida já terminou.'
@@ -491,7 +634,7 @@ try {
     }
 
     // =====================================================
-    // 3. BUSCAR A QUESTÃO ATUAL
+    // 5. BUSCAR A QUESTÃO ATUAL
     // =====================================================
 
     if ($acao === 'question') {
@@ -518,8 +661,10 @@ try {
             ], 404);
         }
 
-        // O tempo começa quando a questão é entregue ao jogo.
+        // Atualiza a questão atual antes de enviá-la ao navegador.
+        $partida['current_question_id'] = (int) $questao['id'];
         $partida['question_started_at'] = time();
+
         $_SESSION['mathspace_run'] = $partida;
 
         responder([
@@ -531,41 +676,43 @@ try {
     }
 
     // =====================================================
-    // 4. RESPONDER UMA QUESTÃO
+    // 6. RESPONDER UMA QUESTÃO
     // =====================================================
 
     if ($acao === 'answer') {
-        $questaoId = (int) (
-            $body['questao_id']
-            ?? $body['question_id']
-            ?? $body['questao']
-            ?? 0
-        );
+        $questaoId = obterIdQuestaoEnviado($body);
+        $alternativaId = obterIdAlternativaEnviado($body);
 
-        $alternativaId = (int) (
-            $body['alternativa_id']
-            ?? $body['alternative_id']
-            ?? $body['alternativa']
-            ?? 0
-        );
-
-        $questao = obterQuestao(
+        $questao = validarQuestaoAtual(
             $db,
-            (int) $partida['phase'],
-            (int) $partida['question_index']
+            $partida,
+            $questaoId
         );
 
-        if (
-            !$questao ||
-            (int) $questao['id'] !== $questaoId
-        ) {
+        if (!$questao) {
+            error_log(
+                'MathSpace: questão divergente. ' .
+                    'Usuário=' . $usuarioId .
+                    ', questão enviada=' . $questaoId .
+                    ', questão atual=' .
+                    (int) ($partida['current_question_id'] ?? 0) .
+                    ', índice=' .
+                    (int) ($partida['question_index'] ?? -1)
+            );
+
             responder([
                 'ok' => false,
-                'message' => 'Esta não é a questão atual da missão.'
+                'message' => 'A questão enviada não corresponde à questão atual. Atualize a missão e tente novamente.'
             ], 409);
         }
 
-        if (in_array($questaoId, $partida['answers'], true)) {
+        if (
+            in_array(
+                $questaoId,
+                $partida['answers'] ?? [],
+                true
+            )
+        ) {
             responder([
                 'ok' => false,
                 'message' => 'Esta questão já foi respondida.'
@@ -576,30 +723,38 @@ try {
             $db,
             'SELECT id, texto, correta
              FROM alternativas
-             WHERE id = ? AND questao_id = ?
+             WHERE id = ?
+               AND questao_id = ?
              LIMIT 1',
-            [$alternativaId, $questaoId]
+            [
+                $alternativaId,
+                $questaoId
+            ]
         );
 
         if (!$alternativa) {
             responder([
                 'ok' => false,
-                'message' => 'Alternativa inválida.'
+                'message' => 'Alternativa inválida para esta questão.'
             ], 400);
         }
 
+        $questaoCompleta = consultarUm(
+            $db,
+            'SELECT resposta_correta
+             FROM questoes
+             WHERE id = ?
+             LIMIT 1',
+            [$questaoId]
+        );
+
         $respostaCorreta =
             (int) $alternativa['correta'] === 1 ||
-            trim((string) $alternativa['texto']) ===
-            trim((string) (
-                consultarUm(
-                    $db,
-                    'SELECT resposta_correta
-                     FROM questoes
-                     WHERE id = ?',
-                    [$questaoId]
-                )['resposta_correta'] ?? ''
-            ));
+            (
+                $questaoCompleta &&
+                trim((string) $alternativa['texto']) ===
+                trim((string) ($questaoCompleta['resposta_correta'] ?? ''))
+            );
 
         $pontos = $respostaCorreta
             ? (int) $questao['pontuacao']
@@ -620,7 +775,6 @@ try {
             if ($respostaCorreta) {
                 $partida['score'] += $pontos;
             } else {
-                // Resposta errada: perde exatamente uma vida.
                 $partida['lives'] = max(
                     0,
                     (int) $partida['lives'] - 1
@@ -656,34 +810,32 @@ try {
     }
 
     // =====================================================
-    // 5. TEMPO ESGOTADO
+    // 7. TEMPO ESGOTADO
     // =====================================================
 
     if ($acao === 'timeout') {
-        $questaoId = (int) (
-            $body['questao_id']
-            ?? $body['question_id']
-            ?? $body['questao']
-            ?? 0
-        );
+        $questaoId = obterIdQuestaoEnviado($body);
 
-        $questao = obterQuestao(
+        $questao = validarQuestaoAtual(
             $db,
-            (int) $partida['phase'],
-            (int) $partida['question_index']
+            $partida,
+            $questaoId
         );
 
-        if (
-            !$questao ||
-            (int) $questao['id'] !== $questaoId
-        ) {
+        if (!$questao) {
             responder([
                 'ok' => false,
-                'message' => 'Esta não é a questão atual da missão.'
+                'message' => 'A questão do temporizador não corresponde à questão atual.'
             ], 409);
         }
 
-        if (in_array($questaoId, $partida['answers'], true)) {
+        if (
+            in_array(
+                $questaoId,
+                $partida['answers'] ?? [],
+                true
+            )
+        ) {
             responder([
                 'ok' => false,
                 'message' => 'Esta questão já foi registrada.'
@@ -693,7 +845,6 @@ try {
         $db->beginTransaction();
 
         try {
-            // Registra o tempo esgotado como resposta incorreta.
             registrarResposta(
                 $db,
                 $usuarioId,
@@ -737,14 +888,12 @@ try {
     }
 
     // =====================================================
-    // 6. DANO CAUSADO POR PROJÉTIL RIVAL
+    // 8. DANO CAUSADO POR PROJÉTIL RIVAL
     // =====================================================
 
     if ($acao === 'damage') {
         $dano = 20;
 
-        // O servidor calcula a integridade. Não confia no valor
-        // enviado pelo navegador, que é controlado pelo usuário.
         $partida['shield'] = max(
             0,
             (int) $partida['shield'] - $dano
@@ -777,7 +926,7 @@ try {
     }
 
     // =====================================================
-    // 7. FINALIZAR E SALVAR A MISSÃO
+    // 9. FINALIZAR E SALVAR A MISSÃO
     // =====================================================
 
     if ($acao === 'finish') {
@@ -807,7 +956,8 @@ try {
                 $db,
                 'UPDATE historico_partidas
                  SET pontuacao = ?, acertos = ?, erros = ?
-                 WHERE id = ? AND usuario_id = ?',
+                 WHERE id = ?
+                   AND usuario_id = ?',
                 [
                     $score,
                     $correct,
@@ -821,9 +971,13 @@ try {
                 $db,
                 'SELECT id
                  FROM progresso_usuario
-                 WHERE usuario_id = ? AND fase_id = ?
+                 WHERE usuario_id = ?
+                   AND fase_id = ?
                  LIMIT 1',
-                [$usuarioId, (int) $partida['phase']]
+                [
+                    $usuarioId,
+                    (int) $partida['phase']
+                ]
             );
 
             if ($progresso) {
@@ -877,7 +1031,11 @@ try {
                      SET xp = COALESCE(xp, 0) + ?,
                          pontuacao_total = COALESCE(pontuacao_total, 0) + ?
                      WHERE id = ?',
-                    [$xp, $score, $usuarioId]
+                    [
+                        $xp,
+                        $score,
+                        $usuarioId
+                    ]
                 );
             }
 
@@ -911,14 +1069,24 @@ try {
         ]);
     }
 
+    // =====================================================
+    // 10. AÇÃO DESCONHECIDA
+    // =====================================================
+
     responder([
         'ok' => false,
         'message' => 'Ação desconhecida.'
     ], 400);
 } catch (Throwable $e) {
-    error_log('MathSpace API: ' . $e->getMessage());
+    error_log(
+        'MathSpace API: ' . $e->getMessage()
+    );
 
-    if ($db instanceof PDO && $db->inTransaction()) {
+    if (
+        isset($db) &&
+        $db instanceof PDO &&
+        $db->inTransaction()
+    ) {
         $db->rollBack();
     }
 
