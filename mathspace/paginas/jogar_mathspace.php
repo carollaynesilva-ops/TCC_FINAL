@@ -143,6 +143,13 @@ $payload = [
                 <div id="result-eyebrow" class="eyebrow">RELATÓRIO DE MISSÃO</div>
                 <h2 id="result-title">Missão concluída</h2>
                 <p id="result-message"></p>
+                <section id="result-medals" class="result-medals" hidden aria-live="polite" aria-atomic="true">
+                    <div class="result-medals-heading">
+                        <span aria-hidden="true">🏅</span>
+                        <strong>Nova conquista desbloqueada!</strong>
+                    </div>
+                    <ul id="result-medals-list" class="result-medals-list"></ul>
+                </section>
                 <div class="result-stats">
                     <div><strong id="result-score">0</strong><span>PONTOS</span></div>
                     <div><strong id="result-correct">0/6</strong><span>ACERTOS</span></div>

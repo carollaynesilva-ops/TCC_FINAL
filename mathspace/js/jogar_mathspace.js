@@ -3,7 +3,7 @@
     const cfg = window.MATHSPACE_GAME;
     if (!cfg) return;
     const $ = id => document.getElementById(id);
-    const ui = { shell: $('game-shell'), canvas: $('space-canvas'), integrity: $('integrity-fill'), integrityLabel: $('integrity-label'), intro: $('mission-intro'), start: $('start-button'), question: $('question-panel'), step: $('question-step'), type: $('question-type'), timer: $('question-timer'), progress: $('question-progress-fill'), text: $('question-text'), answers: $('answer-list'), feedback: $('answer-feedback'), next: $('continue-button'), score: $('score-value'), lives: $('lives'), pause: $('pause-button'), pauseOverlay: $('pause-overlay'), resume: $('resume-button'), exit: $('exit-button'), pauseExit: $('pause-exit-button'), result: $('result-overlay'), resultSymbol: $('result-symbol'), resultEyebrow: $('result-eyebrow'), resultTitle: $('result-title'), resultMessage: $('result-message'), resultScore: $('result-score'), resultCorrect: $('result-correct'), resultXp: $('result-xp'), retry: $('retry-button'), alert: $('mission-alert'), tip: $('flight-tip') };
+    const ui = { shell: $('game-shell'), canvas: $('space-canvas'), integrity: $('integrity-fill'), integrityLabel: $('integrity-label'), intro: $('mission-intro'), start: $('start-button'), question: $('question-panel'), step: $('question-step'), type: $('question-type'), timer: $('question-timer'), progress: $('question-progress-fill'), text: $('question-text'), answers: $('answer-list'), feedback: $('answer-feedback'), next: $('continue-button'), score: $('score-value'), lives: $('lives'), pause: $('pause-button'), pauseOverlay: $('pause-overlay'), resume: $('resume-button'), exit: $('exit-button'), pauseExit: $('pause-exit-button'), result: $('result-overlay'), resultSymbol: $('result-symbol'), resultEyebrow: $('result-eyebrow'), resultTitle: $('result-title'), resultMessage: $('result-message'), resultMedals: $('result-medals'), resultMedalsList: $('result-medals-list'), resultScore: $('result-score'), resultCorrect: $('result-correct'), resultXp: $('result-xp'), retry: $('retry-button'), alert: $('mission-alert'), tip: $('flight-tip') };
     const state = { phase: null, question: null, queuedQuestion: null, index: 0, total: 6, score: 0, lives: 3, integrity: 100, correct: 0, locked: false, paused: false, questionOpen: false, started: false, finished: false, game: null, scene: null, pendingFinish: false, timerInterval: null, timeLeft: 20, lastAlienPosition: null, damageLock: false, finishing: false };
     const api = async (action, extra = {}) => { const response = await fetch(cfg.api, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin', body: JSON.stringify({ action, csrf: cfg.csrf, fase: cfg.faseId, ...extra }) }); const data = await response.json().catch(() => ({ ok: false, message: 'O servidor retornou uma resposta inválida.' })); if (!response.ok || !data.ok) throw new Error(data.message || 'Não foi possível concluir esta ação.'); return data; };
     function toast(message) { ui.alert.textContent = message; ui.alert.classList.add('visible'); clearTimeout(toast.timer); toast.timer = setTimeout(() => ui.alert.classList.remove('visible'), 2600) }
@@ -313,6 +313,22 @@
             const medals = Array.isArray(r.medals) ? r.medals : (r.medal ? [r.medal] : []);
             const medalMessage = medals.length ? ` Medalha${medals.length > 1 ? 's' : ''} conquistada${medals.length > 1 ? 's' : ''}: ${medals.join(', ')}.` : '';
             ui.resultMessage.textContent = (r.success ? 'Você concluiu os seis desafios. Seu progresso foi registrado.' : (r.lives <= 0 ? 'Suas vidas acabaram. O resultado da missão foi registrado e você pode tentar novamente.' : 'A missão terminou antes de concluir todos os desafios. Seu resultado foi registrado.')) + medalMessage;
+
+            // Exibe um destaque visual apenas para medalhas novas devolvidas pelo servidor.
+            if (ui.resultMedals && ui.resultMedalsList) {
+                ui.resultMedalsList.replaceChildren();
+                if (medals.length > 0) {
+                    medals.forEach(name => {
+                        const item = document.createElement('li');
+                        item.textContent = name;
+                        ui.resultMedalsList.appendChild(item);
+                    });
+                    ui.resultMedals.hidden = false;
+                } else {
+                    ui.resultMedals.hidden = true;
+                }
+            }
+
             ui.resultScore.textContent = String(r.score);
             ui.resultCorrect.textContent = `${r.correct}/6`;
             ui.resultXp.textContent = String(r.xp);
