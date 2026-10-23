@@ -749,3 +749,165 @@ body {
         width: 48px;
     }
 }
+
+/* ETAPA 3.5 · acabamento sci-fi rosa e azul, sem alterar a lógica do jogo. */
+:root {
+    --cyan: #68eaff;
+    --violet: #ff83e8;
+    --line: rgba(104, 234, 255, .28);
+    --muted: #bac9e8;
+}
+
+.game-shell {
+    background:
+        radial-gradient(ellipse at 18% 42%, rgba(30, 104, 255, .19), transparent 34%),
+        radial-gradient(ellipse at 82% 31%, rgba(222, 46, 195, .13), transparent 30%),
+        radial-gradient(ellipse at 50% 78%, #151c48 0%, #090f28 44%, #030611 100%);
+}
+
+.game-shell::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    pointer-events: none;
+    opacity: .17;
+    background: repeating-linear-gradient(180deg, transparent 0 3px, rgba(112, 205, 255, .08) 4px, transparent 5px);
+    mix-blend-mode: screen;
+}
+
+.starfield {
+    opacity: .52;
+    background-image:
+        radial-gradient(1px 1px at 10% 20%, #fff 50%, transparent 100%),
+        radial-gradient(1px 1px at 70% 14%, #75eaff 50%, transparent 100%),
+        radial-gradient(2px 2px at 88% 38%, #fff 50%, transparent 100%),
+        radial-gradient(1px 1px at 24% 64%, #ff8bea 50%, transparent 100%),
+        radial-gradient(1px 1px at 55% 88%, #c9a7ff 50%, transparent 100%);
+}
+
+.brand-mark {
+    border-color: #68eaff88;
+    color: #ff9aee;
+    background: linear-gradient(135deg, #68eaff18, #ff83e818);
+    box-shadow: 0 0 24px #59e7ff2b, inset 0 0 14px #ff83e811;
+}
+
+.hud-center strong {
+    text-shadow: 0 0 14px #68eaff55, 0 0 30px #ff83e822;
+}
+
+.integrity-track {
+    border-color: #68eaff77;
+    box-shadow: 0 0 12px #68eaff18;
+}
+
+.integrity-track span {
+    background: linear-gradient(90deg, #ff78dc, #68eaff 65%, #d9fbff);
+    box-shadow: 0 0 12px #68eaff99;
+}
+
+.intro-card,
+.result-card {
+    border-color: #68eaff55;
+    background: linear-gradient(145deg, rgba(14, 27, 64, .97), rgba(17, 9, 42, .97));
+    box-shadow: 0 25px 100px #0009, 0 0 42px #68eaff12, 0 0 50px #ff65df0b;
+}
+
+.eyebrow {
+    color: #79edff;
+}
+
+.intro-planet {
+    filter: drop-shadow(0 0 18px #68eaff66) drop-shadow(0 0 28px #ff83e833);
+}
+
+.primary-button {
+    background: linear-gradient(105deg, #236fbd, #8747ad 58%, #c34eae);
+    box-shadow: 0 0 22px #68eaff22, inset 0 1px 0 #ffffff35;
+}
+
+.primary-button:hover {
+    filter: brightness(1.13);
+    box-shadow: 0 0 28px #ff83e833;
+}
+
+.question-panel {
+    border-color: #68eaff66;
+    background: linear-gradient(145deg, rgba(8, 22, 52, .96), rgba(25, 10, 43, .96));
+    box-shadow: 0 15px 60px #0008, 0 0 30px #68eaff12, 0 0 32px #ff83e80b;
+}
+
+.question-progress span {
+    background: linear-gradient(90deg, #ff7cde, #68eaff);
+}
+
+.answer-button {
+    border-color: #8cb9f344;
+    background: linear-gradient(135deg, #ffffff08, #68eaff08);
+}
+
+.answer-button:hover:not(:disabled),
+.answer-button:focus-visible {
+    border-color: #68eaff;
+    background: linear-gradient(110deg, #68eaff18, #ff83e814);
+    box-shadow: 0 0 18px #68eaff18;
+}
+
+.answer-button.correct {
+    border-color: #73f5b2;
+    box-shadow: 0 0 16px #73f5b222;
+}
+
+.answer-button.incorrect {
+    border-color: #ff75c9;
+    box-shadow: 0 0 16px #ff75c922;
+}
+
+.question-timer {
+    box-shadow: 0 0 14px #68eaff10;
+}
+
+.question-timer.is-urgent {
+    box-shadow: 0 0 18px #ff527d33;
+}
+
+.icon-button {
+    box-shadow: inset 0 1px 0 #ffffff0b, 0 0 18px #68eaff08;
+}
+
+.icon-button:hover {
+    box-shadow: 0 0 18px #68eaff22;
+}
+
+.mission-alert {
+    border-color: #68eaff66;
+    background: rgba(7, 15, 39, .94);
+    box-shadow: 0 8px 35px #0008, 0 0 22px #68eaff14;
+}
+
+.flight-tip {
+    text-shadow: 0 0 10px #68eaff44, 0 2px 8px #000;
+}
+
+@media (max-width: 700px) {
+    .hud {
+        gap: 7px;
+    }
+
+    .hud-brand {
+        min-width: auto;
+    }
+
+    .hud-brand small {
+        font-size: 8px;
+    }
+
+    .hud-center strong {
+        font-size: 19px;
+    }
+
+    .lives {
+        font-size: 17px;
+    }
+}

@@ -17,20 +17,36 @@
             create() {
                 const w = this.scale.width, h = this.scale.height;
                 this.stars = []; this.bullets = []; this.aliens = []; this.enemyBullets = []; state.scene = this;
+                const nebulaBlue = this.add.circle(w * .18, h * .42, Math.min(w, h) * .24, 0x2678ff, .055).setDepth(-3);
+                const nebulaPink = this.add.circle(w * .82, h * .34, Math.min(w, h) * .2, 0xd52bca, .045).setDepth(-3);
+                const horizon = this.add.rectangle(w / 2, h * .78, w * 1.2, 1, 0x4e91ff, .1).setDepth(-2);
+                this.scale.on('resize', size => { nebulaBlue.setPosition(size.width * .18, size.height * .42); nebulaPink.setPosition(size.width * .82, size.height * .34); horizon.setPosition(size.width / 2, size.height * .78); horizon.width = size.width * 1.2; });
                 this.lastShot = 0; this.spawnAt = 0; this.enemyShotAt = 0; this.pointerTarget = w / 2;
                 for (let i = 0; i < 105; i++) {
                     const star = this.add.circle(Math.random() * w, Math.random() * h, Math.random() * 1.6 + .35, 0xffffff, Math.random() * .7 + .15);
                     star.speed = Math.random() * 32 + 12; this.stars.push(star);
                 }
-                this.ship = this.add.container(w / 2, h - 74);
-                const glow = this.add.circle(0, 8, 24, 0x5c76ff, .13);
-                const flame = this.add.triangle(0, 28, 0, 0, -6, 18, 6, 18, 0xff9bff, .9);
-                const wingL = this.add.triangle(-12, 10, 0, -8, -12, 11, 0, 8, 0x7774ff, 1);
-                const wingR = this.add.triangle(12, 10, 0, -8, 12, 11, 0, 8, 0x7774ff, 1);
-                const hull = this.add.triangle(0, 0, 0, -26, -18, 17, 0, 10, 0x8cefff, 1);
-                hull.setStrokeStyle(2, 0xffffff, .95);
-                const cockpit = this.add.ellipse(0, -4, 7, 13, 0xffffff, .9);
-                this.ship.add([glow, flame, wingL, wingR, hull, cockpit]);
+                this.ship = this.add.container(w / 2, h - 74).setDepth(4);
+                // Silhueta sci-fi: aura, motores, asas metálicas, blindagem e cockpit.
+                const aura = this.add.circle(0, 5, 34, 0x39cfff, .075);
+                const engineGlowL = this.add.ellipse(-8, 20, 9, 23, 0x45dfff, .35);
+                const engineGlowR = this.add.ellipse(8, 20, 9, 23, 0xff63df, .3);
+                const flameL = this.add.triangle(-8, 29, 0, -2, -4, 14, 4, 14, 0x57eaff, .95);
+                const flameR = this.add.triangle(8, 29, 0, -2, -4, 14, 4, 14, 0xff7de7, .95);
+                const wingL = this.add.triangle(-13, 9, 0, -12, -17, 12, 1, 9, 0x334a83, 1).setStrokeStyle(1.5, 0x63dfff, 1);
+                const wingR = this.add.triangle(13, 9, 0, -12, 17, 12, -1, 9, 0x48345f, 1).setStrokeStyle(1.5, 0xff76e5, 1);
+                const wingPanelL = this.add.triangle(-12, 9, 0, -5, -10, 8, 0, 7, 0x7beaff, .85);
+                const wingPanelR = this.add.triangle(12, 9, 0, -5, 10, 8, 0, 7, 0xff9bea, .85);
+                const lowerHull = this.add.triangle(0, 7, 0, -17, -11, 15, 11, 15, 0x293a65, 1).setStrokeStyle(1.5, 0x9db9ff, 1);
+                const hull = this.add.triangle(0, 0, 0, -29, -10, 12, 0, 17, 0xb8d9ef, 1).setStrokeStyle(1.5, 0xf4fdff, 1);
+                const hullShade = this.add.triangle(0, 1, 0, -23, -5, 8, 0, 12, 0x668cb9, .95);
+                const cockpitFrame = this.add.ellipse(0, -7, 10, 16, 0x15294e, 1).setStrokeStyle(1.5, 0x7deeff, 1);
+                const cockpit = this.add.ellipse(0, -8, 5, 10, 0xc9fbff, .95);
+                const cockpitShine = this.add.line(1, -10, 0, 0, 0, 4, 0xffffff, .9);
+                const detailL = this.add.rectangle(-6, 5, 2, 7, 0x72eaff, .95);
+                const detailR = this.add.rectangle(6, 5, 2, 7, 0xff7ee9, .95);
+                this.ship.add([aura, engineGlowL, engineGlowR, flameL, flameR, wingL, wingR, wingPanelL, wingPanelR, lowerHull, hull, hullShade, cockpitFrame, cockpit, cockpitShine, detailL, detailR]);
+                this.tweens.add({ targets: [flameL, flameR], scaleY: { from: .78, to: 1.18 }, alpha: { from: .7, to: 1 }, duration: 170, yoyo: true, repeat: -1 });
                 this.input.on('pointermove', p => { this.pointerTarget = p.x });
                 this.input.on('pointerdown', p => { this.pointerTarget = p.x });
                 this.scale.on('resize', size => { this.pointerTarget = Phaser.Math.Clamp(this.ship.x, 28, size.width - 28); this.ship.y = size.height - 74; });
@@ -54,6 +70,7 @@
                 }
                 this.bullets = this.bullets.filter(b => {
                     b.y -= delta * .78;
+                    if (b.glow && b.glow.active) { b.glow.x = b.x; b.glow.y = b.y; }
                     if (b.y < -24) { b.destroy(); return false; }
                     return true;
                 });
@@ -65,6 +82,7 @@
                 });
                 this.enemyBullets = this.enemyBullets.filter(b => {
                     b.y += b.speed * delta / 1000;
+                    if (b.trail && b.trail.active) { b.trail.x = b.x; b.trail.y = b.y - 7; }
                     if (b.y > h + 20) { b.destroy(); return false; }
                     // Colisão real entre projétil rival e nave.
                     if (Math.abs(b.x - this.ship.x) < 22 && Math.abs(b.y - this.ship.y) < 28) {
@@ -79,10 +97,12 @@
                         const laser = this.bullets[j];
                         if (Phaser.Math.Distance.Between(alien.x, alien.y, laser.x, laser.y) < alien.radius + 7) {
                             laser.destroy(); this.bullets.splice(j, 1); alien.hp--;
+                            this.burst(laser.x, laser.y, 0x78eaff, 5, .65);
                             alien.setAlpha(.45); this.time.delayedCall(70, () => { if (alien.active) alien.setAlpha(1); });
                             if (alien.hp <= 0) {
                                 // A questão só abre quando o laser derrota um alien.
                                 state.lastAlienPosition = { x: alien.x, y: alien.y };
+                                this.burst(alien.x, alien.y, 0xff72e4, 16, 1.25);
                                 alien.destroy(); this.aliens.splice(i, 1); destroyed = true;
                                 this.events.emit('alien-defeated', { x: alien.x, y: alien.y });
                                 openQuestionForAlien();
@@ -93,33 +113,56 @@
                     if (destroyed) continue;
                 }
             }
+            burst(x, y, color = 0x65eaff, count = 8, force = 1) {
+                // Partículas curtas e pequenas para destacar impactos sem encobrir a tela.
+                for (let i = 0; i < count; i++) {
+                    const dot = this.add.circle(x, y, Phaser.Math.FloatBetween(1, 2.5), color, .95).setDepth(8);
+                    const angle = (Math.PI * 2 * i / count) + Phaser.Math.FloatBetween(-.2, .2);
+                    const distance = Phaser.Math.Between(12, 28) * force;
+                    this.tweens.add({ targets: dot, x: x + Math.cos(angle) * distance, y: y + Math.sin(angle) * distance, alpha: 0, scale: .2, duration: Phaser.Math.Between(180, 330), ease: 'Cubic.easeOut', onComplete: () => dot.destroy() });
+                }
+                const ring = this.add.circle(x, y, 4, color, 0).setStrokeStyle(2, color, .85).setDepth(7);
+                this.tweens.add({ targets: ring, scale: 3.2, alpha: 0, duration: 230, onComplete: () => ring.destroy() });
+            }
             fire(x, y) {
-                const beam = this.add.rectangle(x, y, 3, 18, 0x75f7ff, 1); beam.setStrokeStyle(1, 0xffffff, .8);
-                beam.glow = this.add.circle(x, y, 5, 0x54dfff, .16);
+                const glow = this.add.ellipse(x, y, 11, 25, 0x43dfff, .18).setDepth(2);
+                const beam = this.add.rectangle(x, y, 3.5, 19, 0x73f5ff, 1).setStrokeStyle(1, 0xffffff, .95).setDepth(3);
+                beam.glow = glow;
                 const originalDestroy = beam.destroy.bind(beam);
-                beam.destroy = () => { if (beam.glow) beam.glow.destroy(); originalDestroy(); };
+                beam.destroy = () => { if (beam.glow && beam.glow.active) beam.glow.destroy(); originalDestroy(); };
                 this.bullets.push(beam);
             }
             fireEnemy(x, y) {
-                const shot = this.add.ellipse(x, y, 10, 16, 0xff527d, 1).setStrokeStyle(2, 0xffb4d0, .9);
-                shot.speed = Phaser.Math.Between(190, 245); shot.setDepth(2); this.enemyBullets.push(shot);
+                const trail = this.add.ellipse(x, y - 7, 7, 23, 0xff4fca, .25).setDepth(1);
+                const shot = this.add.ellipse(x, y, 8, 15, 0xff62d9, 1).setStrokeStyle(2, 0xffd7fb, 1).setDepth(2);
+                shot.trail = trail;
+                const originalDestroy = shot.destroy.bind(shot);
+                shot.destroy = () => { if (shot.trail && shot.trail.active) shot.trail.destroy(); originalDestroy(); };
+                shot.speed = Phaser.Math.Between(190, 245); this.enemyBullets.push(shot);
             }
             spawnAlien() {
-                const x = Phaser.Math.Between(30, this.scale.width - 30);
-                const radius = Phaser.Math.Between(13, 19);
-                const alien = this.add.container(x, -30);
-                const aura = this.add.circle(0, 0, radius + 7, 0xff4fd8, .13);
-                const body = this.add.ellipse(0, 0, radius * 1.8, radius * 1.45, 0x8c5bff, 1).setStrokeStyle(2, 0xe0caff, 1);
-                const eyeL = this.add.ellipse(-5, -2, 4, 7, 0x8cffff, 1);
-                const eyeR = this.add.ellipse(5, -2, 4, 7, 0x8cffff, 1);
-                const feelerL = this.add.line(-6, -radius / 2, 0, 0, -5, -8, 0xc99bff, 1.5);
-                const feelerR = this.add.line(6, -radius / 2, 0, 0, 5, -8, 0xc99bff, 1.5);
-                alien.add([aura, body, eyeL, eyeR, feelerL, feelerR]);
-                alien.radius = radius + 3; alien.speed = Phaser.Math.Between(38, 68); alien.hp = 1; alien.wobble = Math.random() * 6;
+                const x = Phaser.Math.Between(34, this.scale.width - 34);
+                const radius = Phaser.Math.Between(15, 20);
+                const alien = this.add.container(x, -34).setDepth(2);
+                const aura = this.add.circle(0, 0, radius + 12, 0xff4fd8, .08);
+                const shadow = this.add.ellipse(0, 3, radius * 2.45, radius * 1.35, 0x070b1d, .8);
+                const wingL = this.add.triangle(-radius * .6, 1, 0, -radius * .5, -radius * 1.3, radius * .6, radius * .35, radius * .45, 0x26365d, 1).setStrokeStyle(1.5, 0x5deaff, 1);
+                const wingR = this.add.triangle(radius * .6, 1, 0, -radius * .5, radius * 1.3, radius * .6, -radius * .35, radius * .45, 0x40274e, 1).setStrokeStyle(1.5, 0xff71df, 1);
+                const body = this.add.ellipse(0, 0, radius * 1.7, radius * 1.22, 0x566b91, 1).setStrokeStyle(2, 0xd2e6ff, 1);
+                const armor = this.add.ellipse(0, -2, radius * 1.05, radius * .65, 0x172847, 1).setStrokeStyle(1, 0x7eeaff, .95);
+                const core = this.add.ellipse(0, -1, radius * .42, radius * .32, 0xff65e1, 1).setStrokeStyle(1, 0xffe5fb, 1);
+                const eyeL = this.add.circle(-radius * .42, 1, 2.2, 0x72f5ff, 1);
+                const eyeR = this.add.circle(radius * .42, 1, 2.2, 0x72f5ff, 1);
+                const finL = this.add.line(-radius * .55, -radius * .25, 0, 0, -5, -8, 0x8cefff, 1.5);
+                const finR = this.add.line(radius * .55, -radius * .25, 0, 0, 5, -8, 0xff8ce9, 1.5);
+                alien.add([aura, shadow, wingL, wingR, body, armor, core, eyeL, eyeR, finL, finR]);
+                alien.radius = radius + 5; alien.speed = Phaser.Math.Between(38, 68); alien.hp = 1; alien.wobble = Math.random() * 6;
+                this.tweens.add({ targets: aura, alpha: { from: .05, to: .18 }, scale: { from: .94, to: 1.08 }, duration: 680, yoyo: true, repeat: -1 });
                 this.aliens.push(alien);
             }
             damageShip() {
                 if (state.finished || state.paused) return;
+                this.burst(this.ship.x, this.ship.y, 0xff70dc, 12, 1.1);
                 state.integrity = Math.max(0, state.integrity - 20); renderScore();
                 this.ship.setAlpha(.35); this.time.delayedCall(180, () => { if (this.ship && this.ship.active) this.ship.setAlpha(1); });
                 if (state.integrity === 0) {
