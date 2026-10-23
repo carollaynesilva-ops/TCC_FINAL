@@ -254,11 +254,9 @@ body {
     top: 0;
     z-index: 100;
 
-    background: color-mix(
-        in srgb,
-        var(--surface) 94%,
-        transparent
-    );
+    background: color-mix(in srgb,
+            var(--surface) 94%,
+            transparent);
 
     border-bottom: 1px solid var(--border);
 
@@ -1427,4 +1425,642 @@ a:focus-visible {
 .feedback[hidden],
 .next-button[hidden] {
     display: none !important;
+}
+
+/* =========================================================
+   MATHCHEF GAMEPLAY - REFORMA VISUAL
+   Cozinha suave, interface de jogo e sem emojis decorativos
+   ========================================================= */
+
+:root {
+    --background: #f8eee8;
+    --surface: #fffdfb;
+    --surface-soft: #fff5f0;
+    --primary: #b85e83;
+    --primary-dark: #934563;
+    --primary-light: #f9e5ed;
+    --purple: #8e739e;
+    --purple-light: #f1eaf4;
+    --wood: #b98762;
+    --wood-dark: #87583f;
+    --gold: #b98735;
+    --gold-light: #fff2d7;
+    --text: #43323a;
+    --text-light: #806f76;
+    --border: #eadbd7;
+    --success: #4b916c;
+    --success-light: #e7f5ec;
+    --error: #c35f6c;
+    --error-light: #fbeaec;
+    --shadow: 0 18px 48px rgba(93, 55, 57, .13);
+    --shadow-soft: 0 7px 22px rgba(93, 55, 57, .09);
+    --radius: 24px;
+}
+
+body {
+    background: #f8eee8;
+    background-image: linear-gradient(rgba(255, 248, 245, .80), rgba(255, 248, 245, .88)), url('../img/cozinha.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.food-background {
+    display: none;
+}
+
+.topbar {
+    background: rgba(255, 253, 251, .88);
+    border-bottom: 1px solid rgba(234, 219, 215, .9);
+    box-shadow: 0 5px 24px rgba(85, 53, 54, .06);
+}
+
+.topbar-content {
+    max-width: 1320px;
+    min-height: 82px;
+    padding-inline: clamp(16px, 3vw, 38px);
+}
+
+.brand {
+    gap: 13px;
+}
+
+.brand-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #f7dce7, #fdf0e8);
+    border: 1px solid #efd1dd;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+
+.brand-mark {
+    font-family: Georgia, serif;
+    font-size: 25px;
+    font-weight: 800;
+    color: var(--primary-dark);
+}
+
+.brand strong {
+    font-size: 20px;
+    letter-spacing: -.04em;
+}
+
+.brand small {
+    font-size: 12px;
+}
+
+.game-container {
+    max-width: 1320px;
+    padding: clamp(20px, 3vw, 38px) clamp(14px, 3vw, 38px) 64px;
+}
+
+.game-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 14px 24px;
+    padding: clamp(20px, 3vw, 30px);
+    margin-bottom: 20px;
+    background: rgba(255, 253, 251, .90);
+    border: 1px solid rgba(255, 255, 255, .85);
+    border-radius: 26px;
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(12px);
+}
+
+.back-link {
+    grid-column: 1 / -1;
+    width: fit-content;
+    font-weight: 700;
+}
+
+.phase-info {
+    min-width: 0;
+}
+
+.phase-number {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 12px;
+    margin-bottom: 12px;
+    border: 1px solid #efcfdd;
+    border-radius: 999px;
+    background: #fff0f5;
+    color: #9a4d6c;
+    font-size: 11px;
+    letter-spacing: .12em;
+    font-weight: 900;
+}
+
+.phase-info h1 {
+    margin-bottom: 7px;
+    font-size: clamp(25px, 3vw, 36px);
+    line-height: 1.12;
+    letter-spacing: -.045em;
+}
+
+.phase-info p {
+    max-width: 680px;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.phase-badges {
+    align-self: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.badge {
+    padding: 9px 13px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.progress-area {
+    padding: 17px 21px 19px;
+    margin-bottom: 22px;
+    border-radius: 18px;
+    background: rgba(255, 253, 251, .88);
+    border: 1px solid rgba(255, 255, 255, .9);
+    box-shadow: var(--shadow-soft);
+}
+
+.progress-info {
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.progress-bar {
+    height: 10px;
+    margin-top: 11px;
+    border-radius: 999px;
+    background: #f0e1e0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    border-radius: 999px;
+    background: linear-gradient(90deg, #c56f91, #e4a4a8, #d8b078);
+    box-shadow: 0 0 12px rgba(197, 111, 145, .25);
+}
+
+.game-layout {
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 22px;
+    align-items: stretch;
+}
+
+.question-card {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(22px, 3.2vw, 38px);
+    background: rgba(255, 253, 251, .96);
+    border: 1px solid rgba(255, 255, 255, .95);
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    min-height: 440px;
+}
+
+.question-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #b85e83, #e6b5a0, #d8b078);
+}
+
+.question-top {
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+.question-tag {
+    gap: 10px;
+    font-size: 12px;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+}
+
+.question-tag-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 31px;
+    height: 31px;
+    border-radius: 10px;
+    color: #9a4d6c;
+    background: #f9e5ed;
+    border: 1px solid #efd1dd;
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.question-points {
+    border: 1px solid #f0dfba;
+    border-radius: 999px;
+    padding: 9px 13px;
+    color: #946b25;
+}
+
+.subject-label {
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: #f1eaf4;
+    color: #816392;
+    margin-bottom: 15px;
+}
+
+.question-card h2 {
+    max-width: 800px;
+    margin-bottom: 28px;
+    font-size: clamp(22px, 2.7vw, 31px);
+    line-height: 1.4;
+    letter-spacing: -.025em;
+}
+
+.alternatives {
+    gap: 13px;
+}
+
+.alternative-button {
+    min-height: 76px;
+    padding: 16px 18px;
+    gap: 14px;
+    border: 1.5px solid #e9deda;
+    border-radius: 17px;
+    background: linear-gradient(145deg, #fff, #fffaf8);
+    box-shadow: 0 3px 0 rgba(125, 83, 74, .035);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.alternative-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: #d8a0b7;
+    background: #fff5f8;
+    box-shadow: 0 9px 18px rgba(184, 94, 131, .10);
+}
+
+.alternative-letter {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 11px;
+    background: #f7e9ee;
+    color: #9a4d6c;
+    font-weight: 850;
+}
+
+.alternative-button.correct {
+    border-color: #78b795;
+    background: #f0faf3;
+}
+
+.alternative-button.wrong {
+    border-color: #d98a91;
+    background: #fff3f3;
+}
+
+.feedback {
+    margin-top: 22px;
+    border-radius: 18px;
+    padding: 18px;
+}
+
+.next-button {
+    border-radius: 14px;
+    min-height: 52px;
+    box-shadow: 0 8px 18px rgba(184, 94, 131, .18);
+}
+
+.side-panel {
+    gap: 16px;
+}
+
+.score-card,
+.hint-card,
+.recipe-card {
+    border: 1px solid rgba(255, 255, 255, .95);
+    border-radius: 22px;
+    background: rgba(255, 253, 251, .94);
+    box-shadow: var(--shadow-soft);
+    padding: 21px;
+}
+
+.score-card {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+.score-icon,
+.hint-icon,
+.recipe-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 45px;
+    height: 45px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .04em;
+}
+
+.score-icon {
+    background: #fff2d7;
+    color: #946b25;
+    border: 1px solid #f0dfba;
+}
+
+.hint-icon {
+    background: #f9e5ed;
+    color: #9a4d6c;
+    border: 1px solid #efd1dd;
+}
+
+.recipe-icon {
+    background: #f1eaf4;
+    color: #816392;
+    border: 1px solid #e1d4e9;
+}
+
+.score-card span {
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+.score-card strong {
+    display: block;
+    font-size: 29px;
+    line-height: 1.2;
+    letter-spacing: -.04em;
+}
+
+.hint-header {
+    gap: 12px;
+    margin-bottom: 17px;
+}
+
+.hint-header h3,
+.recipe-card h3 {
+    font-size: 16px;
+    letter-spacing: -.02em;
+}
+
+.hint-header p,
+.recipe-card p {
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.hint-button {
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 8px;
+    padding: 12px 13px;
+}
+
+.hint-text {
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+.recipe-card {
+    min-height: 175px;
+}
+
+.recipe-card h3 {
+    margin: 14px 0 7px;
+}
+
+.empty-game {
+    background: rgba(255, 253, 251, .96);
+    border: 1px solid white;
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+}
+
+.empty-icon {
+    display: grid;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    margin: 0 auto 18px;
+    border-radius: 20px;
+    background: #f9e5ed;
+    color: #9a4d6c;
+    font: 800 19px Georgia, serif;
+}
+
+body.dark {
+    --background: #211c21;
+    --surface: #2b252c;
+    --surface-soft: #342c34;
+    --primary: #e3a0bc;
+    --primary-dark: #f0bfd2;
+    --primary-light: #49303e;
+    --purple: #c4a8d4;
+    --purple-light: #3d3143;
+    --gold: #e1bb70;
+    --gold-light: #443827;
+    --text: #f8edf2;
+    --text-light: #c8b8c1;
+    --border: #4b3b47;
+    --success: #85c9a0;
+    --success-light: #243c2d;
+    --error: #e99ba2;
+    --error-light: #482d32;
+    --shadow: 0 18px 48px rgba(0, 0, 0, .28);
+    --shadow-soft: 0 7px 22px rgba(0, 0, 0, .18);
+}
+
+body.dark {
+    background-image: linear-gradient(rgba(28, 22, 29, .84), rgba(28, 22, 29, .91)), url('../img/cozinha.jpg');
+}
+
+body.dark .topbar,
+body.dark .game-header,
+body.dark .progress-area,
+body.dark .question-card,
+body.dark .score-card,
+body.dark .hint-card,
+body.dark .recipe-card,
+body.dark .empty-game {
+    background-color: rgba(43, 37, 44, .94);
+    border-color: var(--border);
+}
+
+body.dark .alternative-button {
+    background: #342c34;
+    border-color: #4b3b47;
+}
+
+body.dark .alternative-button:hover:not(:disabled) {
+    background: #44303d;
+    border-color: #bb7897;
+}
+
+body.dark .phase-number,
+body.dark .question-tag-mark,
+body.dark .hint-icon {
+    background: #49303e;
+    border-color: #624052;
+    color: #f0bfd2;
+}
+
+body.dark .subject-label,
+body.dark .recipe-icon {
+    background: #3d3143;
+    border-color: #55425d;
+    color: #d3bce1;
+}
+
+body.dark .progress-bar {
+    background: #493a43;
+}
+
+body.pink {
+    --background: #fff5f8;
+    --surface: #fffdfd;
+    --surface-soft: #fff0f5;
+    --primary: #bd668c;
+    --primary-dark: #984b6e;
+    --primary-light: #fce7ef;
+    --purple: #9478ae;
+    --purple-light: #f1eaf7;
+    --text: #473642;
+    --text-light: #806b78;
+    --border: #f0dce5;
+}
+
+@media (max-width: 980px) {
+    .game-layout {
+        grid-template-columns: minmax(0, 1fr) 250px;
+        gap: 16px;
+    }
+
+    .question-card {
+        padding: 24px;
+    }
+
+    .side-panel {
+        gap: 12px;
+    }
+}
+
+@media (max-width: 760px) {
+    .topbar-content {
+        min-height: 70px;
+    }
+
+    .brand small {
+        display: none;
+    }
+
+    .game-user {
+        gap: 9px;
+    }
+
+    .user-score {
+        padding: 8px 10px;
+    }
+
+    .game-header {
+        grid-template-columns: 1fr;
+    }
+
+    .phase-badges {
+        justify-content: flex-start;
+    }
+
+    .game-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .side-panel {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .recipe-card {
+        grid-column: 1 / -1;
+    }
+
+    .alternatives {
+        grid-template-columns: 1fr;
+    }
+
+    .question-card {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .topbar-content {
+        padding: 10px 13px;
+        gap: 10px;
+    }
+
+    .brand-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .brand strong {
+        font-size: 17px;
+    }
+
+    .user-score small {
+        display: none;
+    }
+
+    .theme-switcher {
+        gap: 2px;
+    }
+
+    .theme-switcher button {
+        width: 27px;
+        height: 29px;
+    }
+
+    .game-container {
+        padding: 16px 12px 38px;
+    }
+
+    .game-header {
+        padding: 19px;
+        border-radius: 20px;
+    }
+
+    .progress-area {
+        padding: 15px;
+    }
+
+    .question-card {
+        padding: 22px 17px;
+        border-radius: 22px;
+    }
+
+    .question-top {
+        align-items: flex-start;
+    }
+
+    .question-points {
+        white-space: nowrap;
+    }
+
+    .side-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .recipe-card {
+        grid-column: auto;
+    }
 }

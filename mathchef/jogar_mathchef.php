@@ -238,11 +238,9 @@ $questoes = $stmt->fetchAll();
 if (!$questoes) {
 
     $semQuestoes = true;
-
 } else {
 
     $semQuestoes = false;
-
 }
 
 
@@ -328,21 +326,8 @@ $dificuldade = $dificuldades[$fase["nivel_dificuldade"]] ?? "Fácil";
 
 <body>
 
-    <!-- Fundo -->
-    <div class="food-background" aria-hidden="true">
-        <span class="food-icon food-1">🍎</span>
-        <span class="food-icon food-2">🥕</span>
-        <span class="food-icon food-3">🍋</span>
-        <span class="food-icon food-4">🍳</span>
-        <span class="food-icon food-5">🥛</span>
-        <span class="food-icon food-6">🧁</span>
-        <span class="food-icon food-7">🍪</span>
-        <span class="food-icon food-8">🥣</span>
-        <span class="food-icon food-9">🍓</span>
-        <span class="food-icon food-10">🥄</span>
-        <span class="food-icon food-11">🍰</span>
-        <span class="food-icon food-12">🧂</span>
-    </div>
+    <!-- Fundo visual da cozinha, sem ícones decorativos -->
+    <div class="food-background" aria-hidden="true"></div>
 
     <!-- Barra superior -->
     <header class="topbar">
@@ -350,7 +335,7 @@ $dificuldade = $dificuldades[$fase["nivel_dificuldade"]] ?? "Fácil";
         <div class="topbar-content">
 
             <a href="mathchef.php" class="brand">
-                <span class="brand-icon">🍳</span>
+                <span class="brand-icon" aria-hidden="true"><span class="brand-mark">M</span></span>
 
                 <div>
                     <strong>MathChef</strong>
@@ -361,7 +346,7 @@ $dificuldade = $dificuldades[$fase["nivel_dificuldade"]] ?? "Fácil";
             <div class="game-user">
 
                 <div class="user-score">
-                    <span>⭐</span>
+                    <span class="score-mark" aria-hidden="true">XP</span>
                     <strong id="scoreTop">0</strong>
                     <small>pontos</small>
                 </div>
@@ -499,7 +484,7 @@ $dificuldade = $dificuldades[$fase["nivel_dificuldade"]] ?? "Fácil";
                     <div class="question-top">
 
                         <div class="question-tag">
-                            <span>🧠</span>
+                            <span class="question-tag-mark" aria-hidden="true">01</span>
                             Desafio matemático
                         </div>
 
@@ -582,9 +567,7 @@ $dificuldade = $dificuldades[$fase["nivel_dificuldade"]] ?? "Fácil";
 
                     <div class="score-card">
 
-                        <div class="score-icon">
-                            ⭐
-                        </div>
+                        <div class="score-icon" aria-hidden="true">XP</div>
 
                         <div>
 
@@ -605,9 +588,7 @@ $dificuldade = $dificuldades[$fase["nivel_dificuldade"]] ?? "Fácil";
 
                         <div class="hint-header">
 
-                            <div class="hint-icon">
-                                💡
-                            </div>
+                            <div class="hint-icon" aria-hidden="true">?</div>
 
                             <div>
                                 <h3>Dicas</h3>
@@ -626,9 +607,7 @@ $dificuldade = $dificuldades[$fase["nivel_dificuldade"]] ?? "Fácil";
 
                     <div class="recipe-card">
 
-                        <div class="recipe-icon">
-                            👨‍🍳
-                        </div>
+                        <div class="recipe-icon" aria-hidden="true">MC</div>
 
                         <h3>Modo Chef</h3>
 
