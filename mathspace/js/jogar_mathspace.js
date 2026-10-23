@@ -1,4 +1,3 @@
-
 (() => {
     "use strict";
 
@@ -20,6 +19,7 @@
         lives: $("#lives"),
         shieldFill: $("#shield-fill"),
         shieldValue: $("#shield-value"),
+
         phaseName: null,
         phaseDescription: null,
 
@@ -38,8 +38,6 @@
 
         missionIntro: $("#mission-intro"),
         startButton: $("#start-button"),
-
-        startButton: $("#start-button"),
         pauseButton: $("#pause-button"),
         resumeButton: $("#resume-button"),
         restartButton: $("#retry-button"),
@@ -53,6 +51,7 @@
     const state = {
         game: null,
         scene: null,
+        targetAlien: null,
 
         question: null,
         questionIndex: 0,
@@ -75,8 +74,6 @@
         damageInProgress: false,
         pendingFinish: false,
 
-        // Evita que uma sequência de projéteis tire várias vidas
-        // antes que o jogador consiga reagir.
         invulnerableUntil: 0
     };
 
@@ -90,6 +87,10 @@
     // =========================================================
 
     async function api(action, extra = {}) {
+        if (!cfg.api) {
+            throw new Error("O endereço da API do MathSpace não foi configurado.");
+        }
+
         const response = await fetch(cfg.api, {
             method: "POST",
             headers: {
@@ -97,10 +98,13 @@
                 "Accept": "application/json"
             },
             credentials: "same-origin",
+            cache: "no-store",
             body: JSON.stringify({
                 action,
                 acao: action,
 
+                // O PHP aceita os três formatos.
+                fase: cfg.faseId,
                 fase_id: cfg.faseId,
                 faseId: cfg.faseId,
 
@@ -115,13 +119,21 @@
         try {
             data = await response.json();
         } catch {
-            throw new Error("O servidor retornou uma resposta inválida.");
+            throw new Error(
+                "O servidor retornou uma resposta inválida. Verifique o endpoint PHP."
+            );
         }
 
-        if (!response.ok || data.sucesso === false || data.success === false) {
+        // O endpoint PHP utiliza "ok" para indicar sucesso.
+        if (
+            !response.ok ||
+            data.ok === false ||
+            data.sucesso === false ||
+            data.success === false
+        ) {
             throw new Error(
-                data.mensagem ||
                 data.message ||
+                data.mensagem ||
                 "Não foi possível completar essa ação."
             );
         }
@@ -135,23 +147,26 @@
 
     function setText(element, value) {
         if (element) {
-            element.textContent = value;
+            element.textContent = value ?? "";
         }
     }
 
     function getQuestion(data) {
-        return data.questao || data.question || data.pergunta || null;
+        return data?.question ||
+            data?.questao ||
+            data?.pergunta ||
+            null;
     }
 
     function getAlternatives(question) {
-        if (!question) return [];
+        if (!question) {
+            return [];
+        }
 
-        return (
-            question.alternativas ||
+        return question.alternativas ||
             question.alternatives ||
             question.opcoes ||
-            []
-        );
+            [];
     }
 
     function getQuestionId(question) {
@@ -164,11 +179,32 @@
     function getAlternativeId(alternative) {
         return alternative?.id ??
             alternative?.alternativa_id ??
+            alternative?.alternative_id ??
             null;
     }
 
+    function getQuestionIndex(data, fallback = 0) {
+        const index = data?.index ??
+            data?.indice ??
+            data?.questionIndex ??
+            data?.question_index;
+
+        const number = Number(index);
+
+        return Number.isInteger(number) && number >= 0
+            ? number
+            : fallback;
+    }
+
+    function getResult(data) {
+        // O PHP retorna o resultado dentro de "result".
+        return data?.result || data?.resultado || data || {};
+    }
+
     function showFeedback(message, type = "info") {
-        if (!ui.questionFeedback) return;
+        if (!ui.questionFeedback) {
+            return;
+        }
 
         ui.questionFeedback.textContent = message;
         ui.questionFeedback.className = `question-feedback ${type}`;
@@ -176,7 +212,9 @@
     }
 
     function clearFeedback() {
-        if (!ui.questionFeedback) return;
+        if (!ui.questionFeedback) {
+            return;
+        }
 
         ui.questionFeedback.textContent = "";
         ui.questionFeedback.className = "question-feedback";
@@ -184,13 +222,13 @@
     }
 
     function setOptionsDisabled(disabled) {
-        if (!ui.questionOptions) return;
+        if (!ui.questionOptions) {
+            return;
+        }
 
-        ui.questionOptions
-            .querySelectorAll("button")
-            .forEach((button) => {
-                button.disabled = disabled;
-            });
+        ui.questionOptions.querySelectorAll("button").forEach((button) => {
+            button.disabled = disabled;
+        });
     }
 
     function renderScore() {
@@ -198,9 +236,10 @@
     }
 
     function renderLives() {
-        if (!ui.lives) return;
+        if (!ui.lives) {
+            return;
+        }
 
-        // Também funciona caso o HUD use corações individuais.
         const hearts = ui.lives.querySelectorAll("[data-heart]");
 
         if (hearts.length) {
@@ -209,20 +248,31 @@
                 heart.classList.toggle("active", index < state.lives);
             });
         } else {
-            ui.lives.textContent = "♥ ".repeat(state.lives) +
-                "♡ ".repeat(MAX_LIVES - state.lives);
+            ui.lives.textContent =
+                "♥ ".repeat(Math.max(0, state.lives)) +
+                "♡ ".repeat(Math.max(0, MAX_LIVES - state.lives));
         }
     }
 
     function renderShield() {
-        const shield = Math.max(0, Math.min(MAX_SHIELD, state.shield));
+        const shield = Math.max(
+            0,
+            Math.min(MAX_SHIELD, state.shield)
+        );
 
         if (ui.shieldFill) {
             ui.shieldFill.style.width = `${shield}%`;
             ui.shieldFill.setAttribute("aria-valuenow", String(shield));
 
-            ui.shieldFill.classList.toggle("shield-warning", shield <= 40);
-            ui.shieldFill.classList.toggle("shield-critical", shield <= 20);
+            ui.shieldFill.classList.toggle(
+                "shield-warning",
+                shield <= 40
+            );
+
+            ui.shieldFill.classList.toggle(
+                "shield-critical",
+                shield <= 20
+            );
         }
 
         setText(ui.shieldValue, `${shield}%`);
@@ -235,37 +285,38 @@
     }
 
     function syncServerState(data) {
-        if (Number.isFinite(Number(data.pontuacao))) {
-            state.score = Number(data.pontuacao);
-        } else if (Number.isFinite(Number(data.score))) {
-            state.score = Number(data.score);
+        if (!data) {
+            return;
         }
 
-        if (Number.isFinite(Number(data.vidas))) {
-            state.lives = Number(data.vidas);
-        } else if (Number.isFinite(Number(data.lives))) {
-            state.lives = Number(data.lives);
+        const score = data.pontuacao ?? data.score;
+        const lives = data.vidas ?? data.lives;
+        const shield = data.escudo ?? data.shield ?? data.integridade;
+        const correct = data.acertos ?? data.correctCount;
+
+        if (score !== undefined && Number.isFinite(Number(score))) {
+            state.score = Number(score);
         }
 
-        if (Number.isFinite(Number(data.escudo))) {
-            state.shield = Number(data.escudo);
-        } else if (Number.isFinite(Number(data.shield))) {
-            state.shield = Number(data.shield);
-        } else if (Number.isFinite(Number(data.integridade))) {
-            state.shield = Number(data.integridade);
+        if (lives !== undefined && Number.isFinite(Number(lives))) {
+            state.lives = Number(lives);
         }
 
-        if (Number.isFinite(Number(data.acertos))) {
-            state.correct = Number(data.acertos);
-        } else if (Number.isFinite(Number(data.correctCount))) {
-            state.correct = Number(data.correctCount);
+        if (shield !== undefined && Number.isFinite(Number(shield))) {
+            state.shield = Number(shield);
+        }
+
+        if (correct !== undefined && Number.isFinite(Number(correct))) {
+            state.correct = Number(correct);
         }
 
         renderHUD();
     }
 
     function setOverlayVisible(element, visible) {
-        if (!element) return;
+        if (!element) {
+            return;
+        }
 
         element.hidden = !visible;
         element.classList.toggle("visible", visible);
@@ -276,14 +327,13 @@
 
         if (!document.fullscreenElement && element.requestFullscreen) {
             element.requestFullscreen().catch(() => {
-                // Alguns navegadores bloqueiam tela cheia.
-                // O jogo continua funcionando sem ela.
+                // O jogo continua funcionando sem tela cheia.
             });
         }
     }
 
     // =========================================================
-    // TEMPORIZADOR DA PERGUNTA
+    // TEMPORIZADOR
     // =========================================================
 
     function stopQuestionTimer() {
@@ -297,13 +347,16 @@
         setText(ui.questionTimer, `${state.timeLeft}s`);
 
         if (ui.timerProgress) {
-            const percentage = (state.timeLeft / QUESTION_TIME) * 100;
+            const percentage =
+                (state.timeLeft / QUESTION_TIME) * 100;
 
             ui.timerProgress.style.width = `${percentage}%`;
+
             ui.timerProgress.classList.toggle(
                 "timer-warning",
                 state.timeLeft <= 10
             );
+
             ui.timerProgress.classList.toggle(
                 "timer-critical",
                 state.timeLeft <= 5
@@ -317,7 +370,7 @@
         state.timeLeft = QUESTION_TIME;
         renderTimer();
 
-        state.timer = setInterval(() => {
+        state.timer = window.setInterval(() => {
             if (
                 state.finished ||
                 state.paused ||
@@ -338,7 +391,7 @@
     }
 
     // =========================================================
-    // CONTROLE DO PAINEL DE PERGUNTAS
+    // PAINEL DE PERGUNTAS
     // =========================================================
 
     function showQuestion() {
@@ -372,11 +425,19 @@
 
             const alternatives = getAlternatives(state.question);
 
+            if (!alternatives.length) {
+                showFeedback(
+                    "Esta questão não possui alternativas cadastradas.",
+                    "error"
+                );
+            }
+
             alternatives.forEach((alternative, index) => {
                 const button = document.createElement("button");
 
                 button.type = "button";
                 button.className = "answer-option";
+
                 button.textContent =
                     alternative.texto ??
                     alternative.text ??
@@ -409,42 +470,40 @@
     async function loadNextQuestion() {
         try {
             const data = await api("question");
-
             const question = getQuestion(data);
 
             if (!question) {
-                if (data.finished || data.concluida) {
+                if (data.finished || data.concluida || data.fim) {
                     await finishRun();
                     return;
                 }
 
-                throw new Error("O servidor não encontrou a próxima pergunta.");
+                throw new Error(
+                    data.message ||
+                    "O servidor não encontrou a próxima pergunta."
+                );
             }
 
             state.question = question;
+            state.questionIndex = getQuestionIndex(
+                data,
+                state.questionIndex + 1
+            );
 
-            const index = data.indice ?? data.questionIndex;
-
-            if (Number.isFinite(Number(index))) {
-                state.questionIndex = Number(index);
-            } else {
-                state.questionIndex += 1;
-            }
-
-            // A pergunta só aparece quando o laser atingir outro alien.
             closeQuestion();
 
             if (state.scene && !state.paused && !state.finished) {
                 state.scene.scene.resume();
             }
         } catch (error) {
-            console.error(error);
+            console.error("Erro ao carregar a próxima questão:", error);
+
             showFeedback(
-                "Não foi possível carregar o próximo desafio. Tente novamente.",
+                error.message ||
+                "Não foi possível carregar o próximo desafio.",
                 "error"
             );
 
-            // Não deixa a cena travada indefinidamente.
             closeQuestion();
 
             if (state.scene && !state.paused && !state.finished) {
@@ -454,7 +513,7 @@
     }
 
     // =========================================================
-    // RESPOSTA DO JOGADOR
+    // RESPONDER QUESTÃO
     // =========================================================
 
     async function submitAnswer(alternative, button) {
@@ -471,7 +530,7 @@
 
         if (!questionId || !alternativeId) {
             showFeedback(
-                "Esta alternativa não possui um identificador válido.",
+                "Esta questão ou alternativa não possui um identificador válido.",
                 "error"
             );
             return;
@@ -494,8 +553,8 @@
             });
 
             const isCorrect = Boolean(
-                data.correta ??
                 data.correct ??
+                data.correta ??
                 data.acertou
             );
 
@@ -533,35 +592,38 @@
                 }
             }
 
-            const ended = Boolean(
+            state.questionIndex = getQuestionIndex(
+                data,
+                state.questionIndex + 1
+            );
+
+            state.pendingFinish = Boolean(
                 data.finished ||
                 data.fim ||
                 data.concluida ||
                 state.lives <= 0
             );
 
-            state.pendingFinish = ended;
-
             window.setTimeout(async () => {
-                if (state.finished) return;
-
-                if (state.pendingFinish) {
-                    await finishRun();
+                if (state.finished) {
                     return;
                 }
 
-                await loadNextQuestion();
+                if (state.pendingFinish) {
+                    await finishRun();
+                } else {
+                    await loadNextQuestion();
+                }
             }, 1000);
         } catch (error) {
-            console.error(error);
+            console.error("Erro ao registrar resposta:", error);
 
             showFeedback(
                 error.message ||
-                "Não foi possível registrar sua resposta. Tente novamente.",
+                "Não foi possível registrar sua resposta.",
                 "error"
             );
 
-            // Permite tentar novamente sem perder a pergunta.
             state.requestInProgress = false;
             setOptionsDisabled(false);
             startQuestionTimer();
@@ -581,11 +643,19 @@
             return;
         }
 
+        const questionId = getQuestionId(state.question);
+
+        if (!questionId) {
+            showFeedback(
+                "Não foi possível identificar a questão atual.",
+                "error"
+            );
+            return;
+        }
+
         state.requestInProgress = true;
         stopQuestionTimer();
         setOptionsDisabled(true);
-
-        const questionId = getQuestionId(state.question);
 
         try {
             const data = await api("timeout", {
@@ -604,6 +674,11 @@
                 state.scene.showAlienAttack();
             }
 
+            state.questionIndex = getQuestionIndex(
+                data,
+                state.questionIndex + 1
+            );
+
             state.pendingFinish = Boolean(
                 data.finished ||
                 data.fim ||
@@ -611,17 +686,18 @@
             );
 
             window.setTimeout(async () => {
-                if (state.finished) return;
-
-                if (state.pendingFinish) {
-                    await finishRun();
+                if (state.finished) {
                     return;
                 }
 
-                await loadNextQuestion();
+                if (state.pendingFinish) {
+                    await finishRun();
+                } else {
+                    await loadNextQuestion();
+                }
             }, 1000);
         } catch (error) {
-            console.error(error);
+            console.error("Erro ao registrar tempo esgotado:", error);
 
             showFeedback(
                 error.message ||
@@ -629,7 +705,6 @@
                 "error"
             );
 
-            // Não deixa os botões permanentemente desativados.
             state.requestInProgress = false;
             setOptionsDisabled(false);
             startQuestionTimer();
@@ -656,8 +731,11 @@
         state.damageInProgress = true;
         state.invulnerableUntil = now + 900;
 
-        // O dano visual é imediato. O servidor confirma o estado real.
-        state.shield = Math.max(0, state.shield - SHIELD_DAMAGE);
+        state.shield = Math.max(
+            0,
+            state.shield - SHIELD_DAMAGE
+        );
+
         renderShield();
 
         if (state.scene) {
@@ -674,13 +752,16 @@
 
             syncServerState(data);
 
-            if (state.lives <= 0 || data.finished || data.fim) {
+            if (
+                state.lives <= 0 ||
+                data.finished ||
+                data.fim
+            ) {
                 await finishRun();
             }
         } catch (error) {
-            console.error(error);
+            console.error("Erro ao registrar dano:", error);
 
-            // Se o servidor falhar, tenta sincronizar o HUD na próxima ação.
             showFeedback(
                 "Falha ao registrar o dano. Verifique sua conexão.",
                 "error"
@@ -695,7 +776,9 @@
     // =========================================================
 
     function pauseGame() {
-        if (!state.started || state.finished || state.paused) return;
+        if (!state.started || state.finished || state.paused) {
+            return;
+        }
 
         state.paused = true;
 
@@ -711,7 +794,9 @@
     }
 
     function resumeGame() {
-        if (!state.paused || state.finished) return;
+        if (!state.paused || state.finished) {
+            return;
+        }
 
         state.paused = false;
         setOverlayVisible(ui.pauseOverlay, false);
@@ -724,12 +809,15 @@
     }
 
     // =========================================================
-    // FINALIZAÇÃO DA MISSÃO
+    // FINALIZAR A MISSÃO
     // =========================================================
 
     async function finishRun() {
-        if (state.finished) return;
+        if (state.finished) {
+            return;
+        }
 
+        // Bloqueia chamadas repetidas enquanto finaliza.
         state.finished = true;
         state.paused = false;
 
@@ -742,10 +830,11 @@
         setOverlayVisible(ui.pauseOverlay, false);
         setOverlayVisible(ui.questionPanel, false);
 
+        let response = null;
         let result = null;
 
         try {
-            result = await api("finish", {
+            response = await api("finish", {
                 pontuacao: state.score,
                 score: state.score,
                 acertos: state.correct,
@@ -754,16 +843,29 @@
                 lives: state.lives
             });
 
+            result = getResult(response);
+
             syncServerState(result);
         } catch (error) {
             console.error("Erro ao finalizar missão:", error);
+
+            result = {
+                success: false,
+                message: error.message ||
+                    "Não foi possível salvar o resultado da missão."
+            };
         }
 
+        // O PHP retorna { ok: true, result: { success: ... } }.
+        // Por isso, a verificação deve usar o objeto interno "result".
         const success = Boolean(
-            result?.sucesso_missao ??
             result?.success ??
+            result?.sucesso_missao ??
             result?.vitoria ??
-            (state.lives > 0 && state.questionIndex >= state.totalQuestions)
+            (
+                state.lives > 0 &&
+                state.questionIndex >= state.totalQuestions
+            )
         );
 
         setText(
@@ -773,18 +875,19 @@
 
         setText(
             ui.resultMessage,
-            success
-                ? (
-                    result?.mensagem ||
-                    "Você concluiu os desafios desta fase."
-                )
-                : (
-                    result?.mensagem ||
-                    "Sua nave não conseguiu concluir a missão. Recupere suas forças e tente novamente."
-                )
+            result?.message ||
+            result?.mensagem ||
+            (
+                success
+                    ? "Você concluiu os desafios desta fase."
+                    : "Sua nave não conseguiu concluir a missão. Recupere suas forças e tente novamente."
+            )
         );
 
-        setText(ui.resultScore, state.score);
+        setText(
+            ui.resultScore,
+            result?.score ?? state.score
+        );
 
         setOverlayVisible(ui.resultOverlay, true);
 
@@ -812,7 +915,6 @@
             this.lastEnemyShotTime = 0;
 
             this.pointerX = null;
-            this.playerHit = false;
         }
 
         create() {
@@ -837,6 +939,7 @@
             this.scale.on("resize", (size) => {
                 if (this.player) {
                     this.player.y = size.height - 85;
+
                     this.player.x = Phaser.Math.Clamp(
                         this.player.x,
                         35,
@@ -862,7 +965,10 @@
         }
 
         createPlayer(width, height) {
-            this.player = this.add.container(width / 2, height - 85);
+            this.player = this.add.container(
+                width / 2,
+                height - 85
+            );
 
             const body = this.add.polygon(
                 0,
@@ -945,13 +1051,18 @@
 
                 if (star.y > this.scale.height) {
                     star.y = 0;
-                    star.x = Phaser.Math.Between(0, this.scale.width);
+                    star.x = Phaser.Math.Between(
+                        0,
+                        this.scale.width
+                    );
                 }
             });
         }
 
         updatePlayer(delta) {
-            if (this.pointerX === null) return;
+            if (this.pointerX === null) {
+                return;
+            }
 
             const targetX = Phaser.Math.Clamp(
                 this.pointerX,
@@ -966,7 +1077,7 @@
             );
         }
 
-        updateLasers(delta) {
+        updateLasers() {
             const time = this.time.now;
 
             if (time - this.lastLaserTime >= 240) {
@@ -975,7 +1086,9 @@
             }
 
             this.playerLasers = this.playerLasers.filter((laser) => {
-                if (!laser.active) return false;
+                if (!laser.active) {
+                    return false;
+                }
 
                 laser.y -= 10;
 
@@ -985,7 +1098,9 @@
                 }
 
                 for (const alien of this.aliens) {
-                    if (!alien.active) continue;
+                    if (!alien.active) {
+                        continue;
+                    }
 
                     const distance = Phaser.Math.Distance.Between(
                         laser.x,
@@ -1006,7 +1121,9 @@
         }
 
         fireLaser() {
-            if (!this.player || state.locked || state.finished) return;
+            if (!this.player || state.locked || state.finished) {
+                return;
+            }
 
             [-10, 10].forEach((offset) => {
                 const laser = this.add.rectangle(
@@ -1023,13 +1140,18 @@
         }
 
         updateAliens(time) {
-            if (time - this.lastAlienTime >= 1900 && this.aliens.length < 3) {
+            if (
+                time - this.lastAlienTime >= 1900 &&
+                this.aliens.length < 3
+            ) {
                 this.lastAlienTime = time;
                 this.spawnAlien();
             }
 
             this.aliens.forEach((alien) => {
-                if (!alien.active) return;
+                if (!alien.active) {
+                    return;
+                }
 
                 alien.y += alien.speed;
                 alien.x += Math.sin(time / 450 + alien.phase) * 0.8;
@@ -1039,7 +1161,9 @@
                 }
             });
 
-            this.aliens = this.aliens.filter((alien) => alien.active);
+            this.aliens = this.aliens.filter(
+                (alien) => alien.active
+            );
 
             if (
                 this.aliens.length > 0 &&
@@ -1051,7 +1175,11 @@
         }
 
         spawnAlien() {
-            const x = Phaser.Math.Between(45, this.scale.width - 45);
+            const x = Phaser.Math.Between(
+                45,
+                this.scale.width - 45
+            );
+
             const alien = this.add.container(x, -35);
 
             const body = this.add.ellipse(
@@ -1076,17 +1204,27 @@
             ]);
 
             alien.speed = Phaser.Math.FloatBetween(0.35, 0.8);
-            alien.phase = Phaser.Math.FloatBetween(0, Math.PI * 2);
-            alien.setDepth(5);
+            alien.phase = Phaser.Math.FloatBetween(
+                0,
+                Math.PI * 2
+            );
 
+            alien.setDepth(5);
             this.aliens.push(alien);
         }
 
         fireEnemyBullet() {
-            if (!this.player || state.locked) return;
+            if (!this.player || state.locked) {
+                return;
+            }
 
-            const target = this.aliens.find((alien) => alien.active);
-            if (!target) return;
+            const target = this.aliens.find(
+                (alien) => alien.active
+            );
+
+            if (!target) {
+                return;
+            }
 
             const bullet = this.add.circle(
                 target.x,
@@ -1105,14 +1243,19 @@
             );
 
             bullet.vx = Math.cos(angle) * 3.2;
-            bullet.vy = Math.max(3.5, Math.sin(angle) * 3.2);
+            bullet.vy = Math.max(
+                3.5,
+                Math.sin(angle) * 3.2
+            );
 
             this.enemyBullets.push(bullet);
         }
 
         updateEnemyBullets() {
             this.enemyBullets = this.enemyBullets.filter((bullet) => {
-                if (!bullet.active) return false;
+                if (!bullet.active) {
+                    return false;
+                }
 
                 bullet.x += bullet.vx;
                 bullet.y += bullet.vy;
@@ -1134,9 +1277,6 @@
                 );
 
                 if (distance < 28) {
-                    // Remove o projétil mesmo durante a invulnerabilidade.
-                    // Assim ele não fica parado dentro da nave, esperando
-                    // para causar dano assim que o bloqueio terminar.
                     bullet.destroy();
 
                     if (
@@ -1154,12 +1294,16 @@
         }
 
         onLaserHitAlien(alien) {
-            if (state.locked || state.finished) return;
+            if (state.locked || state.finished) {
+                return;
+            }
 
             state.targetAlien = alien;
 
-            // Impede que os lasers atinjam vários aliens enquanto a pergunta abre.
-            this.playerLasers.forEach((laser) => laser.destroy());
+            this.playerLasers.forEach((laser) => {
+                laser.destroy();
+            });
+
             this.playerLasers = [];
 
             showQuestion();
@@ -1174,18 +1318,27 @@
                     scale: 1.7,
                     alpha: 0,
                     duration: 220,
-                    onComplete: () => alien.destroy()
+                    onComplete: () => {
+                        if (alien.active) {
+                            alien.destroy();
+                        }
+                    }
                 });
             }
 
             state.targetAlien = null;
-            this.aliens = this.aliens.filter((item) => item.active);
+
+            this.aliens = this.aliens.filter(
+                (item) => item.active
+            );
         }
 
         showAlienAttack() {
             const alien = state.targetAlien;
 
-            if (!alien || !alien.active || !this.player) return;
+            if (!alien || !alien.active || !this.player) {
+                return;
+            }
 
             this.tweens.add({
                 targets: alien,
@@ -1199,7 +1352,10 @@
                     }
 
                     state.targetAlien = null;
-                    this.aliens = this.aliens.filter((item) => item.active);
+
+                    this.aliens = this.aliens.filter(
+                        (item) => item.active
+                    );
                 }
             });
 
@@ -1207,7 +1363,9 @@
         }
 
         flashPlayer() {
-            if (!this.player) return;
+            if (!this.player) {
+                return;
+            }
 
             this.tweens.add({
                 targets: this.player,
@@ -1229,7 +1387,23 @@
     // =========================================================
 
     async function begin() {
-        if (state.started || state.finished) return;
+        if (state.started || state.finished) {
+            return;
+        }
+
+        if (!cfg.faseId || !Number.isInteger(Number(cfg.faseId))) {
+            window.alert(
+                "O identificador da fase não foi configurado corretamente."
+            );
+            return;
+        }
+
+        if (typeof Phaser === "undefined") {
+            window.alert(
+                "A biblioteca Phaser não foi carregada. Verifique o script Phaser no HTML."
+            );
+            return;
+        }
 
         if (ui.startButton) {
             ui.startButton.disabled = true;
@@ -1247,13 +1421,15 @@
 
             state.question = question;
             state.started = true;
+            state.questionIndex = getQuestionIndex(data, 0);
             state.score = Number(data.pontuacao ?? data.score ?? 0);
             state.lives = Number(data.vidas ?? data.lives ?? MAX_LIVES);
             state.shield = Number(
                 data.escudo ?? data.shield ?? MAX_SHIELD
             );
-            state.correct = Number(data.acertos ?? data.correctCount ?? 0);
-            state.questionIndex = Number(data.indice ?? data.questionIndex ?? 0);
+            state.correct = Number(
+                data.acertos ?? data.correctCount ?? 0
+            );
 
             renderHUD();
 
@@ -1285,31 +1461,31 @@
 
             if (ui.phaseDescription) {
                 ui.phaseDescription.textContent =
-                    cfg.descricao || "Prepare-se para a missão espacial.";
+                    cfg.descricao ||
+                    "Prepare-se para a missão espacial.";
             }
 
             enterFullscreen();
 
-            // Esconde a tela de apresentação da missão.
             if (ui.missionIntro) {
                 ui.missionIntro.classList.remove("visible");
                 ui.missionIntro.hidden = true;
                 ui.missionIntro.style.display = "none";
             }
 
-            // Esconde o botão de iniciar, caso ainda esteja visível.
             if (ui.startButton) {
                 ui.startButton.hidden = true;
             }
-
         } catch (error) {
-            console.error(error);
+            console.error("Erro ao iniciar o MathSpace:", error);
 
             window.alert(
                 error.message ||
                 "Não foi possível iniciar a missão."
             );
 
+            // Se o servidor já criou a partida, não tentamos
+            // iniciar outra automaticamente. Isso evita duplicações.
             if (ui.startButton) {
                 ui.startButton.disabled = false;
             }
@@ -1345,7 +1521,11 @@
     }
 
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && state.started && !state.finished) {
+        if (
+            event.key === "Escape" &&
+            state.started &&
+            !state.finished
+        ) {
             if (state.paused) {
                 resumeGame();
             } else {
