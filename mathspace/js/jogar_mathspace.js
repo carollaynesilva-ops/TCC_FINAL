@@ -4,7 +4,7 @@
     if (!cfg) return;
     const $ = id => document.getElementById(id);
     const ui = { shell: $('game-shell'), canvas: $('space-canvas'), integrity: $('integrity-fill'), integrityLabel: $('integrity-label'), intro: $('mission-intro'), start: $('start-button'), question: $('question-panel'), step: $('question-step'), type: $('question-type'), timer: $('question-timer'), progress: $('question-progress-fill'), text: $('question-text'), answers: $('answer-list'), feedback: $('answer-feedback'), next: $('continue-button'), score: $('score-value'), lives: $('lives'), pause: $('pause-button'), pauseOverlay: $('pause-overlay'), resume: $('resume-button'), exit: $('exit-button'), pauseExit: $('pause-exit-button'), result: $('result-overlay'), resultSymbol: $('result-symbol'), resultEyebrow: $('result-eyebrow'), resultTitle: $('result-title'), resultMessage: $('result-message'), resultScore: $('result-score'), resultCorrect: $('result-correct'), resultXp: $('result-xp'), retry: $('retry-button'), alert: $('mission-alert'), tip: $('flight-tip') };
-    const state = { phase: null, question: null, queuedQuestion: null, index: 0, total: 6, score: 0, lives: 3, integrity: 100, correct: 0, locked: false, paused: false, questionOpen: false, started: false, finished: false, game: null, scene: null, pendingFinish: false, timerInterval: null, timeLeft: 20, lastAlienPosition: null };
+    const state = { phase: null, question: null, queuedQuestion: null, index: 0, total: 6, score: 0, lives: 3, integrity: 100, correct: 0, locked: false, paused: false, questionOpen: false, started: false, finished: false, game: null, scene: null, pendingFinish: false, timerInterval: null, timeLeft: 20, lastAlienPosition: null, damageLock: false, finishing: false };
     const api = async (action, extra = {}) => { const response = await fetch(cfg.api, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin', body: JSON.stringify({ action, csrf: cfg.csrf, fase: cfg.faseId, ...extra }) }); const data = await response.json().catch(() => ({ ok: false, message: 'O servidor retornou uma resposta inválida.' })); if (!response.ok || !data.ok) throw new Error(data.message || 'Não foi possível concluir esta ação.'); return data; };
     function toast(message) { ui.alert.textContent = message; ui.alert.classList.add('visible'); clearTimeout(toast.timer); toast.timer = setTimeout(() => ui.alert.classList.remove('visible'), 2600) }
     function renderLives() { [...ui.lives.children].forEach((heart, i) => heart.classList.toggle('is-lost', i >= state.lives)); ui.lives.setAttribute('aria-label', `${state.lives} vidas restantes`) }
@@ -161,17 +161,31 @@
                 this.aliens.push(alien);
             }
             damageShip() {
-                if (state.finished || state.paused) return;
+                if (state.finished || state.paused || state.damageLock || state.questionOpen) return;
+                state.damageLock = true;
                 this.burst(this.ship.x, this.ship.y, 0xff70dc, 12, 1.1);
-                state.integrity = Math.max(0, state.integrity - 20); renderScore();
-                this.ship.setAlpha(.35); this.time.delayedCall(180, () => { if (this.ship && this.ship.active) this.ship.setAlpha(1); });
-                if (state.integrity === 0) {
-                    state.lives = Math.max(0, state.lives - 1); state.integrity = 100; renderScore();
-                    toast(state.lives ? `Projétil rival! Você perdeu uma vida. Restam ${state.lives}.` : 'Sua nave ficou sem vidas!');
-                    if (state.lives === 0) { state.finished = true; this.physics?.pause?.(); toast('Fim de jogo. Vamos integrar a tela de resultado na etapa 4.'); }
-                } else {
-                    toast(`Projétil rival atingiu a nave: integridade em ${state.integrity}%.`);
-                }
+                this.ship.setAlpha(.35);
+                this.time.delayedCall(220, () => { if (this.ship && this.ship.active && !state.finished) this.ship.setAlpha(1); });
+                // O servidor calcula integridade e vidas. O bloqueio evita que vários projéteis
+                // no mesmo instante gerem penalidades duplicadas.
+                api('damage').then(data => {
+                    if (state.finished) return;
+                    state.integrity = data.integrity;
+                    state.lives = data.lives;
+                    renderScore();
+                    if (data.gameOver) {
+                        toast('Sua nave ficou sem vidas. Encerrando a missão...');
+                        finishRun();
+                    } else if (state.integrity === 100 && state.lives < 3) {
+                        toast(`Integridade restaurada. Você perdeu uma vida. Restam ${state.lives}.`);
+                    } else {
+                        toast(`Projétil rival atingiu a nave: integridade em ${state.integrity}%.`);
+                    }
+                }).catch(error => {
+                    toast(error.message || 'Não foi possível registrar o dano da nave.');
+                }).finally(() => {
+                    window.setTimeout(() => { state.damageLock = false; }, 650);
+                });
             }
         }
         state.game = new Phaser.Game({ type: Phaser.AUTO, parent: ui.canvas, width: '100%', height: '100%', backgroundColor: '#080b20', transparent: true, render: { antialias: true, roundPixels: true }, scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH }, input: { activePointers: 2, touch: { capture: true } }, scene: [SpaceScene] });
@@ -279,8 +293,37 @@
             toast(e.message);
         }
     }
-    async function finishRun() { state.finished = true; try { const data = await api('finish'), r = data.result; ui.question.hidden = true; ui.result.hidden = false; ui.resultSymbol.textContent = r.success ? '✦' : '↻'; ui.resultEyebrow.textContent = r.success ? 'MISSÃO CONCLUÍDA' : 'MISSÃO INTERROMPIDA'; ui.resultTitle.textContent = r.success ? 'Setor explorado!' : 'A nave precisa de reparos'; ui.resultMessage.textContent = r.success ? 'Você concluiu os seis desafios. Seu progresso foi registrado.' : 'Suas vidas acabaram antes de concluir a missão. Você pode tentar novamente.'; ui.resultScore.textContent = String(r.score); ui.resultCorrect.textContent = `${r.correct}/6`; ui.resultXp.textContent = String(r.xp); ui.retry.hidden = false; ui.retry.textContent = 'TENTAR NOVAMENTE'; } catch (e) { state.finished = false; toast(e.message) } }
-    async function begin() { ui.start.disabled = true; try { const data = await api('start'); state.phase = data.phase; state.score = 0; state.lives = 3; state.integrity = 100; state.correct = 0; state.index = 0; state.started = true; state.finished = false; state.paused = false; state.questionOpen = false; state.pendingFinish = false; state.answering = false; stopQuestionTimer(); state.queuedQuestion = data.question; state.queuedIndex = data.index ?? 0; ui.question.hidden = true; renderScore(); ui.intro.hidden = true; startScene(); enterFullscreen(); ui.tip.style.opacity = '1'; setTimeout(() => { if (ui.tip) ui.tip.style.opacity = '.65' }, 5000) } catch (e) { toast(e.message); ui.start.disabled = false } }
+    async function finishRun() {
+        if (state.finishing) return;
+        state.finishing = true;
+        state.finished = true;
+        stopQuestionTimer();
+        state.questionOpen = false;
+        state.question = null;
+        ui.question.hidden = true;
+        if (state.game) state.game.scene.pause('space');
+        try {
+            const data = await api('finish'), r = data.result;
+            state.lives = Number.isFinite(Number(r.lives)) ? Number(r.lives) : state.lives;
+            renderScore();
+            ui.result.hidden = false;
+            ui.resultSymbol.textContent = r.success ? '✦' : '↻';
+            ui.resultEyebrow.textContent = r.success ? 'MISSÃO CONCLUÍDA' : 'MISSÃO INTERROMPIDA';
+            ui.resultTitle.textContent = r.success ? 'Setor explorado!' : (r.lives <= 0 ? 'Nave sem energia' : 'A nave precisa de reparos');
+            ui.resultMessage.textContent = r.success ? 'Você concluiu os seis desafios. Seu progresso foi registrado.' : (r.lives <= 0 ? 'Suas vidas acabaram. O resultado da missão foi registrado e você pode tentar novamente.' : 'A missão terminou antes de concluir todos os desafios. Seu resultado foi registrado.');
+            ui.resultScore.textContent = String(r.score);
+            ui.resultCorrect.textContent = `${r.correct}/6`;
+            ui.resultXp.textContent = String(r.xp);
+            ui.retry.hidden = false;
+            ui.retry.textContent = 'TENTAR NOVAMENTE';
+        } catch (e) {
+            state.finished = false;
+            state.finishing = false;
+            if (state.game && !state.paused) state.game.scene.resume('space');
+            toast(e.message || 'Não foi possível registrar o resultado da missão.');
+        }
+    }
+    async function begin() { ui.start.disabled = true; try { const data = await api('start'); state.phase = data.phase; state.score = 0; state.lives = 3; state.integrity = 100; state.correct = 0; state.index = 0; state.started = true; state.finished = false; state.paused = false; state.questionOpen = false; state.pendingFinish = false; state.answering = false; state.damageLock = false; state.finishing = false; stopQuestionTimer(); state.queuedQuestion = data.question; state.queuedIndex = data.index ?? 0; ui.question.hidden = true; renderScore(); ui.intro.hidden = true; startScene(); enterFullscreen(); ui.tip.style.opacity = '1'; setTimeout(() => { if (ui.tip) ui.tip.style.opacity = '.65' }, 5000) } catch (e) { toast(e.message); ui.start.disabled = false } }
     function pause() { if (!state.started || state.finished || state.paused) return; state.paused = true; ui.pauseOverlay.hidden = false; if (state.game) state.game.scene.pause('space') }
     function resume() { state.paused = false; ui.pauseOverlay.hidden = true; if (state.game) state.game.scene.resume('space') }
     function exitToMap() { if (document.fullscreenElement) document.exitFullscreen().catch(() => { }); window.location.href = cfg.mapa || 'mathspace.php' }

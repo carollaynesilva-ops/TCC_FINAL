@@ -149,7 +149,7 @@ try {
             out(['ok' => false, 'message' => 'Esta fase ainda não tem 6 questões cadastradas (5 questões + 1 desafio especial). Cadastre as perguntas e alternativas no banco antes de jogar.'], 422);
         $gameId = queryOne($db, 'SELECT id FROM jogos WHERE nome="MathSpace" LIMIT 1');
         $partidaId = executeSql($db, 'INSERT INTO historico_partidas (usuario_id,jogo_id,fase_id,pontuacao,acertos,erros,dicas_usadas) VALUES (?,?,?,0,0,0,0)', [$userId, (int) $gameId['id'], $phaseId]);
-        $_SESSION['mathspace_run'] = ['user' => $userId, 'phase' => $phaseId, 'partida' => $partidaId, 'question_index' => 0, 'lives' => 3, 'score' => 0, 'correct' => 0, 'wrong' => 0, 'answers' => [], 'started_at' => time(), 'finished' => false];
+        $_SESSION['mathspace_run'] = ['user' => $userId, 'phase' => $phaseId, 'partida' => $partidaId, 'question_index' => 0, 'lives' => 3, 'integrity' => 100, 'score' => 0, 'correct' => 0, 'wrong' => 0, 'answers' => [], 'started_at' => time(), 'finished' => false];
         $q = $questions[0];
         $alternatives = queryAll($db, 'SELECT id,texto FROM alternativas WHERE questao_id=? ORDER BY id ASC', [(int) $q['id']]);
         if (count($alternatives) < 2)
@@ -159,6 +159,21 @@ try {
     $run = $_SESSION['mathspace_run'] ?? null;
     if (!$run || (int) $run['user'] !== $userId)
         out(['ok' => false, 'message' => 'Nenhuma partida ativa. Inicie a missão novamente.'], 409);
+    if ($action === 'damage') {
+        if (!empty($run['finished']))
+            out(['ok' => false, 'message' => 'Esta partida já terminou.'], 409);
+        // O servidor controla a integridade para evitar perdas duplicadas ou estados inconsistentes no navegador.
+        $integrity = max(0, (int) ($run['integrity'] ?? 100) - 20);
+        $lives = (int) ($run['lives'] ?? 3);
+        if ($integrity <= 0) {
+            $integrity = 100;
+            $lives = max(0, $lives - 1);
+        }
+        $run['integrity'] = $integrity;
+        $run['lives'] = $lives;
+        $_SESSION['mathspace_run'] = $run;
+        out(['ok' => true, 'integrity' => $integrity, 'lives' => $lives, 'gameOver' => $lives <= 0]);
+    }
     if ($action === 'question') {
         $idx = (int) $run['question_index'];
         if ($idx >= 6)
@@ -170,7 +185,7 @@ try {
         out(['ok' => true, 'index' => $idx, 'total' => 6, 'question' => ['id' => (int) $q['id'], 'pergunta' => $q['pergunta'], 'alternativas' => array_map(fn($a) => ['id' => (int) $a['id'], 'texto' => $a['texto']], $alts)]]);
     }
     if ($action === 'answer') {
-        if (!empty($run['finished']))
+        if (!empty($run['finished']) || (int) ($run['lives'] ?? 0) <= 0)
             out(['ok' => false, 'message' => 'Esta partida já terminou.'], 409);
         $questionId = (int) ($body['questao'] ?? 0);
         $timedOut = !empty($body['tempo_esgotado']);
