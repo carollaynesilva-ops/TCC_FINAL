@@ -3,14 +3,14 @@
     const config = window.MATHCHEF_CONFIG || { fases: [], serie: 0 };
     const phases = Array.isArray(config.fases) ? config.fases : [];
     const recipes = [
-        { emoji: '🍫🎂', image: '../assets/img/bolo.jpg', title: 'Bolo de chocolate', note: 'Misture frações e medidas para preparar um bolo fofinho.', math: 'Frações, operações e medidas de ingredientes.' },
-        { emoji: '🍫', image: '../assets/img/brownie.jpg', title: 'Brownie', note: 'Acerte as proporções para deixar o brownie no ponto.', math: 'Proporções, números decimais e quantidades.' },
-        { emoji: '🍮', image: '../assets/img/pudim.jpg', title: 'Pudim', note: 'Prepare porções na medida certa e decore cada cupcake.', math: 'Multiplicação, divisão e divisão em porções.' },
-        { emoji: '🍝', image: '../assets/img/lasanha.jpg', title: 'Lasanha', note: 'Uma receita especial com desafios que exigem atenção.', math: 'Problemas matemáticos com várias etapas.' },
-        { emoji: '🍪', title: 'Cookies crocantes', note: 'Encontre as quantidades certas para uma fornada perfeita.', math: 'Operações e comparação de quantidades.' },
-        { emoji: '🥧', title: 'Torta da casa', note: 'Combine os ingredientes sem perder nenhuma medida.', math: 'Frações, medidas e raciocínio lógico.' },
-        { emoji: '🍮', title: 'Pudim caramelizado', note: 'Equilibre as quantidades para acertar a sobremesa.', math: 'Proporções e cálculos com medidas.' },
-        { emoji: '🍓🍰', title: 'Cheesecake de morango', note: 'O desafio final do caderno: capricho e precisão.', math: 'Desafios matemáticos combinados.' }
+        { image: '../assets/img/bolo.jpg', title: 'Bolo de chocolate', note: 'Misture frações e medidas para preparar um bolo fofinho.', math: 'Frações, operações e medidas de ingredientes.' },
+        { image: '../assets/img/brownie.jpg', title: 'Brownie', note: 'Acerte as proporções para deixar o brownie no ponto.', math: 'Proporções, números decimais e quantidades.' },
+        { image: '../assets/img/pudim.jpg', title: 'Pudim', note: 'Prepare porções na medida certa e decore cada cupcake.', math: 'Multiplicação, divisão e divisão em porções.' },
+        { image: '../assets/img/lasanha.jpg', title: 'Lasanha', note: 'Uma receita especial com desafios que exigem atenção.', math: 'Problemas matemáticos com várias etapas.' },
+        { title: 'Cookies crocantes', note: 'Encontre as quantidades certas para uma fornada perfeita.', math: 'Operações e comparação de quantidades.' },
+        { title: 'Torta da casa', note: 'Combine os ingredientes sem perder nenhuma medida.', math: 'Frações, medidas e raciocínio lógico.' },
+        { title: 'Pudim caramelizado', note: 'Equilibre as quantidades para acertar a sobremesa.', math: 'Proporções e cálculos com medidas.' },
+        { title: 'Cheesecake de morango', note: 'O desafio final do caderno: capricho e precisão.', math: 'Desafios matemáticos combinados.' }
     ];
     const modal = document.getElementById('recipe-modal');
     const card = modal.querySelector('.recipe-card');
@@ -28,7 +28,7 @@
         if (!phase) return;
         selected = phase;
         const recipe = recipeFor(phase, index);
-        document.getElementById('recipe-emoji').textContent = recipe.emoji;
+        document.getElementById('recipe-emoji').remove();
         const art = document.getElementById('recipe-art');
         art.style.backgroundImage = `linear-gradient(180deg, rgba(35,20,12,.02) 45%, rgba(35,20,12,.72)), url("${recipe.image || '../assets/img/bolo.jpg'}")`;
         art.style.backgroundSize = 'cover'; art.style.backgroundPosition = 'center';
@@ -105,16 +105,41 @@
                 const recipe = recipes[i % recipes.length]; const locked = !phase.desbloqueada; const completed = !!phase.concluida;
                 const pageW = pw * .78, pageH = Math.min(70, (bh * .48) / Math.max(total, 1) - 4); const pageX = x - pageW / 2, pageY = y - pageH / 2;
                 const page = this.add.rectangle(x, y, pageW, pageH, completed ? 0xe2edcf : (locked ? 0xe7d8bd : 0xfff4dd), 1).setStrokeStyle(1, completed ? 0x7b9d69 : (locked ? 0xb9a48b : 0xc99967), 1).setInteractive({ useHandCursor: !locked }); page.setData('phaseIndex', i); page.setDepth(4); this.items.push(page);
-                const emoji = locked ? '🔒' : completed ? '✓' : recipe.emoji;
-                const art = this.add.text(pageX + 8, y, emoji, { fontFamily: 'Arial', fontSize: locked ? '17px' : (completed ? '19px' : '24px'), color: '#68442f' }).setOrigin(0, y ? 0.5 : .5).setDepth(5); art.setData('phaseIndex', i); if (!locked) art.setInteractive({ useHandCursor: true }); this.items.push(art);
-                const textX = pageX + pageW * .31;
+                const imageKeys = ['bolo', 'brownie', 'pudim', 'lasanha'];
+                const imageKey = imageKeys[i] ? 'recipe-' + imageKeys[i] : null;
+                const thumbW = Math.min(58, pageW * .29);
+                const thumbH = Math.max(26, Math.min(48, pageH - 8));
+                const thumbX = pageX + 7 + thumbW / 2;
+                const thumbY = y;
+                const thumbFrame = this.add.rectangle(thumbX, thumbY, thumbW + 4, thumbH + 4, 0xd9c09b, 1).setStrokeStyle(1, 0xb78d61, .9).setDepth(5);
+                thumbFrame.setData('phaseIndex', i);
+                if (imageKey && this.textures.exists(imageKey)) {
+                    const photo = this.add.image(thumbX, thumbY, imageKey).setDisplaySize(thumbW, thumbH).setDepth(6);
+                    const scale = Math.max(thumbW / photo.width, thumbH / photo.height);
+                    photo.setDisplaySize(photo.width * scale, photo.height * scale);
+                    photo.setCrop(0, 0, photo.width, photo.height);
+                    photo.setData('phaseIndex', i);
+                    if (!locked) photo.setInteractive({ useHandCursor: true });
+                    this.items.push(photo);
+                } else {
+                    this.add.rectangle(thumbX, thumbY, thumbW, thumbH, 0xf2e3c8, 1).setDepth(6);
+                    this.add.text(thumbX, thumbY, 'SEM FOTO', { fontFamily: 'Arial', fontSize: '7px', color: '#8a6a4b' }).setOrigin(.5).setDepth(7);
+                }
+                if (!locked) thumbFrame.setInteractive({ useHandCursor: true });
+                this.items.push(thumbFrame);
+                if (locked) {
+                    this.add.text(thumbX, thumbY + thumbH / 2 - 5, 'BLOQUEADA', { fontFamily: 'Arial', fontSize: '6px', fontStyle: 'bold', color: '#fff', backgroundColor: '#70503c', padding: { x: 2, y: 2 } }).setOrigin(.5).setDepth(8);
+                } else if (completed) {
+                    this.add.text(thumbX + thumbW / 2 - 2, thumbY - thumbH / 2 + 2, 'OK', { fontFamily: 'Arial', fontSize: '7px', fontStyle: 'bold', color: '#fff', backgroundColor: '#66845a', padding: { x: 2, y: 1 } }).setOrigin(1, 0).setDepth(8);
+                }
+                const textX = pageX + thumbW + 14;
                 const title = phase.numero + '. ' + recipe.title;
                 const label = this.add.text(textX, y - 8, title, { fontFamily: 'Georgia,serif', fontSize: `${Math.max(9, Math.min(13, w * .012))}px`, fontStyle: 'bold', color: locked ? '#a18c75' : '#70432d', wordWrap: { width: pageW * .65 }, lineSpacing: 0 }).setOrigin(0, .5).setDepth(5); label.setData('phaseIndex', i); if (!locked) label.setInteractive({ useHandCursor: true }); this.items.push(label);
                 const status = locked ? 'BLOQUEADA' : completed ? 'CONCLUÍDA' : difficulty(phase.dificuldade).toUpperCase();
                 const sub = this.add.text(textX, y + Math.min(15, pageH * .24), status, { fontFamily: 'Arial', fontSize: '7px', fontStyle: 'bold', color: locked ? '#a18c75' : completed ? '#62865a' : '#a15e3e', letterSpacing: 1 }).setOrigin(0, .5).setDepth(5); sub.setData('phaseIndex', i); if (!locked) sub.setInteractive({ useHandCursor: true }); this.items.push(sub);
             });
             // spine and decorative flourishes
-            g.lineStyle(2, 0xb57d54, .9); g.lineBetween(bx + bw / 2, by + 15, bx + bw / 2, by + bh - 15); this.add.text(bx + bw / 2, by + bh - 27, '✦  MATHCHEF  ✦', { fontFamily: 'Georgia,serif', fontSize: '9px', color: '#9a6748', letterSpacing: 2 }).setOrigin(.5).setDepth(5);
+            g.lineStyle(2, 0xb57d54, .9); g.lineBetween(bx + bw / 2, by + 15, bx + bw / 2, by + bh - 15); this.add.text(bx + bw / 2, by + bh - 27, 'MATHCHEF', { fontFamily: 'Georgia,serif', fontSize: '9px', color: '#9a6748', letterSpacing: 2 }).setOrigin(.5).setDepth(5);
             this.bookBounds = { x: bx, y: by, w: bw, h: bh, perPage };
         }
         paintDecor() {
@@ -125,10 +150,10 @@
             jar(w * .08, h * .69, .9, 0xf5e6c5); jar(w * .14, h * .7, .8, 0xf4d3a2); jar(w * .89, h * .69, .9, 0xe7c5a0); jar(w * .94, h * .7, .75, 0xc2d6a5);
             const bowl = (x, y, r, color) => { g.fillStyle(0x7a482f, 1); g.fillEllipse(x, y, r * 2, r * .7); g.fillStyle(color, 1); g.fillEllipse(x, y - 3, r * 1.8, r * .58); g.fillStyle(0xffe5bc, 1); g.fillEllipse(x, y - 5, r * 1.45, r * .38); };
             bowl(w * .2, h * .75, 22, 0xdca66a); bowl(w * .8, h * .75, 25, 0xd88b8a);
-            const flour = this.add.text(w * .2, h * .73, '🥚', { fontSize: '25px' }).setOrigin(.5).setDepth(4); const berry = this.add.text(w * .8, h * .73, '🍓', { fontSize: '25px' }).setOrigin(.5).setDepth(4);
+            // Sem emojis: os elementos decorativos são desenhados com formas do Phaser.
             this.add.text(w * .045, h * .86, 'FARINHA', { fontFamily: 'Arial', fontSize: '7px', fontStyle: 'bold', color: '#f9e6c8', letterSpacing: 1 }).setDepth(4);
             this.add.text(w * .91, h * .86, 'MORANGOS', { fontFamily: 'Arial', fontSize: '7px', fontStyle: 'bold', color: '#f9e6c8', letterSpacing: 1 }).setOrigin(.5).setDepth(4);
-            this.add.text(w * .5, h * .97, '✦  ESCOLHA UMA RECEITA NO LIVRO  ✦', { fontFamily: 'Arial', fontSize: `${Math.max(8, Math.min(11, w * .009))}px`, fontStyle: 'bold', color: '#fff0d3', letterSpacing: 2 }).setOrigin(.5).setDepth(4);
+            this.add.text(w * .5, h * .97, 'ESCOLHA UMA RECEITA NO LIVRO', { fontFamily: 'Arial', fontSize: `${Math.max(8, Math.min(11, w * .009))}px`, fontStyle: 'bold', color: '#fff0d3', letterSpacing: 2 }).setOrigin(.5).setDepth(4);
         }
         hitPage(x, y) { if (!this.bookBounds) return -1; const b = this.bookBounds; if (x < b.x || x > b.x + b.w || y < b.y || y > b.y + b.h) return -1; const localX = x - b.x; const side = localX < b.w / 2 ? 0 : 1; const localY = (y - (b.y + b.h * .35)) / (b.h * .52); const count = phases.length; const leftCount = Math.ceil(count / 2); const n = side === 0 ? leftCount : count - leftCount; if (n <= 0) return -1; const local = Math.floor(localY * n); const idx = side === 0 ? local : leftCount + local; return idx >= 0 && idx < count ? idx : -1; }
     }

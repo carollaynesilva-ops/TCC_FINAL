@@ -285,7 +285,7 @@ if ($configMathChefJson === false) $configMathChefJson = '{"serie":0,"totalFases
         <button class="modal-backdrop" type="button" data-close-modal aria-label="Fechar receita"></button>
         <section class="recipe-card" role="dialog" aria-modal="true" aria-labelledby="recipe-title">
             <button class="modal-close" type="button" data-close-modal aria-label="Fechar">×</button>
-            <div class="recipe-art" id="recipe-art"><span id="recipe-emoji">🍰</span><small>RECEITA DO CADERNO</small></div>
+            <div class="recipe-art" id="recipe-art"><small>RECEITA DO CADERNO</small></div>
             <div class="recipe-info">
                 <div class="recipe-overline"><span id="recipe-number">RECEITA 01</span><span id="recipe-status">DISPONÍVEL</span></div>
                 <h2 id="recipe-title">Bolo de chocolate</h2>
@@ -296,7 +296,7 @@ if ($configMathChefJson === false) $configMathChefJson = '{"serie":0,"totalFases
                         <p id="recipe-math-description">Resolva os desafios matemáticos para reunir os ingredientes.</p>
                     </div>
                 </div><a id="start-recipe" class="start-recipe" href="#">COMEÇAR A COZINHAR <span>→</span></a>
-                <div id="locked-message" class="locked-message" hidden>🔒 Conquiste XP na receita anterior para liberar esta página.</div>
+                <div id="locked-message" class="locked-message" hidden>Conquiste XP na receita anterior para liberar esta página.</div>
             </div>
         </section>
     </div>
