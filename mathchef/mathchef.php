@@ -210,15 +210,11 @@ $porcentagemProgresso = $totalFases > 0
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>MathChef | MathRun</title>
 
-    <link
-        rel="stylesheet"
-        href="../assets/css/mathchef.css">
+    <link rel="stylesheet" href="../assets/css/mathchef.css">
 
 
 </head>
@@ -257,54 +253,45 @@ $porcentagemProgresso = $totalFases > 0
 
         <div class="topbar-content">
 
-            <<a href="../inicio.php" class="brand">
+            <a href="../inicio.php" class="brand">
                 MathRun
+            </a>
+
+            <nav class="main-nav">
+
+                <a href="../inicio.php">
+                    Início
                 </a>
 
-                <nav class="main-nav">
+                <a href="../conquistas.php">
+                    Conquistas
+                </a>
 
-                    <a href="../inicio.php">
-                        Início
-                    </a>
+                <a href="../ranking.php">
+                    Ranking
+                </a>
 
-                    <a href="../conquistas.php">
-                        Conquistas
-                    </a>
+                <a href="../perfil/perfil.php">
+                    Perfil
+                </a>
 
-                    <a href="../ranking.php">
-                        Ranking
-                    </a>
+            </nav>
 
-                    <a href="../perfil/perfil.php">
-                        Perfil
-                    </a>
+            <div class="theme-switcher">
 
-                </nav>
+                <button type="button" data-theme-option="light" title="Tema claro">
+                    ☀
+                </button>
 
-                <div class="theme-switcher">
+                <button type="button" data-theme-option="dark" title="Tema escuro">
+                    ☾
+                </button>
 
-                    <button
-                        type="button"
-                        data-theme-option="light"
-                        title="Tema claro">
-                        ☀
-                    </button>
+                <button type="button" data-theme-option="pink" title="Tema rosa">
+                    ♡
+                </button>
 
-                    <button
-                        type="button"
-                        data-theme-option="dark"
-                        title="Tema escuro">
-                        ☾
-                    </button>
-
-                    <button
-                        type="button"
-                        data-theme-option="pink"
-                        title="Tema rosa">
-                        ♡
-                    </button>
-
-                </div>
+            </div>
 
         </div>
 
@@ -443,9 +430,7 @@ $porcentagemProgresso = $totalFases > 0
 
             <div class="progress-bar">
 
-                <div
-                    class="progress-fill"
-                    style="width: <?= $porcentagemProgresso ?>%;"></div>
+                <div class="progress-fill" style="width: <?= $porcentagemProgresso ?>%;"></div>
 
             </div>
 
@@ -455,18 +440,29 @@ $porcentagemProgresso = $totalFases > 0
          FASES
     ======================================= -->
 
-        <section class="phases-section">
+        <section class="phases-section notebook-section">
+
+            <div class="notebook-intro">
+                <div class="notebook-book-icon" aria-hidden="true">📖</div>
+                <div>
+                    <span class="notebook-eyebrow">LIVRO DE RECEITAS</span>
+                    <h2>Escolha sua próxima criação</h2>
+                    <p>Cada página guarda uma receita e um desafio matemático. Complete as etapas para liberar novas
+                        páginas.</p>
+                </div>
+                <div class="notebook-stamp" aria-hidden="true">CHEF<br>EM<br>TREINO</div>
+            </div>
 
             <div class="section-heading">
 
                 <div>
 
                     <span>
-                        MENU DE FASES
+                        SEU PROGRESSO CULINÁRIO
                     </span>
 
                     <h2>
-                        Sua cozinha
+                        Caderno de receitas
                     </h2>
 
                 </div>
@@ -512,6 +508,10 @@ $porcentagemProgresso = $totalFases > 0
                         $xpConquistado =
                             (int) $fase["xp_conquistado"];
 
+                        $iconesReceitas = ["🍰", "🧁", "🥧", "🍪", "🍓", "🥞", "🍩", "🍮"];
+                        $indiceIcone = max(0, ((int) $fase["numero"] - 1) % count($iconesReceitas));
+                        $iconeReceita = $iconesReceitas[$indiceIcone];
+
                         if (!$desbloqueada) {
 
                             $classeCard = "locked";
@@ -525,8 +525,7 @@ $porcentagemProgresso = $totalFases > 0
 
                         ?>
 
-                        <article
-                            class="phase-card <?= $classeCard ?>">
+                        <article class="phase-card <?= $classeCard ?>">
 
                             <!-- Número -->
 
@@ -554,21 +553,25 @@ $porcentagemProgresso = $totalFases > 0
 
                             </div>
 
-                            <!-- Conteúdo -->
+                            <!-- Conteúdo visual da página de receita -->
 
                             <div class="phase-content">
+
+                                <div class="recipe-illustration" aria-hidden="true">
+                                    <span class="recipe-emoji"><?= $iconeReceita ?></span>
+                                    <span class="recipe-illustration-caption">RECEITA Nº <?= (int) $fase["numero"] ?></span>
+                                </div>
 
                                 <div class="phase-top">
 
                                     <span class="phase-tag">
 
-                                        FASE
+                                        PÁGINA
                                         <?= $fase["numero"] ?>
 
                                     </span>
 
-                                    <span
-                                        class="difficulty <?= classeDificuldade($fase["nivel_dificuldade"]) ?>">
+                                    <span class="difficulty <?= classeDificuldade($fase["nivel_dificuldade"]) ?>">
 
                                         <?= nomeDificuldade($fase["nivel_dificuldade"]) ?>
 
@@ -627,9 +630,7 @@ $porcentagemProgresso = $totalFases > 0
 
                                         <?php endif; ?>
 
-                                        <a
-                                            href="jogar_mathchef.php?fase=<?= (int) $fase["id"] ?>"
-                                            class="play-button">
+                                        <a href="jogar_mathchef.php?fase=<?= (int) $fase["id"] ?>" class="play-button">
 
                                             Jogar novamente
 
@@ -653,9 +654,7 @@ $porcentagemProgresso = $totalFases > 0
                                             🍴 Bancada liberada
                                         </span>
 
-                                        <a
-                                            href="jogar_mathchef.php?fase=<?= (int) $fase["id"] ?>"
-                                            class="play-button">
+                                        <a href="jogar_mathchef.php?fase=<?= (int) $fase["id"] ?>" class="play-button">
 
                                             Preparar
 
@@ -703,9 +702,7 @@ $porcentagemProgresso = $totalFases > 0
 
         <div class="back-area">
 
-            <a
-                href="../inicio.php"
-                class="back-link">
+            <a href="../inicio.php" class="back-link">
                 ← Voltar para o início
             </a>
 
