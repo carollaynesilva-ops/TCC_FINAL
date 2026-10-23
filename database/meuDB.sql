@@ -315,7 +315,7 @@ ADD COLUMN serie INT NOT NULL AFTER jogo_id;
 ALTER TABLE questoes
 ADD COLUMN materia VARCHAR(100) NOT NULL AFTER fase_id;
 
-DELETE FROM fases;
+
 
 INSERT INTO fases
 (jogo_id, serie, nome, descricao, nivel_dificuldade, numero)

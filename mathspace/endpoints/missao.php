@@ -236,26 +236,143 @@ try {
         if ($success)
             runSql($db, 'UPDATE usuarios SET xp=COALESCE(xp,0)+?,pontuacao_total=COALESCE(pontuacao_total,0)+? WHERE id=?', [$xp, $score, $userId]);
 
-        // Concede a medalha Explorador Espacial na primeira missão concluída.
-        // O nome é consultado no banco, sem depender de um ID fixo.
-        $medalAwarded = null;
+        // Conquistas do MathSpace. O progresso da fase já foi gravado acima.
+        // INSERT IGNORE + a restrição UNIQUE(usuario_id, medalha_id) evitam duplicidades.
+        $medalsAwarded = [];
+
         if ($success) {
-            $phaseGame = queryOne($db, 'SELECT jogo_id FROM fases WHERE id=? LIMIT 1', [(int) $run['phase']]);
-            if ($phaseGame) {
-                $completed = queryOne($db, 'SELECT COUNT(*) AS total FROM progresso_usuario pu JOIN fases f ON f.id=pu.fase_id WHERE pu.usuario_id=? AND pu.concluida=1 AND f.jogo_id=?', [$userId, (int) $phaseGame['jogo_id']]);
-                if ($completed && (int) $completed['total'] === 1) {
-                    $medal = queryOne($db, 'SELECT id,nome FROM medalhas WHERE nome=? LIMIT 1', ['Explorador Espacial']);
+            $phaseInfo = queryOne(
+                $db,
+                'SELECT f.jogo_id, f.serie
+                 FROM fases f
+                 JOIN jogos j ON j.id = f.jogo_id
+                 WHERE f.id = ? AND j.nome = ?
+                 LIMIT 1',
+                [(int) $run['phase'], 'MathSpace']
+            );
+
+            if ($phaseInfo) {
+                // Medalha 1: Explorador Espacial.
+                // Verifica o progresso concluído, não uma contagem que precise ser exatamente 1.
+                $hasCompletedMathSpace = queryOne(
+                    $db,
+                    'SELECT 1 AS encontrado
+                     FROM progresso_usuario pu
+                     JOIN fases f ON f.id = pu.fase_id
+                     WHERE pu.usuario_id = ?
+                       AND pu.concluida = 1
+                       AND f.jogo_id = ?
+                     LIMIT 1',
+                    [$userId, (int) $phaseInfo['jogo_id']]
+                );
+
+                if ($hasCompletedMathSpace) {
+                    $medal = queryOne(
+                        $db,
+                        'SELECT id, nome FROM medalhas WHERE nome = ? LIMIT 1',
+                        ['Explorador Espacial']
+                    );
+
                     if ($medal) {
-                        $owned = queryOne($db, 'SELECT id FROM usuario_medalhas WHERE usuario_id=? AND medalha_id=? LIMIT 1', [$userId, (int) $medal['id']]);
+                        $owned = queryOne(
+                            $db,
+                            'SELECT id FROM usuario_medalhas
+                             WHERE usuario_id = ? AND medalha_id = ?
+                             LIMIT 1',
+                            [$userId, (int) $medal['id']]
+                        );
+
                         if (!$owned) {
-                            runSql($db, 'INSERT INTO usuario_medalhas (usuario_id,medalha_id) VALUES (?,?)', [$userId, (int) $medal['id']]);
-                            $medalAwarded = (string) $medal['nome'];
+                            runSql(
+                                $db,
+                                'INSERT IGNORE INTO usuario_medalhas (usuario_id, medalha_id)
+                                 VALUES (?, ?)',
+                                [$userId, (int) $medal['id']]
+                            );
+                            $medalsAwarded[] = (string) $medal['nome'];
+                        }
+                    }
+                }
+
+                // Medalha 2: Mestre da Geometria.
+                // O critério combinado é concluir TODAS as fases do MathSpace
+                // pertencentes à série cadastrada para o aluno.
+                $student = queryOne(
+                    $db,
+                    'SELECT serie FROM usuarios WHERE id = ? LIMIT 1',
+                    [$userId]
+                );
+                $studentSeries = isset($student['serie']) && $student['serie'] !== ''
+                    ? (int) $student['serie']
+                    : 0;
+
+                // Não concede uma conquista por série quando o cadastro não informa a série.
+                if ($studentSeries > 0 && $studentSeries === (int) $phaseInfo['serie']) {
+                    $phaseTotals = queryOne(
+                        $db,
+                        'SELECT COUNT(*) AS total
+                         FROM fases f
+                         WHERE f.jogo_id = ? AND f.serie = ?',
+                        [(int) $phaseInfo['jogo_id'], $studentSeries]
+                    );
+
+                    $completedTotals = queryOne(
+                        $db,
+                        'SELECT COUNT(DISTINCT f.id) AS total
+                         FROM fases f
+                         JOIN progresso_usuario pu ON pu.fase_id = f.id
+                         WHERE f.jogo_id = ?
+                           AND f.serie = ?
+                           AND pu.usuario_id = ?
+                           AND pu.concluida = 1',
+                        [(int) $phaseInfo['jogo_id'], $studentSeries, $userId]
+                    );
+
+                    $requiredPhases = (int) ($phaseTotals['total'] ?? 0);
+                    $completedPhases = (int) ($completedTotals['total'] ?? 0);
+
+                    if ($requiredPhases > 0 && $completedPhases >= $requiredPhases) {
+                        $medal = queryOne(
+                            $db,
+                            'SELECT id, nome FROM medalhas WHERE nome = ? LIMIT 1',
+                            ['Mestre da Geometria']
+                        );
+
+                        if ($medal) {
+                            $owned = queryOne(
+                                $db,
+                                'SELECT id FROM usuario_medalhas
+                                 WHERE usuario_id = ? AND medalha_id = ?
+                                 LIMIT 1',
+                                [$userId, (int) $medal['id']]
+                            );
+
+                            if (!$owned) {
+                                runSql(
+                                    $db,
+                                    'INSERT IGNORE INTO usuario_medalhas (usuario_id, medalha_id)
+                                     VALUES (?, ?)',
+                                    [$userId, (int) $medal['id']]
+                                );
+                                $medalsAwarded[] = (string) $medal['nome'];
+                            }
                         }
                     }
                 }
             }
         }
-        $result = ['success' => $success, 'score' => $score, 'correct' => $correct, 'wrong' => $wrong, 'xp' => $xp, 'lives' => (int) $run['lives'], 'medal' => $medalAwarded];
+
+        $medalAwarded = $medalsAwarded[0] ?? null;
+        $result = [
+            'success' => $success,
+            'score' => $score,
+            'correct' => $correct,
+            'wrong' => $wrong,
+            'xp' => $xp,
+            'lives' => (int) $run['lives'],
+            'medal' => $medalAwarded,
+            'medals' => $medalsAwarded
+        ];
         $run['finished'] = true;
         $run['result'] = $result;
         $_SESSION['mathspace_run'] = $run;
