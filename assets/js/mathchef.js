@@ -42,7 +42,12 @@
         document.getElementById('recipe-xp').textContent = `${Number(phase.xp || 0)} XP`;
         document.getElementById('recipe-score').textContent = Number(phase.pontuacao || 0).toLocaleString('pt-BR');
         document.getElementById('recipe-math-description').textContent = recipe.math;
-        document.getElementById('start-recipe').href = `jogar_mathchef.php?fase=${encodeURIComponent(phase.id)}`;
+        // Resolve o destino a partir da pasta atual da página, evitando que o link
+        // seja interpretado a partir de outra rota ou subpasta da hospedagem.
+        const startUrl = new URL('./jogar_mathchef.php', window.location.href);
+        startUrl.search = '';
+        startUrl.searchParams.set('fase', String(phase.id));
+        document.getElementById('start-recipe').href = startUrl.toString();
         document.getElementById('start-recipe').textContent = phase.concluida ? 'JOGAR NOVAMENTE' : 'COMEÇAR A COZINHAR';
         document.getElementById('locked-message').hidden = Boolean(phase.desbloqueada);
         card.classList.toggle('is-locked', !phase.desbloqueada);
