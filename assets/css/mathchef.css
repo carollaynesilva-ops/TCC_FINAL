@@ -941,3 +941,49 @@ body.pink .recipe-math {
         scroll-behavior: auto !important
     }
 }
+
+/* Etapa visual: cenário fotográfico e ficha de receita com foto real. */
+.phaser-viewport canvas {
+    image-rendering: auto
+}
+
+.recipe-art.has-recipe-photo {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    color: #fff;
+    isolation: isolate
+}
+
+.recipe-art.has-recipe-photo:before,
+.recipe-art.has-recipe-photo:after {
+    display: none
+}
+
+.recipe-art.has-recipe-photo>span {
+    opacity: 0;
+    position: absolute
+}
+
+.recipe-art.has-recipe-photo small {
+    align-self: flex-start;
+    margin: 0 0 0 20px;
+    padding: 8px 11px;
+    border: 1px solid #ffffff85;
+    border-radius: 30px;
+    background: #2d1a12a6;
+    color: #fff8ed;
+    text-shadow: 0 1px 4px #000;
+    backdrop-filter: blur(4px)
+}
+
+.recipe-art.has-recipe-photo {
+    justify-content: flex-end;
+    padding-bottom: 22px
+}
+
+@media(max-width:760px) {
+    .recipe-art.has-recipe-photo {
+        min-height: 190px
+    }
+}

@@ -3,10 +3,10 @@
     const config = window.MATHCHEF_CONFIG || { fases: [], serie: 0 };
     const phases = Array.isArray(config.fases) ? config.fases : [];
     const recipes = [
-        { emoji: '🍫🎂', title: 'Bolo de chocolate', note: 'Misture frações e medidas para preparar um bolo fofinho.', math: 'Frações, operações e medidas de ingredientes.' },
-        { emoji: '🍫', title: 'Brownie de chocolate', note: 'Acerte as proporções para deixar o brownie no ponto.', math: 'Proporções, números decimais e quantidades.' },
-        { emoji: '🧁', title: 'Cupcakes de morango', note: 'Prepare porções na medida certa e decore cada cupcake.', math: 'Multiplicação, divisão e divisão em porções.' },
-        { emoji: '🍰', title: 'Bolo de festa', note: 'Uma receita especial com desafios que exigem atenção.', math: 'Problemas matemáticos com várias etapas.' },
+        { emoji: '🍫🎂', image: '../assets/img/bolo.jpg', title: 'Bolo de chocolate', note: 'Misture frações e medidas para preparar um bolo fofinho.', math: 'Frações, operações e medidas de ingredientes.' },
+        { emoji: '🍫', image: '../assets/img/brownie.jpg', title: 'Brownie', note: 'Acerte as proporções para deixar o brownie no ponto.', math: 'Proporções, números decimais e quantidades.' },
+        { emoji: '🍮', image: '../assets/img/pudim.jpg', title: 'Pudim', note: 'Prepare porções na medida certa e decore cada cupcake.', math: 'Multiplicação, divisão e divisão em porções.' },
+        { emoji: '🍝', image: '../assets/img/lasanha.jpg', title: 'Lasanha', note: 'Uma receita especial com desafios que exigem atenção.', math: 'Problemas matemáticos com várias etapas.' },
         { emoji: '🍪', title: 'Cookies crocantes', note: 'Encontre as quantidades certas para uma fornada perfeita.', math: 'Operações e comparação de quantidades.' },
         { emoji: '🥧', title: 'Torta da casa', note: 'Combine os ingredientes sem perder nenhuma medida.', math: 'Frações, medidas e raciocínio lógico.' },
         { emoji: '🍮', title: 'Pudim caramelizado', note: 'Equilibre as quantidades para acertar a sobremesa.', math: 'Proporções e cálculos com medidas.' },
@@ -29,6 +29,10 @@
         selected = phase;
         const recipe = recipeFor(phase, index);
         document.getElementById('recipe-emoji').textContent = recipe.emoji;
+        const art = document.getElementById('recipe-art');
+        art.style.backgroundImage = `linear-gradient(180deg, rgba(35,20,12,.02) 45%, rgba(35,20,12,.72)), url("${recipe.image || '../assets/img/bolo.jpg'}")`;
+        art.style.backgroundSize = 'cover'; art.style.backgroundPosition = 'center';
+        art.classList.add('has-recipe-photo');
         document.getElementById('recipe-number').textContent = `RECEITA ${String(phase.numero || index + 1).padStart(2, '0')}`;
         document.getElementById('recipe-status').textContent = phase.concluida ? 'CONCLUÍDA' : (phase.desbloqueada ? 'DISPONÍVEL' : 'BLOQUEADA');
         document.getElementById('recipe-title').textContent = recipe.title;
@@ -55,6 +59,10 @@
     }
     class KitchenScene extends Phaser.Scene {
         constructor() { super('KitchenScene'); this.items = []; this.decor = []; this.selectedIndex = -1; }
+        preload() {
+            this.load.image('kitchen-background', '../assets/img/cozinha.jpg');
+            ['bolo', 'brownie', 'pudim', 'lasanha'].forEach(name => this.load.image('recipe-' + name, '../assets/img/' + name + '.jpg'));
+        }
         create() {
             this.paintRoom(); this.paintCounter(); this.paintBook(); this.paintDecor();
             this.scale.on('resize', () => this.redraw());
@@ -66,27 +74,16 @@
         redraw() { this.children.removeAll(true); this.items = []; this.decor = []; this.paintRoom(); this.paintCounter(); this.paintBook(); this.paintDecor(); }
         paintRoom() {
             const w = this.scale.width, h = this.scale.height;
-            const g = this.add.graphics();
-            g.fillGradientStyle(0xf8dfb9, 0xf8dfb9, 0xe8bd8b, 0xe8bd8b, 1); g.fillRect(0, 0, w, h);
-            // Wall panels and wallpaper pattern
-            g.fillStyle(0xf4d9b1, 1); g.fillRect(0, 0, w, h * .57);
-            g.lineStyle(2, 0xd5ae82, .55); for (let x = 0; x < w; x += Math.max(70, w * .09)) { g.lineBetween(x, 0, x, h * .56); }
-            for (let y = 45; y < h * .55; y += 55) { g.lineStyle(1, 0xd5ae82, .23); g.lineBetween(0, y, w, y); }
-            // Backsplash tiles
-            g.fillStyle(0xffefcf, 1); g.fillRect(0, h * .39, w, h * .18);
-            g.lineStyle(2, 0xd9b78c, .65); for (let x = 0; x < w; x += 54)g.lineBetween(x, h * .39, x, h * .57); for (let y = h * .39; y < h * .57; y += 34)g.lineBetween(0, y, w, y);
-            // Cabinets
-            const cabY = h * .07, cabH = h * .29, cabW = Math.max(95, w * .15);
-            for (let x = -8; x < w; x += cabW + 8) { g.fillStyle(0x9d6746, 1); g.fillRoundedRect(x, cabY, cabW, cabH, 5); g.fillStyle(0xc38c5f, 1); g.fillRoundedRect(x + 5, cabY + 5, cabW - 10, cabH - 10, 4); g.lineStyle(3, 0x875234, .8); g.strokeRoundedRect(x + 8, cabY + 8, cabW - 16, cabH - 16, 3); g.fillStyle(0x6d432e, 1); g.fillRoundedRect(x + cabW * .48, cabY + cabH * .48, 7, 15, 3); }
-            // hanging rail and utensils
-            g.fillStyle(0x76533b, 1); g.fillRoundedRect(w * .19, h * .36, w * .62, 5, 2);
-            const utensilXs = [.25, .34, .43, .58, .67, .76]; utensilXs.forEach((v, i) => { const x = w * v, y = h * .365; g.lineStyle(3, 0x8a6345, 1); g.lineBetween(x, y, x, y + 22 + (i % 2) * 7); g.lineStyle(4, 0xb6a18a, 1); if (i % 3 === 0) g.strokeEllipse(x, y + 28, 12, 18); else if (i % 3 === 1) g.strokeRoundedRect(x - 5, y + 20, 10, 19, 3); else g.strokeEllipse(x, y + 28, 7, 19); });
-            // window and sunlight
-            const wx = w * .43, wy = h * .07, ww = w * .18, wh = h * .25; g.fillStyle(0x8b5c3b, 1); g.fillRoundedRect(wx - 7, wy - 7, ww + 14, wh + 14, 5); g.fillStyle(0xa9d2d5, 1); g.fillRect(wx, wy, ww, wh); g.fillStyle(0xd7efdf, .8); g.fillTriangle(wx, wy, wx + ww, wy, wx + ww, wy + wh); g.lineStyle(5, 0xf5dfb9, 1); g.lineBetween(wx + ww / 2, wy, wx + ww / 2, wy + wh); g.lineBetween(wx, wy + wh / 2, wx + ww, wy + wh / 2);
-            // oven on left
-            const ox = w * .025, oy = h * .38, ow = w * .14, oh = h * .25; g.fillStyle(0x7c4d35, 1); g.fillRoundedRect(ox, oy, ow, oh, 7); g.fillStyle(0xe7c49b, 1); g.fillRoundedRect(ox + 7, oy + 7, ow - 14, oh - 14, 4); g.fillStyle(0x4c3226, 1); g.fillRoundedRect(ox + 13, oy + 35, ow - 26, oh - 53, 4); g.lineStyle(3, 0x9b7558, 1); g.strokeRoundedRect(ox + 18, oy + 41, ow - 36, oh - 66, 3); g.fillStyle(0x6b3c27, 1); g.fillRoundedRect(ox + ow * .28, oy + oh - 11, ow * .44, 4, 2);
-            // warm ambient lights
-            g.fillStyle(0xfff0b9, .38); g.fillCircle(w * .16, h * .16, Math.min(w, h) * .1); g.fillCircle(w * .83, h * .18, Math.min(w, h) * .11);
+            if (this.textures.exists('kitchen-background')) {
+                const bg = this.add.image(w / 2, h / 2, 'kitchen-background').setDepth(-10);
+                const scale = Math.max(w / bg.width, h / bg.height); bg.setDisplaySize(bg.width * scale, bg.height * scale);
+                bg.setPosition(w / 2, h / 2); bg.setData('isKitchenBackground', true); this.kitchenBackground = bg;
+                // A light, translucent veil keeps the game elements readable without damaging the source image.
+                const veil = this.add.rectangle(w / 2, h / 2, w, h, 0x3d2416, .12).setDepth(-9); this.kitchenVeil = veil;
+            } else {
+                this.add.rectangle(w / 2, h / 2, w, h, 0xf0d7b5).setDepth(-10);
+                this.add.text(w / 2, h * .2, 'Carregando cenário da cozinha…', { fontFamily: 'Georgia,serif', fontSize: '20px', color: '#70432d' }).setOrigin(.5).setDepth(-9);
+            }
         }
         paintCounter() {
             const w = this.scale.width, h = this.scale.height, y = h * .61;
