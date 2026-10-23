@@ -4,7 +4,7 @@
     if (!cfg) return;
     const $ = id => document.getElementById(id);
     const ui = { shell: $('game-shell'), canvas: $('space-canvas'), integrity: $('integrity-fill'), integrityLabel: $('integrity-label'), intro: $('mission-intro'), start: $('start-button'), question: $('question-panel'), step: $('question-step'), type: $('question-type'), progress: $('question-progress-fill'), text: $('question-text'), answers: $('answer-list'), feedback: $('answer-feedback'), next: $('continue-button'), score: $('score-value'), lives: $('lives'), pause: $('pause-button'), pauseOverlay: $('pause-overlay'), resume: $('resume-button'), exit: $('exit-button'), pauseExit: $('pause-exit-button'), result: $('result-overlay'), resultSymbol: $('result-symbol'), resultEyebrow: $('result-eyebrow'), resultTitle: $('result-title'), resultMessage: $('result-message'), resultScore: $('result-score'), resultCorrect: $('result-correct'), resultXp: $('result-xp'), retry: $('retry-button'), alert: $('mission-alert'), tip: $('flight-tip') };
-    const state = { phase: null, question: null, index: 0, total: 6, score: 0, lives: 3, integrity: 100, correct: 0, locked: false, paused: false, started: false, finished: false, game: null, scene: null, pendingFinish: false };
+    const state = { phase: null, question: null, queuedQuestion: null, index: 0, total: 6, score: 0, lives: 3, integrity: 100, correct: 0, locked: false, paused: false, questionOpen: false, started: false, finished: false, game: null, scene: null, pendingFinish: false };
     const api = async (action, extra = {}) => { const response = await fetch(cfg.api, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin', body: JSON.stringify({ action, csrf: cfg.csrf, fase: cfg.faseId, ...extra }) }); const data = await response.json().catch(() => ({ ok: false, message: 'O servidor retornou uma resposta inválida.' })); if (!response.ok || !data.ok) throw new Error(data.message || 'Não foi possível concluir esta ação.'); return data; };
     function toast(message) { ui.alert.textContent = message; ui.alert.classList.add('visible'); clearTimeout(toast.timer); toast.timer = setTimeout(() => ui.alert.classList.remove('visible'), 2600) }
     function renderLives() { [...ui.lives.children].forEach((heart, i) => heart.classList.toggle('is-lost', i >= state.lives)); ui.lives.setAttribute('aria-label', `${state.lives} vidas restantes`) }
@@ -16,7 +16,7 @@
             constructor() { super('space') }
             create() {
                 const w = this.scale.width, h = this.scale.height;
-                this.stars = []; this.bullets = []; this.aliens = []; this.enemyBullets = [];
+                this.stars = []; this.bullets = []; this.aliens = []; this.enemyBullets = []; state.scene = this;
                 this.lastShot = 0; this.spawnAt = 0; this.enemyShotAt = 0; this.pointerTarget = w / 2;
                 for (let i = 0; i < 105; i++) {
                     const star = this.add.circle(Math.random() * w, Math.random() * h, Math.random() * 1.6 + .35, 0xffffff, Math.random() * .7 + .15);
@@ -36,7 +36,7 @@
                 this.scale.on('resize', size => { this.pointerTarget = Phaser.Math.Clamp(this.ship.x, 28, size.width - 28); this.ship.y = size.height - 74; });
             }
             update(time, delta) {
-                if (state.paused || state.finished || !state.started) return;
+                if (state.paused || state.finished || state.questionOpen || !state.started) return;
                 const w = this.scale.width, h = this.scale.height;
                 this.stars.forEach(s => { s.y += s.speed * delta / 1000; if (s.y > h) { s.y = -2; s.x = Math.random() * w; } });
                 const target = Phaser.Math.Clamp(this.pointerTarget, 25, w - 25);
@@ -84,6 +84,7 @@
                                 // Na etapa 3, este ponto abrirá a questão ligada ao alien atingido.
                                 alien.destroy(); this.aliens.splice(i, 1); destroyed = true;
                                 this.events.emit('alien-defeated', { x: alien.x, y: alien.y });
+                                openQuestionForAlien();
                                 break;
                             }
                         }
@@ -132,12 +133,59 @@
         state.game = new Phaser.Game({ type: Phaser.AUTO, parent: ui.canvas, width: '100%', height: '100%', backgroundColor: '#080b20', transparent: true, render: { antialias: true, roundPixels: true }, scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH }, input: { activePointers: 2, touch: { capture: true } }, scene: [SpaceScene] });
     }
     function showQuestion(q, index) { state.question = q; state.index = index; state.locked = false; ui.question.hidden = false; ui.step.textContent = index === 5 ? 'DESAFIO ESPECIAL · 6/6' : `QUESTÃO ${index + 1}/6`; ui.type.textContent = index === 5 ? 'CHEFE DE SETOR' : 'TRANSMISSÃO'; ui.progress.style.width = `${((index + 1) / 6) * 100}%`; ui.text.textContent = q.pergunta; ui.answers.innerHTML = ''; ui.feedback.textContent = ''; ui.feedback.className = 'answer-feedback'; ui.next.hidden = true; q.alternativas.forEach((a, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'answer-button'; b.textContent = `${String.fromCharCode(65 + i)}. ${a.texto}`; b.addEventListener('click', () => answer(a.id, b)); ui.answers.appendChild(b) }); }
-    async function answer(alternativeId, button) { if (state.locked || !state.question) return; state.locked = true; const buttons = [...ui.answers.querySelectorAll('button')]; buttons.forEach(b => b.disabled = true); try { const data = await api('answer', { questao: state.question.id, alternativa: alternativeId }); state.score = data.score; state.lives = data.lives; state.correct = data.correctCount; renderScore(); button.classList.add(data.correct ? 'correct' : 'incorrect'); ui.feedback.classList.add(data.correct ? 'good' : 'bad'); ui.feedback.textContent = (data.correct ? 'ACERTOU! ' : 'NÃO FOI DESSA VEZ. ') + (data.explanation || ''); if (!data.correct) toast(state.lives ? `A nave perdeu energia. Restam ${state.lives} vidas.` : 'Energia esgotada!'); ui.next.textContent = data.finished ? 'VER RESULTADO →' : 'PRÓXIMA QUESTÃO →'; ui.next.hidden = false; ui.next.focus({ preventScroll: true }); state.pendingFinish = data.finished; } catch (e) { state.locked = false; buttons.forEach(b => b.disabled = false); toast(e.message) } }
-    async function nextQuestion() { ui.next.disabled = true; try { if (state.pendingFinish) { await finishRun(); return } const data = await api('question'); showQuestion(data.question, data.index) } catch (e) { toast(e.message) } finally { ui.next.disabled = false } }
+    async function openQuestionForAlien() {
+        if (state.questionOpen || state.finished || state.paused) return;
+        state.questionOpen = true;
+        try {
+            let data;
+            if (state.queuedQuestion) {
+                data = { question: state.queuedQuestion, index: state.queuedIndex ?? 0 };
+                state.queuedQuestion = null;
+                state.queuedIndex = null;
+            } else {
+                data = await api('question');
+            }
+            if (state.finished) { state.questionOpen = false; return; }
+            showQuestion(data.question, data.index);
+        } catch (e) {
+            state.questionOpen = false;
+            toast(e.message || 'Não foi possível carregar a questão.');
+        }
+    }
+    async function answer(alternativeId, button) {
+        if (state.locked || !state.question || !state.questionOpen) return;
+        state.locked = true;
+        const buttons = [...ui.answers.querySelectorAll('button')];
+        buttons.forEach(b => b.disabled = true);
+        try {
+            const data = await api('answer', { questao: state.question.id, alternativa: alternativeId });
+            state.score = data.score; state.lives = data.lives; state.correct = data.correctCount;
+            renderScore();
+            button.classList.add(data.correct ? 'correct' : 'incorrect');
+            ui.feedback.classList.add(data.correct ? 'good' : 'bad');
+            ui.feedback.textContent = (data.correct ? 'ACERTOU! ' : 'NÃO FOI DESSA VEZ. ') + (data.explanation || '');
+            if (!data.correct) toast(state.lives ? `Resposta incorreta. Restam ${state.lives} vidas.` : 'Você ficou sem vidas!');
+            state.pendingFinish = Boolean(data.finished) || state.lives <= 0;
+            // A questão fecha após uma resposta. O combate só retoma se a missão ainda estiver ativa.
+            ui.question.hidden = true;
+            state.question = null;
+            state.locked = false;
+            state.questionOpen = false;
+            if (state.pendingFinish) {
+                await finishRun();
+            } else {
+                toast(data.correct ? 'Alien derrotado! O combate continua.' : 'O combate continua. Fique atento!');
+            }
+        } catch (e) {
+            state.locked = false;
+            buttons.forEach(b => b.disabled = false);
+            toast(e.message);
+        }
+    }
     async function finishRun() { state.finished = true; try { const data = await api('finish'), r = data.result; ui.question.hidden = true; ui.result.hidden = false; ui.resultSymbol.textContent = r.success ? '✦' : '↻'; ui.resultEyebrow.textContent = r.success ? 'MISSÃO CONCLUÍDA' : 'MISSÃO INTERROMPIDA'; ui.resultTitle.textContent = r.success ? 'Setor explorado!' : 'A nave precisa de reparos'; ui.resultMessage.textContent = r.success ? 'Você concluiu os seis desafios. Seu progresso foi registrado.' : 'Suas vidas acabaram antes de concluir a missão. Você pode tentar novamente.'; ui.resultScore.textContent = String(r.score); ui.resultCorrect.textContent = `${r.correct}/6`; ui.resultXp.textContent = String(r.xp); ui.retry.hidden = false; ui.retry.textContent = 'TENTAR NOVAMENTE'; } catch (e) { state.finished = false; toast(e.message) } }
-    async function begin() { ui.start.disabled = true; try { const data = await api('start'); state.phase = data.phase; state.score = 0; state.lives = 3; state.integrity = 100; state.correct = 0; state.index = 0; state.started = true; state.finished = false; state.paused = false; state.pendingFinish = false; renderScore(); ui.intro.hidden = true; startScene(); enterFullscreen(); showQuestion(data.question, 0); ui.tip.style.opacity = '1'; setTimeout(() => { if (ui.tip) ui.tip.style.opacity = '.65' }, 5000) } catch (e) { toast(e.message); ui.start.disabled = false } }
+    async function begin() { ui.start.disabled = true; try { const data = await api('start'); state.phase = data.phase; state.score = 0; state.lives = 3; state.integrity = 100; state.correct = 0; state.index = 0; state.started = true; state.finished = false; state.paused = false; state.questionOpen = false; state.pendingFinish = false; state.queuedQuestion = data.question; state.queuedIndex = data.index ?? 0; ui.question.hidden = true; renderScore(); ui.intro.hidden = true; startScene(); enterFullscreen(); ui.tip.style.opacity = '1'; setTimeout(() => { if (ui.tip) ui.tip.style.opacity = '.65' }, 5000) } catch (e) { toast(e.message); ui.start.disabled = false } }
     function pause() { if (!state.started || state.finished) return; state.paused = true; ui.pauseOverlay.hidden = false; if (state.game) state.game.scene.pause('space') }
     function resume() { state.paused = false; ui.pauseOverlay.hidden = true; if (state.game) state.game.scene.resume('space') }
     function exitToMap() { if (document.fullscreenElement) document.exitFullscreen().catch(() => { }); window.location.href = cfg.mapa || 'mathspace.php' }
-    ui.start.addEventListener('click', begin); ui.next.addEventListener('click', nextQuestion); ui.pause.addEventListener('click', pause); ui.resume.addEventListener('click', resume); ui.exit.addEventListener('click', pause); ui.pauseExit.addEventListener('click', exitToMap); ui.retry.addEventListener('click', () => window.location.reload()); document.addEventListener('pointermove', e => { if (state.scene && state.started && !state.finished && !state.paused) { const rect = ui.canvas.getBoundingClientRect(); state.scene.pointerTarget = e.clientX - rect.left } }); document.addEventListener('pointerdown', e => { if (state.scene && state.started && !state.finished && !state.paused) { const rect = ui.canvas.getBoundingClientRect(); state.scene.pointerTarget = e.clientX - rect.left } }); document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.started && !state.finished) { if (state.paused) resume(); else pause() } }); document.addEventListener('fullscreenchange', () => { if (state.game) state.game.scale.refresh() });
+    ui.start.addEventListener('click', begin); ui.pause.addEventListener('click', pause); ui.resume.addEventListener('click', resume); ui.exit.addEventListener('click', pause); ui.pauseExit.addEventListener('click', exitToMap); ui.retry.addEventListener('click', () => window.location.reload()); document.addEventListener('pointermove', e => { if (state.scene && state.started && !state.finished && !state.paused) { const rect = ui.canvas.getBoundingClientRect(); state.scene.pointerTarget = e.clientX - rect.left } }); document.addEventListener('pointerdown', e => { if (state.scene && state.started && !state.finished && !state.paused) { const rect = ui.canvas.getBoundingClientRect(); state.scene.pointerTarget = e.clientX - rect.left } }); document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.started && !state.finished) { if (state.paused) resume(); else pause() } }); document.addEventListener('fullscreenchange', () => { if (state.game) state.game.scale.refresh() });
 })();
