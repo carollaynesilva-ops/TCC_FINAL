@@ -1755,3 +1755,7 @@ button:disabled {
         padding: 18px;
     }
 }
+
+.intro-overlay {
+    display: flex;
+}

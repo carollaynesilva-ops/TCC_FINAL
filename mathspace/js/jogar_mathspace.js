@@ -36,6 +36,9 @@
         resultMessage: $("#result-message"),
         resultScore: $("#result-score"),
 
+        missionIntro: $("#mission-intro"),
+        startButton: $("#start-button"),
+
         startButton: $("#start-button"),
         pauseButton: $("#pause-button"),
         resumeButton: $("#resume-button"),
@@ -1287,9 +1290,18 @@
 
             enterFullscreen();
 
+            // Esconde a tela de apresentação da missão.
+            if (ui.missionIntro) {
+                ui.missionIntro.classList.remove("visible");
+                ui.missionIntro.hidden = true;
+                ui.missionIntro.style.display = "none";
+            }
+
+            // Esconde o botão de iniciar, caso ainda esteja visível.
             if (ui.startButton) {
                 ui.startButton.hidden = true;
             }
+
         } catch (error) {
             console.error(error);
 
