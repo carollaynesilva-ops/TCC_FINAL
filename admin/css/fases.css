@@ -1,0 +1,77 @@
+/* Estilos específicos da tela de fases. Complementa css/admin.css. */
+.admin-fases-page .phase-number {
+    display: inline-grid;
+    place-items: center;
+    min-width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    background: #efedff;
+    color: #6255d9;
+    font-weight: 800;
+    margin-right: 11px
+}
+
+.admin-fases-page .table-primary {
+    display: flex;
+    align-items: center;
+    min-width: 220px
+}
+
+.admin-fases-page .table-primary strong {
+    display: block;
+    color: #25263a;
+    font-size: 13px
+}
+
+.admin-fases-page .table-primary small {
+    display: block;
+    max-width: 270px;
+    color: #8a8da4;
+    font-size: 11px;
+    margin-top: 4px;
+    white-space: normal
+}
+
+.admin-fases-page .grade-pill {
+    display: inline-flex;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #f0efff;
+    color: #6255d9;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap
+}
+
+.admin-fases-page .difficulty {
+    display: inline-flex;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700
+}
+
+.admin-fases-page .difficulty-facil {
+    background: #e6f8ee;
+    color: #218653
+}
+
+.admin-fases-page .difficulty-medio {
+    background: #fff3d9;
+    color: #996710
+}
+
+.admin-fases-page .difficulty-dificil {
+    background: #ffe9ed;
+    color: #c43d5a
+}
+
+@media(max-width:700px) {
+    .admin-fases-page .table-primary {
+        min-width: 180px
+    }
+
+    .admin-fases-page .table-primary small {
+        max-width: 190px
+    }
+}
