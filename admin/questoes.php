@@ -293,22 +293,29 @@ foreach ($alternativasEdicao as $i => $alt) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciar questões | MathRun</title>
     <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/admin-layout.css">
     <link rel="stylesheet" href="css/questoes.css">
 </head>
 
 <body class="admin-page admin-questoes-page">
     <div class="admin-layout">
-        <aside class="admin-sidebar">
-            <a class="admin-brand" href="admin.php"><span class="brand-mark">M</span><span>MathRun<small>PAINEL ADMINISTRATIVO</small></span></a>
-            <nav class="admin-nav" aria-label="Navegação administrativa">
-                <a href="admin.php"><span>⌂</span> Visão geral</a>
-                <a href="alunos.php"><span>♙</span> Alunos</a>
-                <a href="fases.php"><span>▤</span> Fases</a>
-                <a class="active" href="questoes.php"><span>☷</span> Questões</a>
-                <a href="desempenho.php"><span>▥</span> Desempenho</a>
+        <header class="mathrun-topnav">
+            <a class="mathrun-brand" href="admin.php" aria-label="MathRun, painel administrativo">
+                <span class="mathrun-brand-mark">M<span>+</span></span>
+                <span class="mathrun-brand-name">MathRun<small>ÁREA ADMINISTRATIVA</small></span>
+            </a>
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="admin-navigation" aria-label="Abrir menu">
+                <span></span><span></span><span></span>
+            </button>
+            <nav class="mathrun-navigation" id="admin-navigation" aria-label="Navegação administrativa">
+                <a href="admin.php"><span class="nav-symbol">⌂</span> Visão geral</a>
+                <a href="alunos.php"><span class="nav-symbol">♙</span> Alunos</a>
+                <a href="fases.php" class=""><span class="nav-symbol">▤</span> Fases</a>
+                <a href="questoes.php" class="is-active"><span class="nav-symbol">∑</span> Questões</a>
+                <a href="desempenho.php"><span class="nav-symbol">↗</span> Desempenho</a>
             </nav>
-            <div class="sidebar-bottom"><span class="sidebar-status"></span> Sistema MathRun</div>
-        </aside>
+            <span class="topnav-status"><i></i> Painel</span>
+        </header>
 
         <main class="admin-main">
             <header class="page-topbar">
@@ -480,6 +487,7 @@ foreach ($alternativasEdicao as $i => $alt) {
             <footer class="admin-footer">MathRun · Área administrativa</footer>
         </main>
     </div>
+    <script src="js/admin-layout.js" defer></script>
     <script src="js/questoes.js" defer></script>
 </body>
 
