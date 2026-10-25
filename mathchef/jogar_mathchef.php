@@ -58,7 +58,7 @@ $stmt = $pdo->prepare("
         numero
     FROM fases
     WHERE id = ?
-      AND jogo_id = 1
+      AND jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
       AND serie = ?
 ");
 $stmt->execute([$faseId, $serie]);
@@ -123,7 +123,7 @@ if ((int) $fase["numero"] > 1) {
     $stmt = $pdo->prepare("
         SELECT id
         FROM fases
-        WHERE jogo_id = 1
+        WHERE jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
           AND serie = ?
           AND numero = ?
         LIMIT 1

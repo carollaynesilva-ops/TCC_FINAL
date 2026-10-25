@@ -154,7 +154,7 @@ $stmt = $pdo->prepare("
         numero
     FROM fases
     WHERE id = ?
-      AND jogo_id = 1
+      AND jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
       AND serie = ?
     LIMIT 1
 ");
@@ -197,7 +197,7 @@ if ($numeroAtual > 1) {
             ON pu.fase_id = f.id
             AND pu.usuario_id = ?
 
-        WHERE f.jogo_id = 1
+        WHERE f.jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
           AND f.serie = ?
           AND f.numero = ?
 
@@ -851,7 +851,7 @@ try {
     $stmt = $pdo->prepare("
     SELECT COUNT(*)
     FROM fases
-    WHERE jogo_id = 1
+    WHERE jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
       AND serie = ?
 ");
 
@@ -869,7 +869,7 @@ try {
         ON pu.fase_id = f.id
         AND pu.usuario_id = ?
 
-    WHERE f.jogo_id = 1
+    WHERE f.jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
       AND f.serie = ?
       AND (
           pu.id IS NULL
@@ -909,7 +909,7 @@ try {
         ON f.id = q.fase_id
 
     WHERE ru.usuario_id = ?
-      AND f.jogo_id = 1
+      AND f.jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
       AND f.serie = ?
 
     ORDER BY ru.id ASC
@@ -1095,7 +1095,7 @@ try {
 
         FROM fases
 
-        WHERE jogo_id = 1
+        WHERE jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
           AND serie = ?
           AND numero = ?
 

@@ -100,7 +100,7 @@ $stmt = $pdo->prepare("
         numero
     FROM fases
     WHERE id = ?
-      AND jogo_id = 1
+      AND jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
       AND serie = ?
     LIMIT 1
 ");

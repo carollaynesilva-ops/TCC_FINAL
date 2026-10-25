@@ -60,7 +60,7 @@ $sqlFases = "
         ON p.fase_id = f.id
         AND p.usuario_id = ?
 
-    WHERE f.jogo_id = 1
+    WHERE f.jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
       AND f.serie = ?
 
     ORDER BY f.numero ASC
