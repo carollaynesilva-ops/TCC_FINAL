@@ -73,7 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($novoNome === '') {
 
         $erro = "O nome não pode ficar vazio.";
-
     }
 
 
@@ -84,7 +83,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif (!filter_var($novoEmail, FILTER_VALIDATE_EMAIL)) {
 
         $erro = "Digite um e-mail válido.";
-
     }
 
 
@@ -112,7 +110,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($emailExiste) {
 
             $erro = "Esse e-mail já está sendo utilizado por outra conta.";
-
         }
     }
 
@@ -126,25 +123,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($senhaAtual === '') {
 
             $erro = "Digite sua senha atual para alterar a senha.";
-
-        }
-
-        elseif (!password_verify($senhaAtual, $usuario['senha'])) {
+        } elseif (!password_verify($senhaAtual, $usuario['senha'])) {
 
             $erro = "A senha atual está incorreta.";
-
-        }
-
-        elseif (strlen($novaSenha) < 6) {
+        } elseif (strlen($novaSenha) < 6) {
 
             $erro = "A nova senha deve ter pelo menos 6 caracteres.";
-
-        }
-
-        elseif ($novaSenha !== $confirmarSenha) {
+        } elseif ($novaSenha !== $confirmarSenha) {
 
             $erro = "A confirmação da nova senha não corresponde.";
-
         }
     }
 
@@ -223,7 +210,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $senhaAtual = "";
             $novaSenha = "";
             $confirmarSenha = "";
-
         } catch (PDOException $e) {
 
             if ($pdo->inTransaction()) {
@@ -256,368 +242,356 @@ $inicial = strtoupper(
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
     <title>Editar Perfil | MathRun</title>
 
     <link
         rel="stylesheet"
-        href="../assets/css/editar_perfil.css"
-    >
+        href="../assets/css/editar_perfil.css">
 
+    <?php require_once __DIR__ . '/../includes/acessibilidade-head.php'; ?>
 </head>
 
 
 <body>
 
 
-<!-- ======================================================
+    <!-- ======================================================
      NAVBAR
 ====================================================== -->
 
-<header class="navbar">
+    <header class="navbar">
 
-    <a href="inicio.php" class="brand">
-        Math<span>Run</span>
-    </a>
-
-
-    <nav class="nav-links">
-
-        <a href="inicio.php">
-            Início
+        <a href="inicio.php" class="brand">
+            Math<span>Run</span>
         </a>
 
-        <a href="ranking.php">
-            Ranking
-        </a>
 
-        <a href="conquistas.php">
-            Conquistas
-        </a>
+        <nav class="nav-links">
 
-    </nav>
+            <a href="inicio.php">
+                Início
+            </a>
+
+            <a href="ranking.php">
+                Ranking
+            </a>
+
+            <a href="conquistas.php">
+                Conquistas
+            </a>
+
+        </nav>
 
 
-    <div class="nav-user">
+        <div class="nav-user">
 
-        <!-- TEMA -->
+            <!-- TEMA -->
 
-        <div class="theme-switcher">
+            <div class="theme-switcher">
 
-            <button
-                type="button"
-                data-theme-option="light"
-                title="Tema claro"
-            >
-                ☀
-            </button>
+                <button
+                    type="button"
+                    data-theme-option="light"
+                    title="Tema claro">
+                    ☀
+                </button>
 
-            <button
-                type="button"
-                data-theme-option="dark"
-                title="Tema escuro"
-            >
-                ☾
-            </button>
+                <button
+                    type="button"
+                    data-theme-option="dark"
+                    title="Tema escuro">
+                    ☾
+                </button>
 
-            <button
-                type="button"
-                data-theme-option="pink"
-                title="Tema rosa"
-            >
-                ♡
-            </button>
+                <button
+                    type="button"
+                    data-theme-option="pink"
+                    title="Tema rosa">
+                    ♡
+                </button>
+
+            </div>
+
+
+            <!-- AVATAR -->
+
+            <div class="avatar">
+                <?= htmlspecialchars($inicial) ?>
+            </div>
+
+
+            <div class="user-info">
+
+                <strong>
+                    <?= htmlspecialchars($nome) ?>
+                </strong>
+
+                <span>
+                    LEVEL <?= (int) $_SESSION['usuario_nivel'] ?>
+                </span>
+
+            </div>
+
+
+            <a
+                href="logout.php"
+                class="logout"
+                title="Sair">
+                ↪
+            </a>
 
         </div>
 
-
-        <!-- AVATAR -->
-
-        <div class="avatar">
-            <?= htmlspecialchars($inicial) ?>
-        </div>
-
-
-        <div class="user-info">
-
-            <strong>
-                <?= htmlspecialchars($nome) ?>
-            </strong>
-
-            <span>
-                LEVEL <?= (int) $_SESSION['usuario_nivel'] ?>
-            </span>
-
-        </div>
-
-
-        <a
-            href="logout.php"
-            class="logout"
-            title="Sair"
-        >
-            ↪
-        </a>
-
-    </div>
-
-</header>
+    </header>
 
 
 
-<!-- ======================================================
+    <!-- ======================================================
      CONTEÚDO
 ====================================================== -->
 
-<main class="edit-container">
+    <main class="edit-container">
 
 
-    <!-- CABEÇALHO -->
+        <!-- CABEÇALHO -->
 
-    <section class="edit-header">
+        <section class="edit-header">
 
-        <span class="section-label">
-            CONFIGURAÇÕES DA CONTA
-        </span>
+            <span class="section-label">
+                CONFIGURAÇÕES DA CONTA
+            </span>
 
-        <h1>
-            Editar perfil.
-        </h1>
+            <h1>
+                Editar perfil.
+            </h1>
 
-        <p>
-            Atualize suas informações e mantenha sua conta em dia.
-        </p>
+            <p>
+                Atualize suas informações e mantenha sua conta em dia.
+            </p>
 
-    </section>
-
-
-
-    <!-- MENSAGENS -->
-
-    <?php if ($erro !== ''): ?>
-
-        <div class="message error">
-            <span>!</span>
-            <?= htmlspecialchars($erro) ?>
-        </div>
-
-    <?php endif; ?>
-
-
-    <?php if ($sucesso !== ''): ?>
-
-        <div class="message success">
-            <span>✓</span>
-            <?= htmlspecialchars($sucesso) ?>
-        </div>
-
-    <?php endif; ?>
+        </section>
 
 
 
-    <!-- ==================================================
+        <!-- MENSAGENS -->
+
+        <?php if ($erro !== ''): ?>
+
+            <div class="message error">
+                <span>!</span>
+                <?= htmlspecialchars($erro) ?>
+            </div>
+
+        <?php endif; ?>
+
+
+        <?php if ($sucesso !== ''): ?>
+
+            <div class="message success">
+                <span>✓</span>
+                <?= htmlspecialchars($sucesso) ?>
+            </div>
+
+        <?php endif; ?>
+
+
+
+        <!-- ==================================================
          FORMULÁRIO
     ================================================== -->
 
-    <form
-        method="POST"
-        class="edit-form"
-    >
+        <form
+            method="POST"
+            class="edit-form">
 
 
-        <!-- DADOS PESSOAIS -->
+            <!-- DADOS PESSOAIS -->
 
-        <section class="edit-card">
+            <section class="edit-card">
 
-            <div class="card-title">
+                <div class="card-title">
 
-                <div class="title-icon">
-                    👤
-                </div>
+                    <div class="title-icon">
+                        👤
+                    </div>
 
-                <div>
+                    <div>
 
-                    <span>
-                        INFORMAÇÕES PESSOAIS
-                    </span>
+                        <span>
+                            INFORMAÇÕES PESSOAIS
+                        </span>
 
-                    <h2>
-                        Seus dados
-                    </h2>
+                        <h2>
+                            Seus dados
+                        </h2>
 
-                </div>
-
-            </div>
-
-
-            <!-- NOME -->
-
-            <div class="form-group">
-
-                <label for="nome">
-                    Nome
-                </label>
-
-                <input
-                    type="text"
-                    id="nome"
-                    name="nome"
-                    value="<?= htmlspecialchars($nome) ?>"
-                    maxlength="100"
-                    required
-                >
-
-            </div>
-
-
-            <!-- E-MAIL -->
-
-            <div class="form-group">
-
-                <label for="email">
-                    E-mail
-                </label>
-
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value="<?= htmlspecialchars($email) ?>"
-                    maxlength="150"
-                    required
-                >
-
-            </div>
-
-        </section>
-
-
-
-        <!-- SENHA -->
-
-        <section class="edit-card">
-
-            <div class="card-title">
-
-                <div class="title-icon">
-                    🔐
-                </div>
-
-                <div>
-
-                    <span>
-                        SEGURANÇA
-                    </span>
-
-                    <h2>
-                        Alterar senha
-                    </h2>
+                    </div>
 
                 </div>
 
+
+                <!-- NOME -->
+
+                <div class="form-group">
+
+                    <label for="nome">
+                        Nome
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nome"
+                        name="nome"
+                        value="<?= htmlspecialchars($nome) ?>"
+                        maxlength="100"
+                        required>
+
+                </div>
+
+
+                <!-- E-MAIL -->
+
+                <div class="form-group">
+
+                    <label for="email">
+                        E-mail
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value="<?= htmlspecialchars($email) ?>"
+                        maxlength="150"
+                        required>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- SENHA -->
+
+            <section class="edit-card">
+
+                <div class="card-title">
+
+                    <div class="title-icon">
+                        🔐
+                    </div>
+
+                    <div>
+
+                        <span>
+                            SEGURANÇA
+                        </span>
+
+                        <h2>
+                            Alterar senha
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <p class="password-info">
+                    Se não quiser alterar sua senha, deixe os campos abaixo vazios.
+                </p>
+
+
+                <!-- SENHA ATUAL -->
+
+                <div class="form-group">
+
+                    <label for="senha_atual">
+                        Senha atual
+                    </label>
+
+                    <input
+                        type="password"
+                        id="senha_atual"
+                        name="senha_atual"
+                        autocomplete="current-password">
+
+                </div>
+
+
+                <!-- NOVA SENHA -->
+
+                <div class="form-group">
+
+                    <label for="nova_senha">
+                        Nova senha
+                    </label>
+
+                    <input
+                        type="password"
+                        id="nova_senha"
+                        name="nova_senha"
+                        minlength="6"
+                        autocomplete="new-password">
+
+                    <small>
+                        Mínimo de 6 caracteres.
+                    </small>
+
+                </div>
+
+
+                <!-- CONFIRMAR -->
+
+                <div class="form-group">
+
+                    <label for="confirmar_senha">
+                        Confirmar nova senha
+                    </label>
+
+                    <input
+                        type="password"
+                        id="confirmar_senha"
+                        name="confirmar_senha"
+                        minlength="6"
+                        autocomplete="new-password">
+
+                </div>
+
+            </section>
+
+
+
+            <!-- BOTÕES -->
+
+            <div class="form-actions">
+
+                <a
+                    href="perfil.php"
+                    class="cancel-button">
+                    Cancelar
+                </a>
+
+                <button
+                    type="submit"
+                    class="save-button">
+                    Salvar alterações
+                    <span>→</span>
+                </button>
+
             </div>
 
 
-            <p class="password-info">
-                Se não quiser alterar sua senha, deixe os campos abaixo vazios.
-            </p>
+        </form>
 
 
-            <!-- SENHA ATUAL -->
-
-            <div class="form-group">
-
-                <label for="senha_atual">
-                    Senha atual
-                </label>
-
-                <input
-                    type="password"
-                    id="senha_atual"
-                    name="senha_atual"
-                    autocomplete="current-password"
-                >
-
-            </div>
+    </main>
 
 
-            <!-- NOVA SENHA -->
+    <script src="../assets/js/tema.js"></script>
 
-            <div class="form-group">
-
-                <label for="nova_senha">
-                    Nova senha
-                </label>
-
-                <input
-                    type="password"
-                    id="nova_senha"
-                    name="nova_senha"
-                    minlength="6"
-                    autocomplete="new-password"
-                >
-
-                <small>
-                    Mínimo de 6 caracteres.
-                </small>
-
-            </div>
-
-
-            <!-- CONFIRMAR -->
-
-            <div class="form-group">
-
-                <label for="confirmar_senha">
-                    Confirmar nova senha
-                </label>
-
-                <input
-                    type="password"
-                    id="confirmar_senha"
-                    name="confirmar_senha"
-                    minlength="6"
-                    autocomplete="new-password"
-                >
-
-            </div>
-
-        </section>
-
-
-
-        <!-- BOTÕES -->
-
-        <div class="form-actions">
-
-            <a
-                href="perfil.php"
-                class="cancel-button"
-            >
-                Cancelar
-            </a>
-
-            <button
-                type="submit"
-                class="save-button"
-            >
-                Salvar alterações
-                <span>→</span>
-            </button>
-
-        </div>
-
-
-    </form>
-
-
-</main>
-
-
-<script src="../assets/js/tema.js"></script>
-
+    <?php require_once __DIR__ . '/../includes/acessibilidade.php'; ?>
 </body>
 
 </html>

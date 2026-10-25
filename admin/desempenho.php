@@ -546,6 +546,7 @@ $nomePeriodo = [
     <link rel="stylesheet" href="css/admin-legacy-pages.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <?php require_once __DIR__ . '/../includes/acessibilidade-head.php'; ?>
 </head>
 
 <body class="admin-page admin-desempenho-page">
@@ -1325,6 +1326,7 @@ $nomePeriodo = [
     </script>
 
     <script src="js/admin-layout.js" defer></script>
+    <?php require_once __DIR__ . '/../includes/acessibilidade.php'; ?>
 </body>
 
 </html>

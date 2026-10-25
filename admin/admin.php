@@ -270,6 +270,7 @@ if ($hora < 12) {
     <link rel="stylesheet" href="css/admin-layout.css">
     <link rel="stylesheet" href="css/admin-legacy-pages.css">
 
+    <?php require_once __DIR__ . '/../includes/acessibilidade-head.php'; ?>
 </head>
 
 <body class="admin-page admin-dashboard-page">
@@ -290,7 +291,6 @@ if ($hora < 12) {
                 <a href="fases.php"><span class="nav-symbol">▤</span> Fases</a>
                 <a href="questoes.php"><span class="nav-symbol">∑</span> Questões</a>
                 <a href="desempenho.php"><span class="nav-symbol">↗</span> Desempenho</a>
-                <a href="../logout.php" class="btn-sair"><span>🚪 Sair</span></a>
             </nav>
             <span class="topnav-status"><i></i> Painel</span>
         </header>
@@ -1065,6 +1065,7 @@ if ($hora < 12) {
         }
     </script>
     <script src="js/admin-layout.js" defer></script>
+    <?php require_once __DIR__ . '/../includes/acessibilidade.php'; ?>
 </body>
 
 </html>

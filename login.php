@@ -140,6 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         rel="stylesheet"
         href="assets/css/login.css">
 
+    <?php require_once __DIR__ . '/includes/acessibilidade-head.php'; ?>
 </head>
 
 <body>
@@ -381,6 +382,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     </main>
 
+    <?php require_once __DIR__ . '/includes/acessibilidade.php'; ?>
 </body>
 
 </html>

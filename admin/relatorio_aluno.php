@@ -170,12 +170,15 @@ $dataRelatorio = date("d/m/Y");
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatório escolar - <?= relatorioEsc($aluno["nome"]) ?> | MathRun</title>
     <link rel="stylesheet" href="css/relatorio.css">
+    <?php require_once __DIR__ . '/../includes/acessibilidade-head.php'; ?>
 </head>
+
 <body>
     <div class="barra-acoes">
         <a class="acao-voltar" href="alunos.php">← Voltar para alunos</a>
@@ -255,23 +258,35 @@ $dataRelatorio = date("d/m/Y");
             <h2><span>04</span> Comparativo por jogo</h2>
             <div class="tabela-responsiva">
                 <table>
-                    <thead><tr><th>Jogo</th><th>Partidas</th><th>Pontuação</th><th>Acertos</th><th>Erros</th><th>Taxa de acerto</th><th>Dicas usadas</th></tr></thead>
-                    <tbody>
-                    <?php foreach ($resumoJogos as $jogo):
-                        $respostasJogo = (int)$jogo["acertos"] + (int)$jogo["erros"];
-                        $taxaJogo = $respostasJogo > 0 ? round(((int)$jogo["acertos"] / $respostasJogo) * 100, 1) : 0;
-                    ?>
+                    <thead>
                         <tr>
-                            <td><?= relatorioEsc($jogo["jogo_nome"]) ?></td>
-                            <td><?= (int)$jogo["partidas"] ?></td>
-                            <td><?= number_format((int)$jogo["pontuacao"], 0, ',', '.') ?></td>
-                            <td><?= (int)$jogo["acertos"] ?></td>
-                            <td><?= (int)$jogo["erros"] ?></td>
-                            <td><?= number_format($taxaJogo, 1, ',', '.') ?>%</td>
-                            <td><?= (int)$jogo["dicas"] ?></td>
+                            <th>Jogo</th>
+                            <th>Partidas</th>
+                            <th>Pontuação</th>
+                            <th>Acertos</th>
+                            <th>Erros</th>
+                            <th>Taxa de acerto</th>
+                            <th>Dicas usadas</th>
                         </tr>
-                    <?php endforeach; ?>
-                    <?php if (!$resumoJogos): ?><tr><td colspan="7" class="linha-vazia">Não há dados de jogos para este estudante.</td></tr><?php endif; ?>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($resumoJogos as $jogo):
+                            $respostasJogo = (int)$jogo["acertos"] + (int)$jogo["erros"];
+                            $taxaJogo = $respostasJogo > 0 ? round(((int)$jogo["acertos"] / $respostasJogo) * 100, 1) : 0;
+                        ?>
+                            <tr>
+                                <td><?= relatorioEsc($jogo["jogo_nome"]) ?></td>
+                                <td><?= (int)$jogo["partidas"] ?></td>
+                                <td><?= number_format((int)$jogo["pontuacao"], 0, ',', '.') ?></td>
+                                <td><?= (int)$jogo["acertos"] ?></td>
+                                <td><?= (int)$jogo["erros"] ?></td>
+                                <td><?= number_format($taxaJogo, 1, ',', '.') ?>%</td>
+                                <td><?= (int)$jogo["dicas"] ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        <?php if (!$resumoJogos): ?><tr>
+                                <td colspan="7" class="linha-vazia">Não há dados de jogos para este estudante.</td>
+                            </tr><?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -300,7 +315,12 @@ $dataRelatorio = date("d/m/Y");
         <section class="secao secao-observacoes">
             <h2><span>06</span> Observações pedagógicas</h2>
             <p class="texto-apoio">Espaço reservado para registro e acompanhamento pela equipe pedagógica.</p>
-            <div class="linhas-observacao"><div></div><div></div><div></div><div></div></div>
+            <div class="linhas-observacao">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
         </section>
 
         <footer class="rodape-relatorio">
@@ -316,5 +336,7 @@ $dataRelatorio = date("d/m/Y");
             window.addEventListener('load', () => window.print());
         }
     </script>
+    <?php require_once __DIR__ . '/../includes/acessibilidade.php'; ?>
 </body>
+
 </html>

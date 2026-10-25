@@ -205,6 +205,7 @@ $form = $faseEdicao ?: [
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/admin-layout.css">
     <link rel="stylesheet" href="css/fases.css">
+    <?php require_once __DIR__ . '/../includes/acessibilidade-head.php'; ?>
 </head>
 
 <body class="admin-page admin-fases-page">
@@ -369,6 +370,7 @@ $form = $faseEdicao ?: [
     </div>
     <script src="js/admin-layout.js" defer></script>
     <script src="js/fases.js" defer></script>
+    <?php require_once __DIR__ . '/../includes/acessibilidade.php'; ?>
 </body>
 
 </html>

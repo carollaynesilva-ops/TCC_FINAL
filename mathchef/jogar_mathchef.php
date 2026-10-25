@@ -58,7 +58,7 @@ $stmt = $pdo->prepare("
         numero
     FROM fases
     WHERE id = ?
-      AND jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
+      AND jogo_id = 1
       AND serie = ?
 ");
 $stmt->execute([$faseId, $serie]);
@@ -123,7 +123,7 @@ if ((int) $fase["numero"] > 1) {
     $stmt = $pdo->prepare("
         SELECT id
         FROM fases
-        WHERE jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
+        WHERE jogo_id = 1
           AND serie = ?
           AND numero = ?
         LIMIT 1
@@ -322,6 +322,7 @@ $dificuldade = $dificuldades[$fase["nivel_dificuldade"]] ?? "Fácil";
     <title><?= htmlspecialchars($fase["nome"]) ?> | MathChef</title>
 
     <link rel="stylesheet" href="../assets/css/jogar_mathchef.css">
+    <?php require_once __DIR__ . '/../includes/acessibilidade-head.php'; ?>
 </head>
 
 <body>
@@ -648,6 +649,7 @@ $dificuldade = $dificuldades[$fase["nivel_dificuldade"]] ?? "Fácil";
 
     <script src="../assets/js/jogar_mathchef.js"></script>
 
+    <?php require_once __DIR__ . '/../includes/acessibilidade.php'; ?>
 </body>
 
 </html>

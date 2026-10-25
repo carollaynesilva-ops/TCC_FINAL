@@ -16,37 +16,32 @@ if (isset($_SESSION['usuario_id'])) {
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
     <meta
         name="description"
-        content="MathRun - Aprenda matemática jogando."
-    >
+        content="MathRun - Aprenda matemática jogando.">
 
     <title>MathRun | Aprenda jogando</title>
 
     <link
         rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
+        href="https://fonts.googleapis.com">
 
     <link
         rel="preconnect"
         href="https://fonts.gstatic.com"
-        crossorigin
-    >
+        crossorigin>
 
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+        rel="stylesheet">
 
     <link
         rel="stylesheet"
-        href="assets/css/style.css"
-    >
+        href="assets/css/style.css">
 
+    <?php require_once __DIR__ . '/includes/acessibilidade-head.php'; ?>
 </head>
 
 
@@ -93,8 +88,7 @@ if (isset($_SESSION['usuario_id'])) {
 
         <a
             href="index.php"
-            class="brand"
-        >
+            class="brand">
             Math<span>Run</span>
         </a>
 
@@ -106,24 +100,21 @@ if (isset($_SESSION['usuario_id'])) {
                 <button
                     type="button"
                     onclick="mudarTema('claro')"
-                    title="Tema claro"
-                >
+                    title="Tema claro">
                     ☀
                 </button>
 
                 <button
                     type="button"
                     onclick="mudarTema('escuro')"
-                    title="Tema escuro"
-                >
+                    title="Tema escuro">
                     ◐
                 </button>
 
                 <button
                     type="button"
                     onclick="mudarTema('rosa')"
-                    title="Tema rosa"
-                >
+                    title="Tema rosa">
                     ♡
                 </button>
 
@@ -155,7 +146,7 @@ if (isset($_SESSION['usuario_id'])) {
 
             <h1>
 
-                Quantos níveis você aguentaria 
+                Quantos níveis você aguentaria
                 <span>antes de travar?</span>
 
             </h1>
@@ -172,8 +163,7 @@ if (isset($_SESSION['usuario_id'])) {
 
                 <a
                     href="cadastro.php"
-                    class="btn-primary"
-                >
+                    class="btn-primary">
 
                     <span>Começar agora</span>
 
@@ -184,8 +174,7 @@ if (isset($_SESSION['usuario_id'])) {
 
                 <a
                     href="login.php"
-                    class="btn-secondary"
-                >
+                    class="btn-secondary">
 
                     Já tenho uma conta
 
@@ -337,6 +326,7 @@ if (isset($_SESSION['usuario_id'])) {
 
     <script src="assets/js/tema.js"></script>
 
+    <?php require_once __DIR__ . '/includes/acessibilidade.php'; ?>
 </body>
 
 </html>

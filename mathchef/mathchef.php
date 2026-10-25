@@ -60,7 +60,7 @@ $sqlFases = "
         ON p.fase_id = f.id
         AND p.usuario_id = ?
 
-    WHERE f.jogo_id = (SELECT id FROM jogos WHERE nome = 'MathChef' LIMIT 1)
+    WHERE f.jogo_id = 1
       AND f.serie = ?
 
     ORDER BY f.numero ASC
@@ -239,6 +239,7 @@ if ($configMathChefJson === false) $configMathChefJson = '{"serie":0,"totalFases
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js" defer></script>
     <script src="../assets/js/mathchef.js" defer></script>
     <script src="../assets/js/tema.js" defer></script>
+    <?php require_once __DIR__ . '/../includes/acessibilidade-head.php'; ?>
 </head>
 
 <body class="chef-game-page">
@@ -300,6 +301,7 @@ if ($configMathChefJson === false) $configMathChefJson = '{"serie":0,"totalFases
             </div>
         </section>
     </div>
+    <?php require_once __DIR__ . '/../includes/acessibilidade.php'; ?>
 </body>
 
 </html>

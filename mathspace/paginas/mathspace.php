@@ -169,6 +169,7 @@
         </script>
 
         <script src="../js/mathspace.js" defer></script>
+        <?php require_once __DIR__ . '/../../includes/acessibilidade-head.php'; ?>
     </head>
 
     <body class="space-game-page">
@@ -502,6 +503,7 @@
 
         </div>
 
+        <?php require_once __DIR__ . '/../../includes/acessibilidade.php'; ?>
     </body>
 
     </html>

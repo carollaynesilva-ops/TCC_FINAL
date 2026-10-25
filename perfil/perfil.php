@@ -173,6 +173,7 @@ $inicial = strtoupper(
         rel="stylesheet"
         href="../assets/css/perfil.css">
 
+    <?php require_once __DIR__ . '/../includes/acessibilidade-head.php'; ?>
 </head>
 
 
@@ -850,6 +851,7 @@ $inicial = strtoupper(
 
     <script src="../assets/js/tema.js"></script>
 
+    <?php require_once __DIR__ . '/../includes/acessibilidade.php'; ?>
 </body>
 
 </html>

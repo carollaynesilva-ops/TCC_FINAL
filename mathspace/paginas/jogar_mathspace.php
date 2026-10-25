@@ -64,7 +64,8 @@ $payload = [
     'csrf' => $_SESSION['mathspace_csrf'],
     'mapa' => 'mathspace.php'
 ];
-?><!doctype html>
+?>
+<!doctype html>
 <html lang="pt-BR" data-theme="dark">
 
 <head>
@@ -74,8 +75,11 @@ $payload = [
     <title>MathSpace | <?= htmlspecialchars($fase['nome'], ENT_QUOTES, 'UTF-8') ?></title>
     <link rel="stylesheet" href="../css/jogar_mathspace.css">
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js" defer></script>
-    <script>window.MATHSPACE_GAME = <?= json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;</script>
+    <script>
+        window.MATHSPACE_GAME = <?= json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    </script>
     <script src="../js/jogar_mathspace.js" defer></script>
+    <?php require_once __DIR__ . '/../../includes/acessibilidade-head.php'; ?>
 </head>
 
 <body>
@@ -159,6 +163,7 @@ $payload = [
             </div>
         </section>
     </main>
+    <?php require_once __DIR__ . '/../../includes/acessibilidade.php'; ?>
 </body>
 
 </html>

@@ -31,27 +31,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     ) {
 
         $erro = "Preencha todos os campos.";
-
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
         $erro = "Digite um e-mail válido.";
-
     } elseif (!in_array($serie, ["6", "7", "8", "9"])) {
 
         $erro = "Selecione uma série válida.";
-
     } elseif (!in_array($turma, ["A", "B"])) {
 
         $erro = "Selecione uma turma válida.";
-
     } elseif (strlen($senha) < 6) {
 
         $erro = "A senha deve ter pelo menos 6 caracteres.";
-
     } elseif ($senha !== $confirmarSenha) {
 
         $erro = "As senhas não coincidem.";
-
     } else {
 
         // ==========================================
@@ -72,7 +66,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($usuarioExistente) {
 
             $erro = "Este e-mail já está cadastrado.";
-
         } else {
 
             // ==========================================
@@ -150,8 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
     <title>Cadastro | MathRun</title>
 
@@ -160,28 +152,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <link
         rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
+        href="https://fonts.googleapis.com">
 
     <link
         rel="preconnect"
         href="https://fonts.gstatic.com"
-        crossorigin
-    >
+        crossorigin>
 
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+        rel="stylesheet">
 
 
     <!-- CSS -->
 
     <link
         rel="stylesheet"
-        href="assets/css/cadastro.css"
-    >
+        href="assets/css/cadastro.css">
 
+    <?php require_once __DIR__ . '/includes/acessibilidade-head.php'; ?>
 </head>
 
 
@@ -219,16 +208,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <a
             href="index.php"
-            class="brand"
-        >
+            class="brand">
             Math<span>Run</span>
         </a>
 
 
         <a
             href="login.php"
-            class="login-link"
-        >
+            class="login-link">
             Já tenho uma conta
         </a>
 
@@ -292,8 +279,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <form
                 method="POST"
                 action=""
-                class="formulario"
-            >
+                class="formulario">
 
 
                 <!-- NOME -->
@@ -311,8 +297,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         placeholder="Como podemos te chamar?"
                         value="<?= htmlspecialchars($_POST['nome'] ?? '') ?>"
                         autocomplete="name"
-                        required
-                    >
+                        required>
 
                 </div>
 
@@ -332,8 +317,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         placeholder="seuemail@email.com"
                         value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
                         autocomplete="email"
-                        required
-                    >
+                        required>
 
                 </div>
 
@@ -349,8 +333,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <select
                         id="serie"
                         name="serie"
-                        required
-                    >
+                        required>
 
                         <option value="">
                             Selecione sua série
@@ -358,29 +341,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                         <option
                             value="6"
-                            <?= ($_POST['serie'] ?? '') === '6' ? 'selected' : '' ?>
-                        >
+                            <?= ($_POST['serie'] ?? '') === '6' ? 'selected' : '' ?>>
                             6º ano
                         </option>
 
                         <option
                             value="7"
-                            <?= ($_POST['serie'] ?? '') === '7' ? 'selected' : '' ?>
-                        >
+                            <?= ($_POST['serie'] ?? '') === '7' ? 'selected' : '' ?>>
                             7º ano
                         </option>
 
                         <option
                             value="8"
-                            <?= ($_POST['serie'] ?? '') === '8' ? 'selected' : '' ?>
-                        >
+                            <?= ($_POST['serie'] ?? '') === '8' ? 'selected' : '' ?>>
                             8º ano
                         </option>
 
                         <option
                             value="9"
-                            <?= ($_POST['serie'] ?? '') === '9' ? 'selected' : '' ?>
-                        >
+                            <?= ($_POST['serie'] ?? '') === '9' ? 'selected' : '' ?>>
                             9º ano
                         </option>
 
@@ -400,8 +379,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <select
                         id="turma"
                         name="turma"
-                        required
-                    >
+                        required>
 
                         <option value="">
                             Selecione sua turma
@@ -409,15 +387,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                         <option
                             value="A"
-                            <?= ($_POST['turma'] ?? '') === 'A' ? 'selected' : '' ?>
-                        >
+                            <?= ($_POST['turma'] ?? '') === 'A' ? 'selected' : '' ?>>
                             Turma A
                         </option>
 
                         <option
                             value="B"
-                            <?= ($_POST['turma'] ?? '') === 'B' ? 'selected' : '' ?>
-                        >
+                            <?= ($_POST['turma'] ?? '') === 'B' ? 'selected' : '' ?>>
                             Turma B
                         </option>
 
@@ -440,8 +416,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         name="senha"
                         placeholder="Mínimo de 6 caracteres"
                         autocomplete="new-password"
-                        required
-                    >
+                        required>
 
                 </div>
 
@@ -460,8 +435,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         name="confirmar_senha"
                         placeholder="Digite a senha novamente"
                         autocomplete="new-password"
-                        required
-                    >
+                        required>
 
                 </div>
 
@@ -470,8 +444,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 <button
                     type="submit"
-                    class="btn-cadastrar"
-                >
+                    class="btn-cadastrar">
 
                     <span>
                         Criar minha conta
@@ -557,6 +530,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </main>
 
 
+    <?php require_once __DIR__ . '/includes/acessibilidade.php'; ?>
 </body>
 
 </html>

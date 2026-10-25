@@ -147,431 +147,423 @@ $imagensMedalhas = [
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
     <title>Conquistas | MathRun</title>
 
     <link
         rel="stylesheet"
-        href="assets/css/conquistas.css"
-    >
+        href="assets/css/conquistas.css">
 
+    <?php require_once __DIR__ . '/includes/acessibilidade-head.php'; ?>
 </head>
 
 
 <body>
 
 
-<!-- ======================================================
+    <!-- ======================================================
      NAVBAR
 ====================================================== -->
 
-<header class="navbar">
+    <header class="navbar">
 
-    <a href="inicio.php" class="brand">
-        Math<span>Run</span>
-    </a>
-
-
-    <nav class="nav-links">
-
-        <a href="inicio.php">
-            Início
+        <a href="inicio.php" class="brand">
+            Math<span>Run</span>
         </a>
 
-        <a href="ranking.php">
-            Ranking
-        </a>
 
-        <a
-            href="conquistas.php"
-            class="active"
-        >
-            Conquistas
-        </a>
+        <nav class="nav-links">
 
-    </nav>
+            <a href="inicio.php">
+                Início
+            </a>
+
+            <a href="ranking.php">
+                Ranking
+            </a>
+
+            <a
+                href="conquistas.php"
+                class="active">
+                Conquistas
+            </a>
+
+        </nav>
 
 
-    <div class="nav-user">
+        <div class="nav-user">
 
 
-        <!-- TEMA -->
+            <!-- TEMA -->
 
-        <div class="theme-switcher">
+            <div class="theme-switcher">
 
-            <button
-                type="button"
-                data-theme-option="light"
-                title="Tema claro"
-            >
-                ☀
-            </button>
+                <button
+                    type="button"
+                    data-theme-option="light"
+                    title="Tema claro">
+                    ☀
+                </button>
 
-            <button
-                type="button"
-                data-theme-option="dark"
-                title="Tema escuro"
-            >
-                ☾
-            </button>
+                <button
+                    type="button"
+                    data-theme-option="dark"
+                    title="Tema escuro">
+                    ☾
+                </button>
 
-            <button
-                type="button"
-                data-theme-option="pink"
-                title="Tema rosa"
-            >
-                ♡
-            </button>
+                <button
+                    type="button"
+                    data-theme-option="pink"
+                    title="Tema rosa">
+                    ♡
+                </button>
+
+            </div>
+
+
+            <!-- AVATAR -->
+
+            <div class="avatar">
+                <?= htmlspecialchars($inicial) ?>
+            </div>
+
+
+            <!-- USUÁRIO -->
+
+            <div class="user-info">
+
+                <strong>
+                    <?= htmlspecialchars($nome) ?>
+                </strong>
+
+                <span>
+                    LEVEL <?= $nivel ?>
+                </span>
+
+            </div>
+
+
+            <!-- LOGOUT -->
+
+            <a
+                href="logout.php"
+                class="logout"
+                title="Sair">
+                ↪
+            </a>
 
         </div>
 
-
-        <!-- AVATAR -->
-
-        <div class="avatar">
-            <?= htmlspecialchars($inicial) ?>
-        </div>
-
-
-        <!-- USUÁRIO -->
-
-        <div class="user-info">
-
-            <strong>
-                <?= htmlspecialchars($nome) ?>
-            </strong>
-
-            <span>
-                LEVEL <?= $nivel ?>
-            </span>
-
-        </div>
-
-
-        <!-- LOGOUT -->
-
-        <a
-            href="logout.php"
-            class="logout"
-            title="Sair"
-        >
-            ↪
-        </a>
-
-    </div>
-
-</header>
+    </header>
 
 
 
-<!-- ======================================================
+    <!-- ======================================================
      CONTEÚDO
 ====================================================== -->
 
-<main class="achievements-container">
+    <main class="achievements-container">
 
 
-    <!-- ==================================================
+        <!-- ==================================================
          CABEÇALHO
     ================================================== -->
 
-    <section class="achievements-header">
-
-        <div>
-
-            <span class="section-label">
-                SUA JORNADA
-            </span>
-
-            <h1>
-                Conquistas.
-            </h1>
-
-            <p>
-                Cada desafio concluído deixa uma marca na sua jornada.
-            </p>
-
-        </div>
-
-
-        <div class="achievement-counter">
-
-            <strong>
-                <?= $desbloqueadas ?>
-            </strong>
-
-            <span>
-                / <?= $totalMedalhas ?>
-            </span>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- ==================================================
-         PROGRESSO
-    ================================================== -->
-
-    <section class="achievement-progress">
-
-        <div class="progress-heading">
+        <section class="achievements-header">
 
             <div>
 
-                <span>
-                    PROGRESSO DAS CONQUISTAS
+                <span class="section-label">
+                    SUA JORNADA
                 </span>
 
+                <h1>
+                    Conquistas.
+                </h1>
+
+                <p>
+                    Cada desafio concluído deixa uma marca na sua jornada.
+                </p>
+
+            </div>
+
+
+            <div class="achievement-counter">
+
                 <strong>
-                    <?= $desbloqueadas ?> desbloqueadas
+                    <?= $desbloqueadas ?>
+                </strong>
+
+                <span>
+                    / <?= $totalMedalhas ?>
+                </span>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+         PROGRESSO
+    ================================================== -->
+
+        <section class="achievement-progress">
+
+            <div class="progress-heading">
+
+                <div>
+
+                    <span>
+                        PROGRESSO DAS CONQUISTAS
+                    </span>
+
+                    <strong>
+                        <?= $desbloqueadas ?> desbloqueadas
+                    </strong>
+
+                </div>
+
+                <strong>
+                    <?= round($porcentagem) ?>%
                 </strong>
 
             </div>
 
-            <strong>
-                <?= round($porcentagem) ?>%
-            </strong>
 
-        </div>
+            <div class="progress-bar">
 
+                <div
+                    style="width: <?= $porcentagem ?>%;"></div>
 
-        <div class="progress-bar">
-
-            <div
-                style="width: <?= $porcentagem ?>%;"
-            ></div>
-
-        </div>
+            </div>
 
 
-        <p>
+            <p>
 
-            <?= $bloqueadas ?>
-            conquista<?= $bloqueadas == 1 ? '' : 's' ?>
-            ainda aguardando você.
+                <?= $bloqueadas ?>
+                conquista<?= $bloqueadas == 1 ? '' : 's' ?>
+                ainda aguardando você.
 
-        </p>
+            </p>
 
-    </section>
+        </section>
 
 
 
-    <!-- ==================================================
+        <!-- ==================================================
          TÍTULO DA COLEÇÃO
     ================================================== -->
 
-    <div class="collection-heading">
+        <div class="collection-heading">
 
-        <div>
+            <div>
 
-            <span>
-                COLEÇÃO
+                <span>
+                    COLEÇÃO
+                </span>
+
+                <h2>
+                    Todas as conquistas
+                </h2>
+
+            </div>
+
+            <span class="collection-count">
+
+                <?= $totalMedalhas ?> medalhas
+
             </span>
-
-            <h2>
-                Todas as conquistas
-            </h2>
 
         </div>
 
-        <span class="collection-count">
-
-            <?= $totalMedalhas ?> medalhas
-
-        </span>
-
-    </div>
 
 
-
-    <!-- ==================================================
+        <!-- ==================================================
          GRID DAS CONQUISTAS
     ================================================== -->
 
-    <section class="achievement-grid">
+        <section class="achievement-grid">
 
 
-        <?php foreach ($medalhas as $medalha): ?>
+            <?php foreach ($medalhas as $medalha): ?>
 
-            <?php
+                <?php
 
-            $desbloqueada =
-                $medalha['data_conquista'] !== null;
+                $desbloqueada =
+                    $medalha['data_conquista'] !== null;
 
-            $imagemMedalha =
-                $imagensMedalhas[$medalha['nome']] ?? null;
+                $imagemMedalha =
+                    $imagensMedalhas[$medalha['nome']] ?? null;
 
-            ?>
+                ?>
 
 
-            <article
-                class="
+                <article
+                    class="
                     achievement-card
                     <?= $desbloqueada
                         ? 'unlocked'
                         : 'locked'
                     ?>
-                "
-            >
+                ">
 
 
-                <!-- ======================================
+                    <!-- ======================================
                      ÁREA DA MEDALHA
                 ======================================= -->
 
-                <div class="medal-area">
+                    <div class="medal-area">
 
 
-                    <?php if ($imagemMedalha): ?>
+                        <?php if ($imagemMedalha): ?>
 
-                        <img
-                            src="assets/img/<?= htmlspecialchars($imagemMedalha) ?>"
-                            alt="<?= htmlspecialchars($medalha['nome']) ?>"
-                            class="medal-image"
-                        >
+                            <img
+                                src="assets/img/<?= htmlspecialchars($imagemMedalha) ?>"
+                                alt="<?= htmlspecialchars($medalha['nome']) ?>"
+                                class="medal-image">
 
-                    <?php else: ?>
+                        <?php else: ?>
 
-                        <div class="medal-placeholder">
+                            <div class="medal-placeholder">
 
-                            <?= $desbloqueada
-                                ? '🏆'
-                                : '🔒'
-                            ?>
+                                <?= $desbloqueada
+                                    ? '🏆'
+                                    : '🔒'
+                                ?>
 
-                        </div>
+                            </div>
 
-                    <?php endif; ?>
-
-
-                    <!-- STATUS DA MEDALHA -->
-
-                    <?php if ($desbloqueada): ?>
-
-                        <span class="unlocked-badge">
-                            ✓
-                        </span>
-
-                    <?php else: ?>
-
-                        <span class="locked-badge">
-                            🔒
-                        </span>
-
-                    <?php endif; ?>
+                        <?php endif; ?>
 
 
-                </div>
+                        <!-- STATUS DA MEDALHA -->
 
+                        <?php if ($desbloqueada): ?>
 
+                            <span class="unlocked-badge">
+                                ✓
+                            </span>
 
-                <!-- ======================================
-                     CONTEÚDO DA CONQUISTA
-                ======================================= -->
+                        <?php else: ?>
 
-                <div class="achievement-content">
+                            <span class="locked-badge">
+                                🔒
+                            </span>
 
+                        <?php endif; ?>
 
-                    <span class="achievement-status">
-
-                        <?= $desbloqueada
-                            ? 'DESBLOQUEADA'
-                            : 'BLOQUEADA'
-                        ?>
-
-                    </span>
-
-
-                    <h3>
-
-                        <?= htmlspecialchars(
-                            $medalha['nome']
-                        ) ?>
-
-                    </h3>
-
-
-                    <p class="achievement-description">
-
-                        <?= htmlspecialchars(
-                            $medalha['descricao']
-                        ) ?>
-
-                    </p>
-
-
-
-                    <!-- CRITÉRIO -->
-
-                    <div class="achievement-criterion">
-
-                        <span>
-                            COMO CONQUISTAR
-                        </span>
-
-                        <p>
-
-                            <?= htmlspecialchars(
-                                $medalha['criterio']
-                            ) ?>
-
-                        </p>
 
                     </div>
 
 
 
-                    <!-- DATA -->
+                    <!-- ======================================
+                     CONTEÚDO DA CONQUISTA
+                ======================================= -->
 
-                    <?php if ($desbloqueada): ?>
+                    <div class="achievement-content">
 
-                        <div class="achievement-date">
 
-                            ✓ Conquistada em
+                        <span class="achievement-status">
 
-                            <?= date(
-                                'd/m/Y',
-                                strtotime(
-                                    $medalha['data_conquista']
-                                )
+                            <?= $desbloqueada
+                                ? 'DESBLOQUEADA'
+                                : 'BLOQUEADA'
+                            ?>
+
+                        </span>
+
+
+                        <h3>
+
+                            <?= htmlspecialchars(
+                                $medalha['nome']
                             ) ?>
+
+                        </h3>
+
+
+                        <p class="achievement-description">
+
+                            <?= htmlspecialchars(
+                                $medalha['descricao']
+                            ) ?>
+
+                        </p>
+
+
+
+                        <!-- CRITÉRIO -->
+
+                        <div class="achievement-criterion">
+
+                            <span>
+                                COMO CONQUISTAR
+                            </span>
+
+                            <p>
+
+                                <?= htmlspecialchars(
+                                    $medalha['criterio']
+                                ) ?>
+
+                            </p>
 
                         </div>
 
-                    <?php else: ?>
 
-                        <div class="
+
+                        <!-- DATA -->
+
+                        <?php if ($desbloqueada): ?>
+
+                            <div class="achievement-date">
+
+                                ✓ Conquistada em
+
+                                <?= date(
+                                    'd/m/Y',
+                                    strtotime(
+                                        $medalha['data_conquista']
+                                    )
+                                ) ?>
+
+                            </div>
+
+                        <?php else: ?>
+
+                            <div class="
                             achievement-date
                             locked-text
                         ">
 
-                            🔒 Ainda não conquistada
+                                🔒 Ainda não conquistada
 
-                        </div>
+                            </div>
 
-                    <?php endif; ?>
-
-
-                </div>
+                        <?php endif; ?>
 
 
-            </article>
-
-        <?php endforeach; ?>
+                    </div>
 
 
-    </section>
+                </article>
+
+            <?php endforeach; ?>
 
 
-</main>
+        </section>
 
 
-<script src="assets/js/tema.js"></script>
+    </main>
 
+
+    <script src="assets/js/tema.js"></script>
+
+    <?php require_once __DIR__ . '/includes/acessibilidade.php'; ?>
 </body>
 
 </html>
