@@ -290,6 +290,7 @@ if ($hora < 12) {
                 <a href="fases.php"><span class="nav-symbol">▤</span> Fases</a>
                 <a href="questoes.php"><span class="nav-symbol">∑</span> Questões</a>
                 <a href="desempenho.php"><span class="nav-symbol">↗</span> Desempenho</a>
+                <a href="../logout.php" class="btn-sair"><span>🚪 Sair</span></a>
             </nav>
             <span class="topnav-status"><i></i> Painel</span>
         </header>
