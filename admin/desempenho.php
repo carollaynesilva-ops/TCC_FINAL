@@ -542,74 +542,37 @@ $nomePeriodo = [
 
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/desempenho.css">
+    <link rel="stylesheet" href="css/admin-layout.css">
+    <link rel="stylesheet" href="css/admin-legacy-pages.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body>
+<body class="admin-page admin-desempenho-page">
 
     <div class="admin-layout">
 
-        <aside class="sidebar">
-            <a href="admin.php" class="admin-brand">
-                <span class="brand-icon">M</span>
-                <span>
-                    Math<span class="brand-highlight">Run</span>
-                    <small>PAINEL ADMINISTRATIVO</small>
-                </span>
+        <header class="mathrun-topnav">
+            <a class="mathrun-brand" href="admin.php" aria-label="MathRun, painel administrativo">
+                <span class="mathrun-brand-mark">M<span>+</span></span>
+                <span class="mathrun-brand-name">MathRun<small>ÁREA ADMINISTRATIVA</small></span>
             </a>
-
-            <div class="sidebar-label">MENU PRINCIPAL</div>
-
-            <nav class="sidebar-nav">
-                <a href="admin.php" class="nav-link">
-                    <span class="nav-icon">⌂</span>
-                    <span>Visão geral</span>
-                </a>
-
-                <a href="alunos.php" class="nav-link ativo">
-                    <span class="nav-icon">♙</span>
-                    <span>Alunos</span>
-                </a>
-
-                <a href="desempenho.php" class="nav-link">
-                    <span class="nav-icon">▥</span>
-                    <span>Desempenho</span>
-                </a>
-
-                <a href="questoes.php" class="nav-link">
-                    <span class="nav-icon">✎</span>
-                    <span>Questões</span>
-                </a>
-
-                <a href="fases.php" class="nav-link">
-                    <span class="nav-icon">⚑</span>
-                    <span>Fases</span>
-                </a>
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="admin-navigation" aria-label="Abrir menu">
+                <span></span><span></span><span></span>
+            </button>
+            <nav class="mathrun-navigation" id="admin-navigation" aria-label="Navegação administrativa">
+                <a href="admin.php"><span class="nav-symbol">⌂</span> Visão geral</a>
+                <a href="alunos.php"><span class="nav-symbol">♙</span> Alunos</a>
+                <a href="fases.php"><span class="nav-symbol">▤</span> Fases</a>
+                <a href="questoes.php"><span class="nav-symbol">∑</span> Questões</a>
+                <a href="desempenho.php" class="is-active"><span class="nav-symbol">↗</span> Desempenho</a>
             </nav>
+            <span class="topnav-status"><i></i> Painel</span>
+        </header>
 
-            <div class="sidebar-bottom">
-                <div class="admin-profile">
-                    <div class="admin-avatar">A</div>
-                    <div class="admin-profile-info">
-                        <strong>Administrador</strong>
-                        <span>MathRun</span>
-                    </div>
-                </div>
+        <main class="admin-main desempenho-main">
 
-                <a href="../index.php" class="nav-link sair-link">
-                    <span class="nav-icon">↗</span>
-                    <span>Voltar ao site</span>
-                </a>
-            </div>
-        </aside>
-
-
-        <!-- CONTEÚDO PRINCIPAL -->
-
-        <main class="main-content desempenho-main">
-
-            <header class="topbar">
+            <header class="page-topbar">
                 <div>
                     <p class="topbar-eyebrow">PAINEL ADMINISTRATIVO</p>
                     <h1>Desempenho</h1>
@@ -618,7 +581,7 @@ $nomePeriodo = [
                     </p>
                 </div>
 
-                <div class="admin-status">
+                <div class="topbar-status-legacy">
                     <span class="status-dot"></span>
                     Área administrativa
                 </div>
@@ -1331,7 +1294,7 @@ $nomePeriodo = [
                     legend: {
                         display: true,
                         labels: {
-                            color: "#e5e7eb",
+                            color: "#777990",
                             usePointStyle: true,
                             padding: 20
                         }
@@ -1340,20 +1303,20 @@ $nomePeriodo = [
                 scales: {
                     x: {
                         ticks: {
-                            color: "#aeb4c5"
+                            color: "#85879d"
                         },
                         grid: {
-                            color: "rgba(255, 255, 255, 0.05)"
+                            color: "rgba(108, 99, 217, 0.08)"
                         }
                     },
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            color: "#aeb4c5",
+                            color: "#85879d",
                             precision: 0
                         },
                         grid: {
-                            color: "rgba(255, 255, 255, 0.07)"
+                            color: "rgba(108, 99, 217, 0.09)"
                         }
                     }
                 }
@@ -1361,6 +1324,7 @@ $nomePeriodo = [
         });
     </script>
 
+    <script src="js/admin-layout.js" defer></script>
 </body>
 
 </html>

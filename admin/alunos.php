@@ -372,68 +372,34 @@ $saudacao = $hora < 12
 
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/alunos.css">
+    <link rel="stylesheet" href="css/admin-layout.css">
+    <link rel="stylesheet" href="css/admin-legacy-pages.css">
 </head>
 
-<body>
+<body class="admin-page admin-alunos-page">
     <div class="admin-layout">
 
-        <aside class="sidebar">
-            <a href="admin.php" class="admin-brand">
-                <span class="brand-icon">M</span>
-                <span>
-                    Math<span class="brand-highlight">Run</span>
-                    <small>PAINEL ADMINISTRATIVO</small>
-                </span>
+        <header class="mathrun-topnav">
+            <a class="mathrun-brand" href="admin.php" aria-label="MathRun, painel administrativo">
+                <span class="mathrun-brand-mark">M<span>+</span></span>
+                <span class="mathrun-brand-name">MathRun<small>ÁREA ADMINISTRATIVA</small></span>
             </a>
-
-            <div class="sidebar-label">MENU PRINCIPAL</div>
-
-            <nav class="sidebar-nav">
-                <a href="admin.php" class="nav-link">
-                    <span class="nav-icon">⌂</span>
-                    <span>Visão geral</span>
-                </a>
-
-                <a href="alunos.php" class="nav-link ativo">
-                    <span class="nav-icon">♙</span>
-                    <span>Alunos</span>
-                </a>
-
-                <a href="desempenho.php" class="nav-link">
-                    <span class="nav-icon">▥</span>
-                    <span>Desempenho</span>
-                </a>
-
-                <a href="questoes.php" class="nav-link">
-                    <span class="nav-icon">✎</span>
-                    <span>Questões</span>
-                </a>
-
-                <a href="fases.php" class="nav-link">
-                    <span class="nav-icon">⚑</span>
-                    <span>Fases</span>
-                </a>
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="admin-navigation" aria-label="Abrir menu">
+                <span></span><span></span><span></span>
+            </button>
+            <nav class="mathrun-navigation" id="admin-navigation" aria-label="Navegação administrativa">
+                <a href="admin.php"><span class="nav-symbol">⌂</span> Visão geral</a>
+                <a href="alunos.php" class="is-active"><span class="nav-symbol">♙</span> Alunos</a>
+                <a href="fases.php"><span class="nav-symbol">▤</span> Fases</a>
+                <a href="questoes.php"><span class="nav-symbol">∑</span> Questões</a>
+                <a href="desempenho.php"><span class="nav-symbol">↗</span> Desempenho</a>
             </nav>
-
-            <div class="sidebar-bottom">
-                <div class="admin-profile">
-                    <div class="admin-avatar">A</div>
-                    <div class="admin-profile-info">
-                        <strong>Administrador</strong>
-                        <span>MathRun</span>
-                    </div>
-                </div>
-
-                <a href="../index.php" class="nav-link sair-link">
-                    <span class="nav-icon">↗</span>
-                    <span>Voltar ao site</span>
-                </a>
-            </div>
-        </aside>
+            <span class="topnav-status"><i></i> Painel</span>
+        </header>
 
         <main class="admin-main alunos-main">
 
-            <header class="topbar">
+            <header class="page-topbar">
                 <div>
                     <span class="breadcrumb">Painel / Gerenciamento</span>
                     <h1>Alunos</h1>
@@ -1128,6 +1094,7 @@ $saudacao = $hora < 12
         });
     </script>
 
+    <script src="js/admin-layout.js" defer></script>
 </body>
 
 </html>
