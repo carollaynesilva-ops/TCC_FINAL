@@ -186,6 +186,7 @@ if ($hora < 12) {
     <script src="assets/js/tema.js" defer></script>
 
 
+    <?php require_once __DIR__ . '/includes/acessibilidade-head.php'; ?>
 </head>
 
 <body>
@@ -616,6 +617,7 @@ if ($hora < 12) {
     </main>
 
 
+    <?php require_once __DIR__ . '/includes/acessibilidade.php'; ?>
 </body>
 
 </html>
