@@ -92,36 +92,6 @@ if (isset($_SESSION['usuario_id'])) {
             Math<span>Run</span>
         </a>
 
-
-        <div class="navbar-right">
-
-            <div class="theme-switch">
-
-                <button
-                    type="button"
-                    onclick="mudarTema('claro')"
-                    title="Tema claro">
-                    ☀
-                </button>
-
-                <button
-                    type="button"
-                    onclick="mudarTema('escuro')"
-                    title="Tema escuro">
-                    ◐
-                </button>
-
-                <button
-                    type="button"
-                    onclick="mudarTema('rosa')"
-                    title="Tema rosa">
-                    ♡
-                </button>
-
-            </div>
-
-        </div>
-
     </header>
 
 
