@@ -987,3 +987,230 @@ body.pink .recipe-math {
         min-height: 190px
     }
 }
+
+/* MathChef visual refresh: cozinha acolhedora, livro de receitas e detalhes rosé */
+:root {
+    --ink: #633d49;
+    --muted: #956c78;
+    --panel: #fff8f5;
+    --line: #f0cbd5;
+    --accent: #c84f78;
+    --accent2: #f0a7b9;
+    --shadow: 0 18px 48px #8b40501f;
+    --room: #f9e2dc;
+}
+
+body.chef-game-page {
+    background-color: #f9e5e4;
+    background-image: radial-gradient(ellipse at 12% 0%, #fff9f3 0, transparent 38%), linear-gradient(135deg, #f8e1df, #e9bfc6);
+}
+
+.game-topbar {
+    color: #713d4c;
+    border-bottom-color: #d98fa34a;
+}
+
+.brand-icon {
+    background: #d75b7f;
+    color: #fff8f4;
+    box-shadow: 0 5px 0 #a73f61;
+}
+
+.brand-icon span,
+.brand-accent {
+    color: #f0a5b5;
+}
+
+.kitchen-status,
+.exit-link {
+    color: #a14f68;
+}
+
+.kitchen-status i {
+    background: #d99aab;
+}
+
+.theme-switcher {
+    border-color: #d98fa355;
+    background: #fff4f1d9;
+}
+
+.theme-switcher button {
+    color: #a14f68;
+}
+
+.theme-switcher button.active {
+    background: #d75b7f;
+    color: #fff8f4;
+}
+
+.eyebrow {
+    color: #b34d6b;
+}
+
+.eyebrow span {
+    background: #d75b7f;
+}
+
+.phaser-viewport {
+    background: #f4d4d0;
+}
+
+.game-loading {
+    background: #fff0ed;
+    color: #a14f68;
+}
+
+.frame-topline,
+.frame-bottomline {
+    color: #a45a6e;
+}
+
+.kitchen-frame {
+    border-color: #e9b4c1;
+    box-shadow: 0 18px 48px #8b40501f;
+}
+
+.frame-topline {
+    background: #fff2ef;
+}
+
+.frame-bottomline {
+    background: #fff2ef;
+}
+
+.progress-track {
+    background: #f3d5dc;
+}
+
+.progress-track span {
+    background: linear-gradient(90deg, #e8799b, #bd416d);
+}
+
+.progress-module {
+    background: #fff5f2;
+    border-color: #f0cbd5;
+}
+
+.game-legend {
+    color: #986879;
+}
+
+.recipe-card {
+    border-color: #efc2ce;
+}
+
+.start-recipe {
+    background: linear-gradient(135deg, #dc6488, #b83e69);
+    box-shadow: 0 5px 0 #91304f;
+}
+
+.start-recipe:hover {
+    filter: brightness(1.04);
+}
+
+.locked-message {
+    color: #9a7b82;
+}
+
+body[data-theme="pink"],
+body.theme-pink,
+[data-theme="pink"] body.chef-game-page {
+    --ink: #633d49;
+    --muted: #956c78;
+    --panel: #fff8f5;
+    --line: #f0cbd5;
+    --accent: #c84f78;
+    --accent2: #f0a7b9;
+}
+
+body.dark.chef-game-page {
+    background-color: #211a20;
+    background-image: radial-gradient(ellipse at 12% 0%, #4b303b 0, transparent 38%), linear-gradient(135deg, #30212a, #171318);
+    color: #f6e7ed;
+}
+
+body.dark .game-topbar,
+body.dark .hud-copy h1 {
+    color: #f6e7ed;
+}
+
+body.dark .kitchen-status,
+body.dark .hud-copy p,
+body.dark .game-legend,
+body.dark .game-footer,
+body.dark .exit-link {
+    color: #dfbfc9;
+}
+
+body.dark .progress-module {
+    background: #382731;
+    border-color: #694657;
+}
+
+body.dark .progress-head,
+body.dark .progress-foot {
+    color: #e4c6d0;
+}
+
+body.dark .progress-track {
+    background: #573746;
+}
+
+body.dark .theme-switcher {
+    background: #382731;
+    border-color: #694657;
+}
+
+body.dark .theme-switcher button {
+    color: #f1d6df;
+}
+
+body.dark .theme-switcher button.active {
+    background: #c84f78;
+}
+
+body.dark .frame-topline,
+body.dark .frame-bottomline {
+    background: linear-gradient(#3a2932, #2b1e26);
+    color: #f1d6df;
+}
+
+body.dark .kitchen-frame {
+    border-color: #694657;
+}
+
+body.dark .game-loading {
+    background: #30212a;
+    color: #f1d6df;
+}
+
+body.pink .brand-icon {
+    background: #d75b7f;
+}
+
+body.pink .brand-accent,
+body.pink .hud-copy h1 em,
+body.pink .progress-head strong {
+    color: #c84f78;
+}
+
+body.pink .start-recipe {
+    background: linear-gradient(135deg, #dc6488, #b83e69);
+    box-shadow: 0 5px 0 #91304f;
+}
+
+@media (max-width: 680px) {
+    .phaser-viewport {
+        height: clamp(430px, 125vw, 620px);
+        min-height: 430px;
+    }
+
+    .game-topbar {
+        gap: 8px;
+    }
+
+    .kitchen-status {
+        display: none;
+    }
+}

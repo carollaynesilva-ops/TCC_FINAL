@@ -64,7 +64,7 @@
         return;
     }
     class KitchenScene extends Phaser.Scene {
-        constructor() { super('KitchenScene'); this.items = []; this.decor = []; this.selectedIndex = -1; }
+        constructor() { super('KitchenScene'); this.items = []; this.decor = []; this.selectedIndex = -1; this.pageIndex = 0; }
         preload() {
             this.load.image('kitchen-background', '../assets/img/cozinha.jpg');
             ['bolo', 'brownie', 'pudim', 'lasanha'].forEach(name => this.load.image('recipe-' + name, '../assets/img/' + name + '.jpg'));
@@ -76,6 +76,13 @@
             // Cada item da receita recebe seu próprio evento. Isso evita que o clique
             // seja interpretado como outra página quando o livro muda de tamanho.
             this.input.on('gameobjectdown', (pointer, obj) => {
+                const direction = obj.getData('pageDirection');
+                if (direction) {
+                    const totalPages = Math.max(1, Math.ceil(phases.length / 2));
+                    this.pageIndex = Phaser.Math.Clamp(this.pageIndex + direction, 0, totalPages - 1);
+                    this.redraw();
+                    return;
+                }
                 const index = obj.getData('phaseIndex');
                 if (Number.isInteger(index)) openRecipe(index);
             });
@@ -89,7 +96,7 @@
                 const scale = Math.max(w / bg.width, h / bg.height); bg.setDisplaySize(bg.width * scale, bg.height * scale);
                 bg.setPosition(w / 2, h / 2); bg.setData('isKitchenBackground', true); this.kitchenBackground = bg;
                 // A light, translucent veil keeps the game elements readable without damaging the source image.
-                const veil = this.add.rectangle(w / 2, h / 2, w, h, 0x3d2416, .12).setDepth(-9); this.kitchenVeil = veil;
+                const veil = this.add.rectangle(w / 2, h / 2, w, h, 0x6e3348, .10).setDepth(-9); this.kitchenVeil = veil;
             } else {
                 this.add.rectangle(w / 2, h / 2, w, h, 0xf0d7b5).setDepth(-10);
                 this.add.text(w / 2, h * .2, 'Carregando cenário da cozinha…', { fontFamily: 'Georgia,serif', fontSize: '20px', color: '#70432d' }).setOrigin(.5).setDepth(-9);
@@ -97,60 +104,104 @@
         }
         paintCounter() {
             const w = this.scale.width, h = this.scale.height, y = h * .61;
-            const g = this.add.graphics(); g.fillStyle(0x70442d, 1); g.fillRect(0, y + 10, w, h - y); g.fillStyle(0xb87949, 1); g.fillRect(0, y, w, h * .075); g.fillStyle(0xd69b63, 1); g.fillRect(0, y + 5, w, h * .04); g.lineStyle(2, 0x8b5635, .55); for (let x = 0; x < w; x += 85) { g.lineBetween(x, y + 7, x + 45, y + 7); g.lineBetween(x + 30, y + 18, x + 70, y + 18); } g.fillStyle(0x593523, .22); g.fillRect(0, y + h * .075, w, 8);
+            const g = this.add.graphics(); g.fillStyle(0x704044, 1); g.fillRect(0, y + 10, w, h - y); g.fillStyle(0xb87970, 1); g.fillRect(0, y, w, h * .075); g.fillStyle(0xdca0a0, 1); g.fillRect(0, y + 5, w, h * .04); g.lineStyle(2, 0x8b5635, .55); for (let x = 0; x < w; x += 85) { g.lineBetween(x, y + 7, x + 45, y + 7); g.lineBetween(x + 30, y + 18, x + 70, y + 18); } g.fillStyle(0x593523, .22); g.fillRect(0, y + h * .075, w, 8);
         }
         paintBook() {
             const w = this.scale.width, h = this.scale.height;
-            const bw = Math.min(w * .66, 850), bh = Math.min(h * .52, 355), bx = (w - bw) / 2, by = h * .405;
-            // shadow and cover
-            const g = this.add.graphics(); g.fillStyle(0x54301d, .25); g.fillRoundedRect(bx - 9, by + 10, bw + 18, bh + 6, 14); g.fillStyle(0x713f2a, 1); g.fillRoundedRect(bx - 7, by - 4, bw + 14, bh + 8, 13); g.fillStyle(0x9b593b, 1); g.fillRoundedRect(bx, by, bw, bh, 10);
-            // pages
-            const gap = 8, pw = (bw - gap) / 2; g.fillStyle(0xf8e9c9, 1); g.fillRoundedRect(bx + 8, by + 8, pw - 7, bh - 16, { tl: 5, tr: 1, bl: 5, br: 2 }); g.fillRoundedRect(bx + pw + gap, by + 8, pw - 16, bh - 16, { tl: 1, tr: 5, bl: 2, br: 5 }); g.fillStyle(0xe1c69e, .6); g.fillRect(bx + pw - 2, by + 11, 5, bh - 22); g.lineStyle(1, 0xd4b68a, .6); for (let i = 0; i < 7; i++) { g.lineBetween(bx + 18, by + bh - 18 - i * 3, bx + bw - 22, by + bh - 18 - i * 3); }
-            this.add.text(w / 2, by + 18, 'O CADERNO DE RECEITAS', { fontFamily: 'Georgia,serif', fontSize: `${Math.max(13, Math.min(20, w * .019))}px`, fontStyle: 'bold', color: '#78452e', letterSpacing: 2 }).setOrigin(.5, 0).setDepth(3);
-            this.add.text(bx + bw * .25, by + 45, 'RECEITAS DOCES', { fontFamily: 'Arial', fontSize: '9px', fontStyle: 'bold', color: '#a16b4b', letterSpacing: 2 }).setOrigin(.5).setDepth(3);
-            this.add.text(bx + bw * .75, by + 45, 'ESCOLHA UMA PÁGINA', { fontFamily: 'Arial', fontSize: '9px', fontStyle: 'bold', color: '#a16b4b', letterSpacing: 1.5 }).setOrigin(.5).setDepth(3);
-            const count = phases.length; const perPage = Math.ceil(count / 2); const leftX = bx + pw * .5 + 4, rightX = bx + pw + gap + pw * .5 - 3; const top = by + bh * .52;
-            phases.forEach((phase, i) => {
-                const side = i < perPage ? 0 : 1, local = i % perPage; const total = side === 0 ? perPage : count - perPage; const x = side === 0 ? leftX : rightX; const y = by + bh * .35 + (local + .5) * (bh * .52 / Math.max(total, 1));
-                const recipe = recipes[i % recipes.length]; const locked = !phase.desbloqueada; const completed = !!phase.concluida;
-                const pageW = pw * .78, pageH = Math.min(70, (bh * .48) / Math.max(total, 1) - 4); const pageX = x - pageW / 2, pageY = y - pageH / 2;
-                const page = this.add.rectangle(x, y, pageW, pageH, completed ? 0xe2edcf : (locked ? 0xe7d8bd : 0xfff4dd), 1).setStrokeStyle(1, completed ? 0x7b9d69 : (locked ? 0xb9a48b : 0xc99967), 1).setInteractive({ useHandCursor: true }); page.setData('phaseIndex', i); page.setDepth(4); this.items.push(page);
-                const imageKeys = ['bolo', 'brownie', 'pudim', 'lasanha'];
+            const bw = Math.min(w * .82, 1120), bh = Math.min(h * .62, 430);
+            const bx = (w - bw) / 2, by = Math.max(h * .24, h * .34);
+            const totalPages = Math.max(1, Math.ceil(phases.length / 2));
+            this.pageIndex = Phaser.Math.Clamp(this.pageIndex, 0, totalPages - 1);
+
+            // Capa, páginas e sombra para dar ao livro volume de objeto físico.
+            const g = this.add.graphics();
+            g.fillStyle(0x4d2635, .30); g.fillRoundedRect(bx - 12, by + 15, bw + 24, bh + 10, 20);
+            g.fillStyle(0x8f3d55, 1); g.fillRoundedRect(bx - 10, by - 5, bw + 20, bh + 15, 18);
+            g.fillStyle(0xc65e7e, 1); g.fillRoundedRect(bx - 3, by - 1, bw + 6, bh + 8, 15);
+            const gap = 10, pw = (bw - gap) / 2;
+            g.fillStyle(0xfff1d9, 1);
+            g.fillRoundedRect(bx + 7, by + 8, pw - 8, bh - 16, { tl: 8, tr: 2, bl: 8, br: 3 });
+            g.fillRoundedRect(bx + pw + gap, by + 8, pw - 15, bh - 16, { tl: 2, tr: 8, bl: 3, br: 8 });
+            g.fillStyle(0xe7c8a7, .75); g.fillRect(bx + pw - 2, by + 12, 5, bh - 24);
+            g.lineStyle(1, 0xd6a98e, .75);
+            for (let i = 0; i < 8; i++) g.lineBetween(bx + 20, by + bh - 20 - i * 3, bx + bw - 25, by + bh - 20 - i * 3);
+
+            this.add.text(w / 2, by + 16, '♡  NOSSO LIVRO DE RECEITAS  ♡', {
+                fontFamily: 'Georgia,serif', fontSize: `${Math.max(14, Math.min(23, w * .021))}px`,
+                fontStyle: 'bold', color: '#8f3d55', letterSpacing: 1.5
+            }).setOrigin(.5, 0).setDepth(3);
+            this.add.text(bx + pw * .5, by + 47, 'RECEITAS DOCES', { fontFamily: 'Arial', fontSize: `${Math.max(9, Math.min(12, w * .011))}px`, fontStyle: 'bold', color: '#b46a78', letterSpacing: 2 }).setOrigin(.5).setDepth(3);
+            this.add.text(bx + pw + gap + pw * .5, by + 47, 'RECEITAS ESPECIAIS', { fontFamily: 'Arial', fontSize: `${Math.max(9, Math.min(12, w * .011))}px`, fontStyle: 'bold', color: '#b46a78', letterSpacing: 2 }).setOrigin(.5).setDepth(3);
+
+            // Duas receitas por abertura, uma em cada página. As demais ficam nas próximas viradas.
+            const first = this.pageIndex * 2;
+            const cardW = Math.min(pw * .62, 260);
+            const cardH = Math.min(bh * .64, 275);
+            const positions = [
+                { x: bx + pw * .50, y: by + bh * .56 },
+                { x: bx + pw + gap + pw * .50, y: by + bh * .56 }
+            ];
+            const imageKeys = ['bolo', 'brownie', 'pudim', 'lasanha'];
+            for (let slot = 0; slot < 2; slot++) {
+                const i = first + slot;
+                const phase = phases[i];
+                if (!phase) continue;
+                const pos = positions[slot];
+                const recipe = recipes[i % recipes.length];
+                const locked = !phase.desbloqueada, completed = !!phase.concluida;
+                const cardX = pos.x, cardY = pos.y;
+                const cardFill = completed ? 0xfff0d5 : locked ? 0xe4dfd9 : 0xfff8e9;
+                const cardStroke = completed ? 0x86a66b : locked ? 0xb2aaa3 : 0xe99aab;
+                const card = this.add.rectangle(cardX, cardY, cardW, cardH, cardFill, 1).setStrokeStyle(2, cardStroke, 1).setDepth(4).setInteractive({ useHandCursor: true });
+                card.setData('phaseIndex', i);
+                this.items.push(card);
                 const imageKey = imageKeys[i] ? 'recipe-' + imageKeys[i] : null;
-                const thumbW = Math.min(58, pageW * .29);
-                const thumbH = Math.max(26, Math.min(48, pageH - 8));
-                const thumbX = pageX + 7 + thumbW / 2;
-                const thumbY = y;
-                const thumbFrame = this.add.rectangle(thumbX, thumbY, thumbW + 4, thumbH + 4, 0xd9c09b, 1).setStrokeStyle(1, 0xb78d61, .9).setDepth(5);
-                thumbFrame.setData('phaseIndex', i);
+                const imageY = cardY - cardH * .19;
+                const imageW = cardW * .76, imageH = cardH * .43;
+                this.add.rectangle(cardX, imageY, imageW + 8, imageH + 8, locked ? 0xc5c0ba : 0xf4d4d9, 1).setStrokeStyle(1, locked ? 0xaaa39c : 0xe6a0ad, 1).setDepth(5);
                 if (imageKey && this.textures.exists(imageKey)) {
-                    const photo = this.add.image(thumbX, thumbY, imageKey).setDisplaySize(thumbW, thumbH).setDepth(6);
-                    const scale = Math.max(thumbW / photo.width, thumbH / photo.height);
+                    const photo = this.add.image(cardX, imageY, imageKey).setDepth(6);
+                    const scale = Math.max(imageW / photo.width, imageH / photo.height);
                     photo.setDisplaySize(photo.width * scale, photo.height * scale);
                     photo.setCrop(0, 0, photo.width, photo.height);
-                    photo.setData('phaseIndex', i);
-                    photo.setInteractive({ useHandCursor: true });
+                    if (locked) photo.setTint(0x777777);
+                    photo.setInteractive({ useHandCursor: true }).setData('phaseIndex', i);
                     this.items.push(photo);
                 } else {
-                    this.add.rectangle(thumbX, thumbY, thumbW, thumbH, 0xf2e3c8, 1).setDepth(6);
-                    this.add.text(thumbX, thumbY, 'SEM FOTO', { fontFamily: 'Arial', fontSize: '7px', color: '#8a6a4b' }).setOrigin(.5).setDepth(7);
+                    this.add.text(cardX, imageY, '♡', { fontSize: '28px', color: locked ? '#99918b' : '#d45e83' }).setOrigin(.5).setDepth(6);
                 }
-                thumbFrame.setInteractive({ useHandCursor: true });
-                this.items.push(thumbFrame);
-                if (locked) {
-                    this.add.text(thumbX, thumbY + thumbH / 2 - 5, 'BLOQUEADA', { fontFamily: 'Arial', fontSize: '6px', fontStyle: 'bold', color: '#fff', backgroundColor: '#70503c', padding: { x: 2, y: 2 } }).setOrigin(.5).setDepth(8);
-                } else if (completed) {
-                    this.add.text(thumbX + thumbW / 2 - 2, thumbY - thumbH / 2 + 2, 'OK', { fontFamily: 'Arial', fontSize: '7px', fontStyle: 'bold', color: '#fff', backgroundColor: '#66845a', padding: { x: 2, y: 1 } }).setOrigin(1, 0).setDepth(8);
-                }
-                const textX = pageX + thumbW + 14;
-                const title = phase.numero + '. ' + recipe.title;
-                const label = this.add.text(textX, y - 8, title, { fontFamily: 'Georgia,serif', fontSize: `${Math.max(9, Math.min(13, w * .012))}px`, fontStyle: 'bold', color: locked ? '#a18c75' : '#70432d', wordWrap: { width: pageW * .65 }, lineSpacing: 0 }).setOrigin(0, .5).setDepth(5); label.setData('phaseIndex', i); label.setInteractive({ useHandCursor: true }); this.items.push(label);
-                const status = locked ? 'BLOQUEADA' : completed ? 'CONCLUÍDA' : difficulty(phase.dificuldade).toUpperCase();
-                const sub = this.add.text(textX, y + Math.min(15, pageH * .24), status, { fontFamily: 'Arial', fontSize: '7px', fontStyle: 'bold', color: locked ? '#a18c75' : completed ? '#62865a' : '#a15e3e', letterSpacing: 1 }).setOrigin(0, .5).setDepth(5); sub.setData('phaseIndex', i); sub.setInteractive({ useHandCursor: true }); this.items.push(sub);
-            });
-            // spine and decorative flourishes
-            g.lineStyle(2, 0xb57d54, .9); g.lineBetween(bx + bw / 2, by + 15, bx + bw / 2, by + bh - 15); this.add.text(bx + bw / 2, by + bh - 27, 'MATHCHEF', { fontFamily: 'Georgia,serif', fontSize: '9px', color: '#9a6748', letterSpacing: 2 }).setOrigin(.5).setDepth(5);
-            this.bookBounds = { x: bx, y: by, w: bw, h: bh, perPage };
+                const title = this.add.text(cardX, cardY + cardH * .13, recipe.title, {
+                    fontFamily: 'Georgia,serif', fontSize: `${Math.max(10, Math.min(16, w * .014))}px`,
+                    fontStyle: 'bold', color: locked ? '#918983' : '#71384b',
+                    align: 'center', wordWrap: { width: cardW * .88 }
+                }).setOrigin(.5).setDepth(7).setInteractive({ useHandCursor: true });
+                title.setData('phaseIndex', i); this.items.push(title);
+                const statusText = locked ? '🔒 BLOQUEADA' : completed ? '✓ CONCLUÍDA' : 'DISPONÍVEL';
+                const status = this.add.text(cardX, cardY + cardH * .34, statusText, {
+                    fontFamily: 'Arial', fontSize: `${Math.max(8, Math.min(11, w * .009))}px`, fontStyle: 'bold',
+                    color: locked ? '#89827d' : completed ? '#66804d' : '#bd466b', align: 'center'
+                }).setOrigin(.5).setDepth(7).setInteractive({ useHandCursor: true });
+                status.setData('phaseIndex', i); this.items.push(status);
+                if (completed) this.add.text(cardX + cardW * .36, cardY - cardH * .42, '★', { fontSize: '18px', color: '#dca13a' }).setOrigin(.5).setDepth(8);
+            }
+
+            // Lombada, número da página e setas interativas.
+            g.lineStyle(3, 0xd9a3a4, .9); g.lineBetween(bx + bw / 2, by + 13, bx + bw / 2, by + bh - 14);
+            this.add.text(bx + bw / 2, by + bh - 20, 'MATHCHEF ♡', { fontFamily: 'Georgia,serif', fontSize: '10px', color: '#b86a7e', letterSpacing: 1 }).setOrigin(.5).setDepth(5);
+            const arrowY = by + bh * .57;
+            const arrowXLeft = Math.max(24, bx - 25), arrowXRight = Math.min(w - 24, bx + bw + 25);
+            const addArrow = (x, direction, enabled) => {
+                const circle = this.add.circle(x, arrowY, Math.max(17, Math.min(27, w * .026)), enabled ? 0xd94f7b : 0xb7a6a5, 1).setStrokeStyle(2, 0xffe5e9, 1).setDepth(10);
+                this.add.text(x, arrowY - 1, direction < 0 ? '‹' : '›', { fontFamily: 'Arial', fontSize: '34px', color: '#fff8f3', fontStyle: 'bold' }).setOrigin(.5).setDepth(11);
+                if (enabled) { circle.setInteractive({ useHandCursor: true }); circle.setData('pageDirection', direction); this.items.push(circle); }
+            };
+            addArrow(arrowXLeft, -1, this.pageIndex > 0);
+            addArrow(arrowXRight, 1, this.pageIndex < totalPages - 1);
+            this.add.text(w / 2, Math.min(h - 14, by + bh + 18), `${this.pageIndex + 1} / ${totalPages}`, {
+                fontFamily: 'Arial', fontSize: '13px', fontStyle: 'bold', color: '#fff5ef',
+                backgroundColor: '#a94362', padding: { x: 12, y: 5 }
+            }).setOrigin(.5).setDepth(10);
+            this.bookBounds = { x: bx, y: by, w: bw, h: bh, totalPages };
         }
         paintDecor() {
             const w = this.scale.width, h = this.scale.height;
